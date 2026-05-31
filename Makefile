@@ -45,6 +45,18 @@ boundary:
 contracts:
 	./scripts/check_contracts.sh
 
+.PHONY: property
+property:
+	go test ./... -run 'Test.*Property|Test.*Invariant'
+
+.PHONY: fuzz-smoke
+fuzz-smoke:
+	./scripts/run_fuzz_smoke.sh
+
+.PHONY: golden
+golden:
+	go test ./... -run 'Test.*Golden|Test.*Snapshot'
+
 .PHONY: evidence
 evidence:
 	./scripts/generate_manifest.sh
@@ -56,8 +68,16 @@ release-evidence-check:
 .PHONY: ci
 ci: fmt vet lint test race boundary security contracts
 
+.PHONY: ci-extended
+ci-extended: ci property golden fuzz-smoke
+
 .PHONY: release-check
 release-check: ci integration
+	CHECK_STATUS=passed $(MAKE) evidence
+	$(MAKE) release-evidence-check
+
+.PHONY: release-check-extended
+release-check-extended: ci-extended integration
 	CHECK_STATUS=passed $(MAKE) evidence
 	$(MAKE) release-evidence-check
 

@@ -41,6 +41,7 @@
 - [生成](docs/generation.md)：从模板渲染 `foundationx` 等具体基础库。
 - [错误模型](docs/errors.md)：`ErrorKind`、`NewError`、`WrapError` 和重试语义。
 - [可观测性](docs/observability.md)：指标名、健康状态和 JSON 字段。
+- [测试策略母版](docs/test-strategy.md)：Required、Extended 和 profile-specific gates。
 - [测试](docs/testing.md)：单元、race、contracts、boundary 和 release 验证要求。
 - [供应链](docs/supply-chain.md)：可校验 release Evidence、源码摘要、contract 指纹、依赖清单和 CI artifact。
 - [发布](docs/release.md)：`release-check`、manifest 字段和 Evidence 规则。
@@ -51,6 +52,7 @@
 
 ```bash
 make ci
+make ci-extended
 make release-check
 make evidence
 ```
