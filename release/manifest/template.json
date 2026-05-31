@@ -1,0 +1,21 @@
+{
+  "module": "{{MODULE_PATH}}",
+  "version": "v0.1.0",
+  "commit": "{{COMMIT}}",
+  "checks": {
+    "fmt": "{{CHECK_STATUS}}",
+    "vet": "{{CHECK_STATUS}}",
+    "unit_test": "{{CHECK_STATUS}}",
+    "race_test": "{{CHECK_STATUS}}",
+    "boundary": "{{CHECK_STATUS}}",
+    "secret_scan": "{{CHECK_STATUS}}",
+    "contract": "{{CHECK_STATUS}}"
+  },
+  "artifacts": [
+    "release/manifest/latest.json"
+  ],
+  "notes": {
+    "breaking_changes": "none",
+    "known_risks": []
+  }
+}

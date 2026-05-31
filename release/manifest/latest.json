@@ -1,0 +1,23 @@
+{
+  "module": "github.com/bytechainx/baselib-template",
+  "version": "v0.1.0",
+  "commit": "aade0ae4f44f84a7e35a6652a26d59186dca5d7b",
+  "go_version": "go1.26.3",
+  "generated_at": "2026-05-31T20:58:20Z",
+  "checks": {
+    "fmt": "manual-or-ci",
+    "vet": "manual-or-ci",
+    "unit_test": "manual-or-ci",
+    "race_test": "manual-or-ci",
+    "boundary": "manual-or-ci",
+    "secret_scan": "manual-or-ci",
+    "contract": "manual-or-ci"
+  },
+  "artifacts": [
+    "release/manifest/latest.json"
+  ],
+  "notes": {
+    "breaking_changes": "none",
+    "known_risks": []
+  }
+}
