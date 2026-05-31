@@ -30,4 +30,4 @@
 
 ## 发布
 
-发布前必须通过 Harness Gate，并生成 `release/manifest/latest.json`。`make release-check` 会先运行 CI 和 integration gate，再以 `CHECK_STATUS=passed` 生成 manifest；manifest 记录 `generated_by`、`go_version` 和 `tree_state`。integration gate 会渲染临时 `foundationx` 并运行测试，防止模板替换链路回归。
+发布前必须通过 Harness Gate，并生成 `release/manifest/latest.json`。`latest.json` 是 release Evidence artifact，不提交到源码历史；仓库只提交 `release/manifest/template.json`。`make release-check` 会先运行 CI 和 integration gate，再以 `CHECK_STATUS=passed` 生成 manifest；manifest 记录实际执行 gate 的 `commit`、`generated_by`、`go_version` 和 `tree_state`。integration gate 会渲染临时 `foundationx` 并运行测试，防止模板替换链路回归。

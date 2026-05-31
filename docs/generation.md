@@ -23,7 +23,7 @@ scripts/render_template.sh \
 - `{{PACKAGE_NAME}}`、`pkg/templatex` 和 `templatex` imports 替换为 `--package-name`。
 - 文档、Go 代码、JSON contract、shell 脚本、Makefile 和 CI 配置同步更新。
 
-脚本不会复制 `.git`、`.omx`、`.worktree` 和 `release/manifest/latest.json`。生成后的库必须自己运行 release gate 生成新的 Evidence。
+脚本不会复制 `.git`、`.omx`、`.worktree` 和 `release/manifest/latest.json`。`latest.json` 是生成产物，生成后的库必须自己运行 release gate 生成新的 Evidence artifact。
 
 ## 验证
 

@@ -30,7 +30,7 @@
 - `docs/`：规格、设计、API、配置、测试和发布模板。
 - `scripts/`：Harness Gate 脚本。
 - `.agent/`：Goal Runtime 工件、Evidence、评审、发布和复盘模板。
-- `release/manifest/`：release manifest 模板和生成的 Evidence。
+- `release/manifest/`：release manifest 模板；`latest.json` 由 release gate 生成并作为 Evidence artifact 保存。
 
 ## 文档入口
 
@@ -70,4 +70,4 @@ GOWORK=off make release-check
 
 ## Evidence
 
-完成需要 release manifest 和 CI Evidence。`release/manifest/latest.json` 会记录 module、commit、Go 版本、生成时间、工作区状态和 gate 结果。最终完成声明必须包含 `DONE with evidence:`。
+完成需要 release manifest 和 CI Evidence。`release/manifest/latest.json` 是生成产物，不提交到源码历史；它会记录 module、commit、Go 版本、生成时间、工作区状态和 gate 结果，并由 CI release workflow 上传为 artifact。最终完成声明必须包含 `DONE with evidence:`。

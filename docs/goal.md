@@ -7,7 +7,7 @@
 > 默认执行模式：Full。
 > 完成声明必须使用：`DONE with evidence:`。
 
-> 当前实现对齐说明：本文件保留为完整 Goal Prompt 和历史蓝图，当前仓库实现已经在 `README.md`、`docs/api.md`、`docs/design.md`、`docs/observability.md`、`docs/release.md`、`docs/testing.md`、`contracts/` 和 `release/manifest/template.json` 中收敛为可执行事实。以当前代码为准的差异包括：`make release-check` 先运行 CI 与 integration，再以 `CHECK_STATUS=passed` 生成 Evidence；manifest 包含 `generated_by`、`go_version`、`tree_state`、`lint`、`security` 和 `integration`；`HealthStatus` 使用 snake_case JSON 字段；metrics contract 覆盖 client 创建、关闭、错误、健康、请求、重试和 inflight 指标；错误模型公开 `NewError`、`WrapError` 和 `IsKind`。
+> 当前实现对齐说明：本文件保留为完整 Goal Prompt 和历史蓝图，当前仓库实现已经在 `README.md`、`docs/api.md`、`docs/design.md`、`docs/observability.md`、`docs/release.md`、`docs/testing.md`、`contracts/` 和 `release/manifest/template.json` 中收敛为可执行事实。以当前代码为准的差异包括：`make release-check` 先运行 CI 与 integration，再以 `CHECK_STATUS=passed` 生成未提交的 Evidence artifact；manifest 包含 `generated_by`、`go_version`、`tree_state`、`lint`、`security` 和 `integration`；`HealthStatus` 使用 snake_case JSON 字段；metrics contract 覆盖 client 创建、关闭、错误、健康、请求、重试和 inflight 指标；错误模型公开 `NewError`、`WrapError` 和 `IsKind`。
 
 ---
 
