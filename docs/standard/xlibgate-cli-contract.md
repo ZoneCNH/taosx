@@ -25,6 +25,12 @@
 - `issue-registry`
 - `command-registry`
 - `makefile-baseline`
+- `context-profile`
+- `context-profile-check`
+- `context-schema-check`
+- `context-fast-check`
+- `context-standard-check`
+- `context-full-check`
 - `boundary`
 - `contracts`
 - `dependency-check`

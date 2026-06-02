@@ -82,6 +82,16 @@ issues:
     status: implemented
     command: governance-check
     evidence: [ci_pull_request, execution-context, github-governance]
+  - id: P0-017
+    title: Context Runtime v4 profile baseline
+    status: implemented
+    command: context-profile-check
+    evidence: [context-profile, context-profile-check, context-schema-check]
+  - id: P0-018
+    title: Context Runtime v4 release wrapper
+    status: implemented
+    command: context-release
+    evidence: [context-release, release-final-check, context-fast-check, context-standard-check, context-full-check]
   - id: P1-001
     title: 治理硬化矩阵
     status: implemented

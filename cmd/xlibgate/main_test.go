@@ -173,6 +173,9 @@ func TestRunDispatchesExternalCommands(t *testing.T) {
 		{name: "release-evidence-checksum-check", args: []string{"release-evidence-checksum-check"}, wantStdout: "hash_release_evidence.sh --check"},
 		{name: "release-evidence-hash", args: []string{"release-evidence-hash"}, wantStdout: "hash_release_evidence.sh"},
 		{name: "release-final-check", args: []string{"release-final-check"}, wantStdout: "make release-final-check"},
+		{name: "context-fast-check", args: []string{"context-fast-check"}, wantStdout: "make context-fast-check"},
+		{name: "context-standard-check", args: []string{"context-standard-check"}, wantStdout: "make context-standard-check"},
+		{name: "context-full-check", args: []string{"context-full-check"}, wantStdout: "make context-full-check"},
 		{name: "render-check", args: []string{"render-check", "rendered"}, wantStdout: "check_rendered_template.sh rendered"},
 		{name: "secrets", args: []string{"secrets"}, wantStdout: "check_secrets.sh"},
 		{name: "security", args: []string{"security"}, wantStdout: "check_secrets.sh"},
@@ -214,6 +217,9 @@ func TestGoalGovernanceCommandSurface(t *testing.T) {
 		{command: "issue-registry"},
 		{command: "command-registry"},
 		{command: "makefile-baseline"},
+		{command: "context-profile"},
+		{command: "context-profile-check"},
+		{command: "context-schema-check"},
 		{command: "agent-team-contract"},
 		{command: "scope-lock"},
 		{command: "pr-template"},
@@ -942,7 +948,7 @@ func TestMakefileReleaseGuardsUseContextVariable(t *testing.T) {
 	for _, want := range []string{
 		"$(XLIBGATE) main-guard --context $(XLIB_CONTEXT)",
 		"$(XLIBGATE) worktree-guard --context $(XLIB_CONTEXT)",
-		"XLIB_CONTEXT=release_verify GOWORK=off $(MAKE) release-check",
+		"XLIB_CONTEXT=release_verify GOWORK=off $(MAKE) context-release",
 		"GOWORK=off XLIB_CONTEXT=release_verify VERSION=\"$(VERSION)\" $(MAKE) release-final-check",
 	} {
 		if !strings.Contains(text, want) {

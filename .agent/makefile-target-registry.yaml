@@ -33,5 +33,15 @@ targets:
   - p1-governance-check
   - execution-context
   - p2-runtime-check
+  - context-profile
+  - context-profile-check
+  - context-schema-check
+  - context-lite
+  - context-standard
+  - context-full
+  - context-release
+  - context-fast-check
+  - context-standard-check
+  - context-full-check
   - release-check
   - release-final-check

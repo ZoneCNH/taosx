@@ -34,6 +34,24 @@ commands:
   - name: makefile-baseline
     phase: P0
     target: makefile-baseline
+  - name: context-profile
+    phase: P0
+    target: context-profile
+  - name: context-profile-check
+    phase: P0
+    target: context-profile-check
+  - name: context-schema-check
+    phase: P0
+    target: context-schema-check
+  - name: context-fast-check
+    phase: P0
+    target: context-fast-check
+  - name: context-standard-check
+    phase: P0
+    target: context-standard-check
+  - name: context-full-check
+    phase: P0
+    target: context-full-check
   - name: boundary
     phase: P0
     target: boundary
