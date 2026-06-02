@@ -30,6 +30,8 @@
 
 缺少 `govulncheck` 必须失败，不能跳过。secret scan 发现疑似凭据时必须阻断。
 
+Secret scan 会排除 `.git`、`.omc`、`.omx` 和 `vendor` 等本地或第三方目录，避免把 Agent 运行态、OMX 兼容状态或 vendored 依赖误判为源码凭据。该排除只用于降低误报，不代表这些目录可以提交真实凭据；任何进入 git 历史、manifest、Issue、PR 或日志的 secret 都必须视为违规。
+
 ## 日志和 Evidence
 
 - 日志不得输出敏感字段原值。

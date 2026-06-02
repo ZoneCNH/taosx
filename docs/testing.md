@@ -15,6 +15,8 @@
 - `Config.Sanitize` 的 secret 不变量必须由 property test 覆盖。
 - `Config` 边界输入必须由 fuzz-smoke 覆盖。
 - `HealthStatus` JSON 公共输出必须由 golden test 锁定。
+- `internal/releasequality` 必须覆盖 `Compute`、`Verify` 和 `Marshal` 的正常与失败路径。
+- Release manifest 测试必须在临时 fixture 仓库构造所需 `.omc` state，不得依赖当前工作区的 Agent 运行态文件。
 
 ## 示例与 testkit Smoke
 

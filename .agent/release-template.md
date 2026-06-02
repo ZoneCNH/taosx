@@ -1,5 +1,8 @@
 # Release Template
 
+> 模板说明：本文件是发布证据填写模板，不是 DONE 证据本身。只有填写了
+> workflow run、artifact URL、sha256、score 和 gate 结果的新鲜实例才可作为发布证据。
+
 ## Version
 
 - Version:

@@ -41,11 +41,17 @@
 - [仓库角色](docs/standard/repository-roles.md)：区分 `xlib-standard`、`kernel`、生成基础库和 `x.go`。
 - [模块边界](docs/standard/module-boundary.md)：定义标准、模板、generator、Harness、Evidence 与下游库边界。
 - [下游矩阵](docs/downstream-matrix.md)：列出 `kernel` 与所有目标库的 module path、package、layer、允许依赖和禁止依赖。
+- [下游同步策略](docs/downstream-sync-policy.md)：定义 `xlib-standard` 变更如何同步到 `kernel`、L1/L2 基础库，以及 `x.go` 的消费方边界。
 - [x.go 集成边界](docs/xgo-integration-boundary.md)：说明 `x.go` 只能作为调用方组合层，基础库不得反向依赖。
 - [迁移指南](docs/migration/baselib-template-to-xlib-standard.md)：记录旧名到新身份的迁移规则。
 - [Harness gate](docs/standard/harness-gates.md)：required、extended、generator、docs、score 和 final gate 命令。
 - [Evidence 协议](docs/standard/evidence-protocol.md)：`DONE with evidence:` 和 release manifest 要求。
+- [测试策略](docs/testing.md)：单元、示例 smoke、release quality 和 release manifest fixture 隔离要求。
+- [安全与密钥策略](docs/standard/security-and-secret-policy.md)：`govulncheck`、secret scan 和 Agent runtime 目录排除边界。
+- [供应链与 Evidence](docs/supply-chain.md)：workflow Action SHA pinning、固定 `govulncheck` 版本、release manifest 和 CI artifact 对齐。
+- [Release Scorecard](docs/scorecard.md)：`xlibgate score --min 9.8` 的评分维度、阈值和语义边界。
 - [发布](docs/release.md)：`release-check`、manifest 字段和 Evidence 规则。
+- [独立审计 2026-06-02](docs/independent-audit-20260602.md)：独立审计发现、修复状态和剩余验证缺口。
 
 ## 命令
 
@@ -54,6 +60,8 @@
 ```bash
 make ci
 make ci-extended
+GOWORK=off make dependency-check
+GOWORK=off make standard-impact-check
 GOWORK=off make docs-check
 GOWORK=off make release-check
 GOWORK=off make release-final-check
@@ -61,7 +69,9 @@ make release-preflight VERSION=v0.2.0
 make evidence
 ```
 
-`release-check` 和 `release-check-extended` 已依赖 `docs-check`，用于在生成 Evidence 前确认标准文档入口、链接、模板占位符、关键文本和 release manifest 协议没有漂移。`docs-check` 是结构性 gate，不替代人工语义审查。
+`release-check` 和 `release-check-extended` 已依赖 `dependency-check`、`standard-impact-check` 和 `docs-check`，用于在生成 Evidence 前确认依赖漂移自动化、标准影响报告、标准文档入口、下游同步策略、链接、模板占位符、当前命名、关键文本和 release manifest 协议没有漂移。`dependency-check` 读取 `renovate.json`、`.github/dependabot.yml` 和 `go.mod`；`standard-impact-check` 生成 `release/standard-impact/latest.md`，并把 `downstream_sync_required` 结论交给 release manifest。`docs-check` 是结构性 gate，不替代人工语义审查。
+
+Release gate 还必须执行 `GOWORK=off go run ./cmd/xlibgate score --min 9.8`。GitHub Actions workflow 引用的第三方 Action 必须固定为 40 位 commit SHA 并保留来源 tag 注释；CI、Release Check 和 Security workflow 安装 `govulncheck` 时使用固定基线 `golang.org/x/vuln/cmd/govulncheck@v1.3.0`，不得用 `@latest` 作为发布门禁配置。
 
 生成 `kernel` 示例：
 
@@ -82,7 +92,7 @@ GOWORK=off make release-check
 
 ## Evidence
 
-完成需要 release manifest 和 CI Evidence。`release/manifest/latest.json` 是生成产物，不提交到源码历史；对应的 `release/manifest/latest.json.sha256` 也是生成产物，两者都必须保持在 `.gitignore` 中。manifest 会记录 module、commit、tree SHA、源码摘要、contract 指纹、依赖清单、工具版本、生成时间、工作区状态、gate 结果和这两个 Evidence artifact；`release-check` 会生成并校验 checksum，CI 会上传两者作为 artifact。`make release-evidence-check` 会验证 manifest 与当前仓库事实一致，`make release-final-check` 会额外要求工作区为 `clean`。最终完成声明必须包含 `DONE with evidence:`。
+完成需要 release manifest 和 CI Evidence。`release/manifest/latest.json` 是生成产物，不提交到源码历史；对应的 `release/manifest/latest.json.sha256` 也是生成产物，两者都必须保持在 `.gitignore` 中。manifest 会记录 module、commit、tree SHA、源码摘要、contract 指纹、`dependencies`、`tools`、生成时间、工作区状态、gate 结果、`standard_impact`、`downstream_sync_required`、`generator_evidence`、`score`、`workflow` 和这两个 Evidence artifact；`release-check` 会生成并校验 checksum，CI 会上传两者作为 artifact。`make release-evidence-check` 会验证 manifest 与当前仓库事实一致，`make release-final-check` 会额外要求工作区为 `clean`。Release manifest 测试必须在临时 fixture 仓库中构造所需 `.omc` state，不得依赖当前工作区的 Agent 运行态文件。最终完成声明必须包含 `DONE with evidence:`。
 
 Full Goal Runtime v3.1 位于 [.agent](.agent/)，其中 [goal-runtime](.agent/goal-runtime.md)、[object-model](.agent/object-model.md)、[state-machine](.agent/state-machine.md)、[traceability-matrix](.agent/traceability-matrix.md)、[harness](.agent/harness.yaml)、[evidence-protocol](.agent/evidence-protocol.md)、[release-template](.agent/release-template.md)、[retrospective-template](.agent/retrospective-template.md)、[risk-register](.agent/risk-register.md)、[decision-log](.agent/decision-log.md)、[rollback-protocol](.agent/rollback-protocol.md) 和 patch 文档用于把标准、执行、评审、发布和复盘连接到同一套 Evidence 协议。
 

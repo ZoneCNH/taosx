@@ -32,6 +32,8 @@ var checkNames = []string{
 	"security",
 	"contract",
 	"integration",
+	"dependency_check",
+	"standard_impact",
 	"docs_check",
 	"property",
 	"golden",
@@ -39,20 +41,22 @@ var checkNames = []string{
 }
 
 var checkEnvNames = map[string]string{
-	"fmt":         "FMT_STATUS",
-	"vet":         "VET_STATUS",
-	"lint":        "LINT_STATUS",
-	"unit_test":   "UNIT_TEST_STATUS",
-	"race_test":   "RACE_TEST_STATUS",
-	"boundary":    "BOUNDARY_STATUS",
-	"secret_scan": "SECRET_SCAN_STATUS",
-	"security":    "SECURITY_STATUS",
-	"contract":    "CONTRACT_STATUS",
-	"integration": "INTEGRATION_STATUS",
-	"docs_check":  "DOCS_CHECK_STATUS",
-	"property":    "PROPERTY_STATUS",
-	"golden":      "GOLDEN_STATUS",
-	"fuzz_smoke":  "FUZZ_SMOKE_STATUS",
+	"fmt":              "FMT_STATUS",
+	"vet":              "VET_STATUS",
+	"lint":             "LINT_STATUS",
+	"unit_test":        "UNIT_TEST_STATUS",
+	"race_test":        "RACE_TEST_STATUS",
+	"boundary":         "BOUNDARY_STATUS",
+	"secret_scan":      "SECRET_SCAN_STATUS",
+	"security":         "SECURITY_STATUS",
+	"contract":         "CONTRACT_STATUS",
+	"integration":      "INTEGRATION_STATUS",
+	"dependency_check": "DEPENDENCY_CHECK_STATUS",
+	"standard_impact":  "STANDARD_IMPACT_STATUS",
+	"docs_check":       "DOCS_CHECK_STATUS",
+	"property":         "PROPERTY_STATUS",
+	"golden":           "GOLDEN_STATUS",
+	"fuzz_smoke":       "FUZZ_SMOKE_STATUS",
 }
 
 var contractFiles = []string{
@@ -67,25 +71,35 @@ var requiredArtifacts = []string{
 	"release/manifest/latest.json.sha256",
 }
 
+const standardImpactReportPath = "release/standard-impact/latest.md"
+
+var generatorEvidenceTargets = []GeneratorTarget{
+	{Name: "kernel", ModulePath: "github.com/ZoneCNH/kernel", PackageName: "kernel"},
+	{Name: "corekit", ModulePath: "example.com/acme/corekit", PackageName: "corekit"},
+}
+
 type Manifest struct {
-	Module           string                `json:"module"`
-	Version          string                `json:"version"`
-	Commit           string                `json:"commit"`
-	TreeSHA          string                `json:"tree_sha"`
-	SourceDigest     string                `json:"source_digest"`
-	TrackedFileCount int                   `json:"tracked_file_count"`
-	GoVersion        string                `json:"go_version"`
-	GeneratedAt      string                `json:"generated_at"`
-	GeneratedBy      string                `json:"generated_by"`
-	TreeState        string                `json:"tree_state"`
-	Checks           map[string]string     `json:"checks"`
-	Workflow         WorkflowEvidence      `json:"workflow"`
-	Score            releasequality.Report `json:"score"`
-	Contracts        []FileDigest          `json:"contracts"`
-	Dependencies     []ModuleDigest        `json:"dependencies"`
-	Tools            map[string]string     `json:"tools"`
-	Artifacts        []string              `json:"artifacts"`
-	Notes            Notes                 `json:"notes"`
+	Module                 string                 `json:"module"`
+	Version                string                 `json:"version"`
+	Commit                 string                 `json:"commit"`
+	TreeSHA                string                 `json:"tree_sha"`
+	SourceDigest           string                 `json:"source_digest"`
+	TrackedFileCount       int                    `json:"tracked_file_count"`
+	GoVersion              string                 `json:"go_version"`
+	GeneratedAt            string                 `json:"generated_at"`
+	GeneratedBy            string                 `json:"generated_by"`
+	TreeState              string                 `json:"tree_state"`
+	Checks                 map[string]string      `json:"checks"`
+	Workflow               WorkflowEvidence       `json:"workflow"`
+	Score                  releasequality.Report  `json:"score"`
+	Contracts              []FileDigest           `json:"contracts"`
+	Dependencies           []ModuleDigest         `json:"dependencies"`
+	StandardImpact         StandardImpactEvidence `json:"standard_impact"`
+	DownstreamSyncRequired bool                   `json:"downstream_sync_required"`
+	GeneratorEvidence      GeneratorEvidence      `json:"generator_evidence"`
+	Tools                  map[string]string      `json:"tools"`
+	Artifacts              []string               `json:"artifacts"`
+	Notes                  Notes                  `json:"notes"`
 }
 
 type WorkflowEvidence struct {
@@ -109,6 +123,26 @@ type ModuleDigest struct {
 type ModuleReplace struct {
 	Path    string `json:"path"`
 	Version string `json:"version,omitempty"`
+}
+
+type StandardImpactEvidence struct {
+	ReportPath             string `json:"report_path"`
+	ReportSHA256           string `json:"report_sha256"`
+	Status                 string `json:"status"`
+	DownstreamSyncRequired bool   `json:"downstream_sync_required"`
+	PrimaryDownstream      string `json:"primary_downstream"`
+}
+
+type GeneratorEvidence struct {
+	Command  string            `json:"command"`
+	Required bool              `json:"required"`
+	Targets  []GeneratorTarget `json:"targets"`
+}
+
+type GeneratorTarget struct {
+	Name        string `json:"name"`
+	ModulePath  string `json:"module_path"`
+	PackageName string `json:"package_name"`
 }
 
 type Notes struct {
@@ -187,23 +221,30 @@ func buildManifest() (Manifest, error) {
 	if err != nil {
 		return Manifest{}, err
 	}
+	standardImpact, err := buildStandardImpactEvidence()
+	if err != nil {
+		return Manifest{}, err
+	}
 
 	return Manifest{
-		Module:           module,
-		Version:          envDefault("VERSION", "v0.1.0"),
-		Commit:           runTrimmedDefault("unknown", "git", "rev-parse", "HEAD"),
-		TreeSHA:          runTrimmedDefault("unknown", "git", "rev-parse", "HEAD^{tree}"),
-		SourceDigest:     sourceDigest,
-		TrackedFileCount: trackedFileCount,
-		GoVersion:        runtime.Version(),
-		GeneratedAt:      time.Now().UTC().Format(time.RFC3339),
-		GeneratedBy:      envDefault("GENERATED_BY", "scripts/generate_manifest.sh"),
-		TreeState:        treeState(),
-		Checks:           buildChecks(),
-		Workflow:         buildWorkflowEvidence(),
-		Score:            releasequality.Compute(releasequality.DefaultMinimum),
-		Contracts:        contracts,
-		Dependencies:     dependencies,
+		Module:                 module,
+		Version:                envDefault("VERSION", "v0.1.0"),
+		Commit:                 runTrimmedDefault("unknown", "git", "rev-parse", "HEAD"),
+		TreeSHA:                runTrimmedDefault("unknown", "git", "rev-parse", "HEAD^{tree}"),
+		SourceDigest:           sourceDigest,
+		TrackedFileCount:       trackedFileCount,
+		GoVersion:              runtime.Version(),
+		GeneratedAt:            time.Now().UTC().Format(time.RFC3339),
+		GeneratedBy:            envDefault("GENERATED_BY", "scripts/generate_manifest.sh"),
+		TreeState:              treeState(),
+		Checks:                 buildChecks(),
+		Workflow:               buildWorkflowEvidence(),
+		Score:                  releasequality.Compute(releasequality.DefaultMinimum),
+		Contracts:              contracts,
+		Dependencies:           dependencies,
+		StandardImpact:         standardImpact,
+		DownstreamSyncRequired: standardImpact.DownstreamSyncRequired,
+		GeneratorEvidence:      buildGeneratorEvidence(),
 		Tools: map[string]string{
 			"go":            firstLine(runTrimmedDefault(runtime.Version(), "go", "version")),
 			"golangci-lint": toolVersion("golangci-lint", "--version"),
@@ -295,6 +336,27 @@ func verifyManifest(path string, requirePassed bool, requireClean bool, expectVe
 	if !reflect.DeepEqual(got.Dependencies, current.Dependencies) {
 		failures = append(failures, "dependency inventory does not match go list -m -json all")
 	}
+	if !reflect.DeepEqual(got.StandardImpact, current.StandardImpact) {
+		failures = append(failures, "standard_impact does not match current standard impact evidence")
+	}
+	if got.DownstreamSyncRequired != current.DownstreamSyncRequired {
+		failures = append(failures, fmt.Sprintf("downstream_sync_required mismatch: got %t, want %t", got.DownstreamSyncRequired, current.DownstreamSyncRequired))
+	}
+	if got.DownstreamSyncRequired != got.StandardImpact.DownstreamSyncRequired {
+		failures = append(failures, "downstream_sync_required must match standard_impact.downstream_sync_required")
+	}
+	requireNonEmpty(&failures, "standard_impact.report_path", got.StandardImpact.ReportPath)
+	requireNonEmpty(&failures, "standard_impact.status", got.StandardImpact.Status)
+	if !reflect.DeepEqual(got.GeneratorEvidence, current.GeneratorEvidence) {
+		failures = append(failures, "generator_evidence does not match current integration evidence")
+	}
+	requireNonEmpty(&failures, "generator_evidence.command", got.GeneratorEvidence.Command)
+	if !got.GeneratorEvidence.Required {
+		failures = append(failures, "generator_evidence.required must be true")
+	}
+	if len(got.GeneratorEvidence.Targets) == 0 {
+		failures = append(failures, "generator_evidence.targets is required")
+	}
 	for _, artifact := range requiredArtifacts {
 		if !contains(got.Artifacts, artifact) {
 			failures = append(failures, fmt.Sprintf("artifacts must include %s", artifact))
@@ -350,6 +412,51 @@ func buildWorkflowEvidence() WorkflowEvidence {
 		WorkflowRunID: runID,
 		ArtifactName:  artifactName,
 		ArtifactURL:   artifactURL,
+	}
+}
+
+func buildStandardImpactEvidence() (StandardImpactEvidence, error) {
+	evidence := StandardImpactEvidence{
+		ReportPath: standardImpactReportPath,
+		Status:     "missing",
+	}
+
+	data, err := os.ReadFile(standardImpactReportPath)
+	if err != nil {
+		if errors.Is(err, os.ErrNotExist) {
+			return evidence, nil
+		}
+		return StandardImpactEvidence{}, err
+	}
+
+	sum := sha256.Sum256(data)
+	report := string(data)
+	evidence.ReportSHA256 = "sha256:" + hex.EncodeToString(sum[:])
+	evidence.Status = "present"
+	evidence.DownstreamSyncRequired = strings.EqualFold(parseReportValue(report, "downstream_sync_required"), "true")
+	evidence.PrimaryDownstream = parseReportValue(report, "primary_downstream")
+	return evidence, nil
+}
+
+func parseReportValue(report string, key string) string {
+	prefix := key + ":"
+	for _, line := range strings.Split(report, "\n") {
+		line = strings.TrimSpace(line)
+		line = strings.TrimSpace(strings.TrimPrefix(line, "-"))
+		if strings.HasPrefix(line, prefix) {
+			value := strings.TrimSpace(strings.TrimPrefix(line, prefix))
+			value = strings.Trim(value, "`")
+			return strings.TrimSpace(value)
+		}
+	}
+	return ""
+}
+
+func buildGeneratorEvidence() GeneratorEvidence {
+	return GeneratorEvidence{
+		Command:  "GOWORK=off make integration",
+		Required: true,
+		Targets:  append([]GeneratorTarget(nil), generatorEvidenceTargets...),
 	}
 }
 

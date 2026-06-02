@@ -36,9 +36,17 @@
 
 GitHub Actions 运行 `GOWORK=off make release-check`，并上传 `release/manifest/latest.json` 与 `release/manifest/latest.json.sha256` 作为 `release-manifest` artifact。CI 中上传的 artifact 是发布 Evidence 的外部留痕；本地生成的 `latest.json` 和 checksum 用于验证和排障。
 
+## Workflow 供应链固定
+
+GitHub Actions workflow 必须使用 40 位 commit SHA 固定第三方 Action，并在同一行用注释记录来源 tag，例如 `# tag v4.2.2`。不得使用 `actions/checkout@v4`、`actions/setup-go@v5` 这类浮动 tag 作为最终发布门禁配置；版本更新应通过维护者审查或 dependabot PR 重新 pin 到新的 commit。
+
+CI、Release Check 和 Security workflow 安装 `govulncheck` 时必须使用固定版本。当前基线是 `golang.org/x/vuln/cmd/govulncheck@v1.3.0`；升级时应同步更新 workflow、发布文档和验证记录。
+
+Release manifest 相关测试必须在临时 fixture 仓库内构造所需 `.omc` state 文件，不得依赖当前工作区的 Agent 运行态。这样可以保证 Evidence 测试在 clean checkout、CI 和本地开发目录中行为一致。
+
 ## 下游模板安全线
 
-`make integration` 会渲染 `foundationx` 和 `corekit` 两个临时下游库，检查旧模板标识是否清空，并在下游库内生成、校验 release Evidence。这保证模板替换逻辑、contract gate、boundary gate 和 Evidence 工具不会只在模板仓库自身成立。
+`make integration` 会渲染 `kernel` 和 `corekit` 两个临时下游库，检查旧模板标识是否清空，并在下游库内生成、校验 release Evidence。这保证模板替换逻辑、contract gate、boundary gate 和 Evidence 工具不会只在模板仓库自身成立。旧 `foundationx` 只作为迁移兼容扫描项，不再作为默认下游。
 
 ## Score 与 Workflow Evidence
 

@@ -19,7 +19,12 @@
 ## 当前 v3.1 补充入口
 
 - [下游矩阵](../downstream-matrix.md)：`kernel` 与目标基础库的 module/package/layer/dependency 矩阵。
+- [下游同步策略](../downstream-sync-policy.md)：标准变更到 `kernel`、L1/L2 基础库和 `x.go` 的同步规则。
 - [x.go 集成边界](../xgo-integration-boundary.md)：调用方密钥路径和组合边界。
+- [测试策略](../testing.md)：单元、示例 smoke、release quality 和 release manifest fixture 隔离要求。
+- [供应链与 Evidence](../supply-chain.md)：workflow Action SHA pinning、固定 `govulncheck` 版本、manifest 校验和 CI artifact 对齐。
+- [Release Scorecard](../scorecard.md)：`xlibgate score --min 9.8` 的评分维度、阈值和语义边界。
+- [独立审计 2026-06-02](../independent-audit-20260602.md)：审计发现、修复状态和剩余远端验证缺口。
 - [迁移指南](../migration/baselib-template-to-xlib-standard.md)：旧名迁移规则。
 - [目标 ADR-001](../adr/ADR-20260602-001-xlib-standard-role.md)：合并五类职责的身份决策。
 - [目标 ADR-002](../adr/ADR-20260602-002-kernel-rename.md)：默认下游名迁移到 `kernel`。
@@ -29,8 +34,13 @@
 发布式验证必须至少运行：
 
 ```bash
+GOWORK=off make dependency-check
+GOWORK=off make standard-impact-check
 GOWORK=off make docs-check
+GOWORK=off go run ./cmd/xlibgate score --min 9.8
 GOWORK=off make release-check
 ```
 
-完整 release Evidence 还需要 `release/manifest/latest.json`、`release/manifest/latest.json.sha256`、CI artifact 和 `DONE with evidence:` 声明。Fuzz smoke 默认使用 `FUZZ_SMOKE_TIME=10s`，加长时必须记录到 Evidence。
+完整 release Evidence 还需要 `release/manifest/latest.json`、`release/manifest/latest.json.sha256`、`release/standard-impact/latest.md`、`downstream_sync_required` 结论、manifest 内的 `score` 与 `workflow` 字段、CI artifact 和 `DONE with evidence:` 声明。Fuzz smoke 默认使用 `FUZZ_SMOKE_TIME=10s`，加长时必须记录到 Evidence。
+
+CI、Release Check 和 Security workflow 的第三方 Action 必须 pin 到 40 位 commit SHA，并保留来源 tag 注释。`govulncheck` 发布门禁基线为 `golang.org/x/vuln/cmd/govulncheck@v1.3.0`；release manifest 测试必须在临时 fixture 仓库构造 `.omc` state，不得读取当前工作区的 Agent 运行态。

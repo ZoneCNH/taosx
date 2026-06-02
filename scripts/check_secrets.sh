@@ -22,6 +22,7 @@ PATTERNS=(
 for pattern in "${PATTERNS[@]}"; do
   if grep -R -E \
     --exclude-dir=.git \
+    --exclude-dir=.omc \
     --exclude-dir=.omx \
     --exclude-dir=vendor \
     --exclude="*.sum" \

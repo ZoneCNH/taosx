@@ -16,8 +16,10 @@ Full Goal Runtime v3.1 以 `cmd/xlibgate` 作为 Go gate runtime。Makefile targ
 | Boundary | `GOWORK=off make boundary` | 模块边界和模板禁止项 |
 | Security | `GOWORK=off make security` | `govulncheck` 和 secret scan |
 | Contracts | `GOWORK=off make contracts` | schema、metrics 和 manifest contract |
-| Docs Check | `GOWORK=off make docs-check` | 文档、链接、v3.1 runtime 和 release protocol |
+| Docs Check | `GOWORK=off make docs-check` | 文档、链接、当前命名、下游同步策略、v3.1 runtime 和 release protocol |
 | Integration | `GOWORK=off make integration` | generator 和 downstream smoke |
+| Dependency Check | `GOWORK=off make dependency-check` | 校验 `renovate.json`、`.github/dependabot.yml` 和 Go dependency inventory |
+| Standard Impact Check | `GOWORK=off make standard-impact-check` | 生成 `release/standard-impact/latest.md` 并判定 `downstream_sync_required` |
 | Score | `GOWORK=off make score` / `GOWORK=off go run ./cmd/xlibgate score --min 9.8` | 校验 v3.1 gate runtime、CI 和文档契约一致性 |
 | Evidence | `CHECK_STATUS=passed GOWORK=off make evidence` | 生成 release manifest |
 | Release Evidence | `RELEASE_EVIDENCE_REQUIRE_PASSED=1 GOWORK=off make release-evidence-check` | 校验 manifest 与仓库事实 |
@@ -51,3 +53,9 @@ Generator gate 必须证明模板能生成代表性下游，而不是只证明 `
 ## Secret Gate
 
 Secret Gate 必须确认源码、README、测试日志、release manifest、PR 描述和 Evidence 不包含 `/home/k8s/secrets/env/*` 的真实内容。该路径只能在文档中作为调用方部署路径名出现。
+
+Secret scan 会排除 `.git`、`.omc`、`.omx` 和 `vendor` 等本地或第三方目录，避免把 Agent runtime 或 vendored 依赖误判为源码凭据；这些目录一旦内容进入 git 历史、manifest、PR、Issue 或日志，仍按 secret leak 处理。
+
+## Workflow Supply Chain Gate
+
+CI、Release Check、Integration 和 Security workflow 引用的第三方 Action 必须固定为 40 位 commit SHA，并保留来源 tag 注释。`govulncheck` 安装必须使用固定版本；当前发布门禁基线是 `golang.org/x/vuln/cmd/govulncheck@v1.3.0`。

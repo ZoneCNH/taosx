@@ -84,6 +84,8 @@ fuzz-smoke
 
 缺少任一工具时，本地 Makefile 必须硬失败。GitHub Actions CI 和 Release Check workflow 会在运行 `make ci` / `make release-check` 前安装 `golangci-lint` 和 `govulncheck`，以保证本地与远端 workflow 对同一组强制 gate 负责。
 
+GitHub Actions workflow 引用的第三方 Action 必须固定为 40 位 commit SHA，并用注释保留来源 tag 供审计。CI、Release Check 和 Security workflow 安装 `govulncheck` 时必须使用固定版本；当前基线是 `golang.org/x/vuln/cmd/govulncheck@v1.3.0`，不得在发布门禁中使用 `@latest`。
+
 `make security` 必须同时运行 `govulncheck ./...` 和 `scripts/check_secrets.sh`；不得把漏洞扫描降级为可选检查。
 
 ## Evidence

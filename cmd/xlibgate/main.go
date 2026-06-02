@@ -25,6 +25,8 @@ func run(args []string, stdin io.Reader, stdout io.Writer, stderr io.Writer) int
 		return runExternal(stdin, stdout, stderr, "./scripts/check_boundary.sh")
 	case "contracts":
 		return runExternal(stdin, stdout, stderr, "./scripts/check_contracts.sh")
+	case "dependency-check":
+		return runExternal(stdin, stdout, stderr, "./scripts/check_dependency_diff.sh")
 	case "docs-check":
 		return runExternal(stdin, stdout, stderr, "./scripts/check_docs.sh")
 	case "evidence":
@@ -45,6 +47,8 @@ func run(args []string, stdin io.Reader, stdout io.Writer, stderr io.Writer) int
 		return runScore(args[1:], stdout, stderr)
 	case "secrets":
 		return runExternal(stdin, stdout, stderr, "./scripts/check_secrets.sh")
+	case "standard-impact-check":
+		return runExternal(stdin, stdout, stderr, "./scripts/check_standard_impact.sh")
 	case "help", "-h", "--help":
 		write(stdout, usage)
 		return 0
@@ -103,6 +107,7 @@ const usage = `usage: xlibgate <command> [args]
 commands:
   boundary
   contracts
+  dependency-check
   docs-check
   evidence
   integration
@@ -113,4 +118,5 @@ commands:
   render-check <rendered-dir>
   score [--min <score>]
   secrets
+  standard-impact-check
 `

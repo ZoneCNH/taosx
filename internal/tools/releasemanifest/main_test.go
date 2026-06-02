@@ -45,6 +45,8 @@ func TestCheckNamesCoverReleaseTargets(t *testing.T) {
 		"security",
 		"contract",
 		"integration",
+		"dependency_check",
+		"standard_impact",
 		"docs_check",
 		"property",
 		"golden",
@@ -146,6 +148,21 @@ func TestRunCLIGeneratesManifestToOut(t *testing.T) {
 	}
 	if manifest.Score.Threshold != 9.8 || manifest.Score.Status == "" || len(manifest.Score.Dimensions) == 0 {
 		t.Fatalf("score report is incomplete: %+v", manifest.Score)
+	}
+	if manifest.StandardImpact.ReportPath != standardImpactReportPath || manifest.StandardImpact.Status == "" {
+		t.Fatalf("standard impact evidence is incomplete: %+v", manifest.StandardImpact)
+	}
+	if manifest.DownstreamSyncRequired != manifest.StandardImpact.DownstreamSyncRequired {
+		t.Fatalf("downstream_sync_required = %t, want standard impact value %t", manifest.DownstreamSyncRequired, manifest.StandardImpact.DownstreamSyncRequired)
+	}
+	if !manifest.GeneratorEvidence.Required || manifest.GeneratorEvidence.Command == "" {
+		t.Fatalf("generator evidence is incomplete: %+v", manifest.GeneratorEvidence)
+	}
+	if !hasGeneratorTarget(manifest.GeneratorEvidence.Targets, "kernel", "github.com/ZoneCNH/kernel", "kernel") {
+		t.Fatalf("generator targets = %+v, want kernel target", manifest.GeneratorEvidence.Targets)
+	}
+	if !hasGeneratorTarget(manifest.GeneratorEvidence.Targets, "corekit", "example.com/acme/corekit", "corekit") {
+		t.Fatalf("generator targets = %+v, want corekit target", manifest.GeneratorEvidence.Targets)
 	}
 	for _, name := range checkNames {
 		if manifest.Checks[name] != "passed" {
@@ -323,6 +340,9 @@ func TestRunCLIVerifyReportsDrift(t *testing.T) {
 	}
 	manifest.SourceDigest = "sha256:stale"
 	manifest.Checks["lint"] = "failed"
+	manifest.StandardImpact.Status = "stale"
+	manifest.DownstreamSyncRequired = !manifest.StandardImpact.DownstreamSyncRequired
+	manifest.GeneratorEvidence.Targets = nil
 	if err := writeManifest(outPath, manifest); err != nil {
 		t.Fatal(err)
 	}
@@ -340,6 +360,8 @@ func TestRunCLIVerifyReportsDrift(t *testing.T) {
 	for _, want := range []string{
 		"ERROR: release evidence verification failed",
 		"source_digest does not match current tracked file contents",
+		"standard_impact does not match current standard impact evidence",
+		"generator_evidence does not match current integration evidence",
 		`checks.lint must be passed, got "failed"`,
 	} {
 		if !strings.Contains(message, want) {
@@ -428,20 +450,20 @@ func TestPrintCLIMessageReportsWriterFailure(t *testing.T) {
 	}
 }
 
-func TestBuildManifestRecordsCurrentRepositoryFacts(t *testing.T) {
+func TestBuildManifestRecordsFixtureRepositoryFacts(t *testing.T) {
 	t.Setenv("GOWORK", "off")
 	t.Setenv("VERSION", "v9.9.9-test")
 	t.Setenv("GENERATED_BY", "releasemanifest-test")
 	t.Setenv("CHECK_STATUS", "passed")
-	chdir(t, repoRoot(t))
+	chdir(t, releaseManifestFixtureRepo(t))
 
 	manifest, err := buildManifest()
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	if manifest.Module != "github.com/ZoneCNH/xlib-standard" {
-		t.Fatalf("module = %q, want github.com/ZoneCNH/xlib-standard", manifest.Module)
+	if manifest.Module != "example.com/releasefixture" {
+		t.Fatalf("module = %q, want example.com/releasefixture", manifest.Module)
 	}
 	if manifest.Version != "v9.9.9-test" {
 		t.Fatalf("version = %q, want v9.9.9-test", manifest.Version)
@@ -467,6 +489,24 @@ func TestBuildManifestRecordsCurrentRepositoryFacts(t *testing.T) {
 	if manifest.Tools["go"] == "" {
 		t.Fatal("tools.go is empty")
 	}
+	if manifest.StandardImpact.ReportPath != standardImpactReportPath {
+		t.Fatalf("standard_impact.report_path = %q, want %q", manifest.StandardImpact.ReportPath, standardImpactReportPath)
+	}
+	if manifest.StandardImpact.Status != "missing" && manifest.StandardImpact.Status != "present" {
+		t.Fatalf("standard_impact.status = %q, want missing or present", manifest.StandardImpact.Status)
+	}
+	if manifest.DownstreamSyncRequired != manifest.StandardImpact.DownstreamSyncRequired {
+		t.Fatalf("downstream_sync_required = %t, want standard impact value %t", manifest.DownstreamSyncRequired, manifest.StandardImpact.DownstreamSyncRequired)
+	}
+	if manifest.GeneratorEvidence.Command != "GOWORK=off make integration" || !manifest.GeneratorEvidence.Required {
+		t.Fatalf("generator_evidence = %+v, want integration command and required=true", manifest.GeneratorEvidence)
+	}
+	if !hasGeneratorTarget(manifest.GeneratorEvidence.Targets, "kernel", "github.com/ZoneCNH/kernel", "kernel") {
+		t.Fatalf("generator targets = %+v, want kernel target", manifest.GeneratorEvidence.Targets)
+	}
+	if !hasGeneratorTarget(manifest.GeneratorEvidence.Targets, "corekit", "example.com/acme/corekit", "corekit") {
+		t.Fatalf("generator targets = %+v, want corekit target", manifest.GeneratorEvidence.Targets)
+	}
 	for _, artifact := range requiredArtifacts {
 		if !contains(manifest.Artifacts, artifact) {
 			t.Fatalf("artifacts = %v, want %s", manifest.Artifacts, artifact)
@@ -485,7 +525,7 @@ func TestBuildManifestRecordsCurrentRepositoryFacts(t *testing.T) {
 func TestVerifyManifestAcceptsFreshManifestAndRejectsDrift(t *testing.T) {
 	t.Setenv("GOWORK", "off")
 	t.Setenv("CHECK_STATUS", "passed")
-	chdir(t, repoRoot(t))
+	chdir(t, releaseManifestFixtureRepo(t))
 
 	manifest, err := buildManifest()
 	if err != nil {
@@ -503,6 +543,9 @@ func TestVerifyManifestAcceptsFreshManifestAndRejectsDrift(t *testing.T) {
 	manifest.SourceDigest = "sha256:bad"
 	manifest.Checks["lint"] = "unknown"
 	manifest.Artifacts = []string{"release/manifest/latest.json"}
+	manifest.StandardImpact.Status = "stale"
+	manifest.DownstreamSyncRequired = !manifest.StandardImpact.DownstreamSyncRequired
+	manifest.GeneratorEvidence.Command = "make old-integration"
 	badPath := filepath.Join(t.TempDir(), "stale.json")
 	if err := writeManifest(badPath, manifest); err != nil {
 		t.Fatal(err)
@@ -517,6 +560,9 @@ func TestVerifyManifestAcceptsFreshManifestAndRejectsDrift(t *testing.T) {
 		"source_digest does not match current tracked file contents",
 		`checks.lint must be passed, got "unknown"`,
 		"artifacts must include release/manifest/latest.json.sha256",
+		"standard_impact does not match current standard impact evidence",
+		"downstream_sync_required must match standard_impact.downstream_sync_required",
+		"generator_evidence does not match current integration evidence",
 	} {
 		if !strings.Contains(message, want) {
 			t.Fatalf("error = %q, want substring %q", message, want)
@@ -524,10 +570,80 @@ func TestVerifyManifestAcceptsFreshManifestAndRejectsDrift(t *testing.T) {
 	}
 }
 
+func TestBuildStandardImpactEvidenceAllowsMissingReport(t *testing.T) {
+	chdir(t, t.TempDir())
+
+	got, err := buildStandardImpactEvidence()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if got.ReportPath != standardImpactReportPath {
+		t.Fatalf("report_path = %q, want %q", got.ReportPath, standardImpactReportPath)
+	}
+	if got.Status != "missing" {
+		t.Fatalf("status = %q, want missing", got.Status)
+	}
+	if got.ReportSHA256 != "" {
+		t.Fatalf("report_sha256 = %q, want empty", got.ReportSHA256)
+	}
+	if got.DownstreamSyncRequired {
+		t.Fatal("downstream_sync_required = true, want false")
+	}
+}
+
+func TestBuildStandardImpactEvidenceReadsReport(t *testing.T) {
+	root := t.TempDir()
+	reportPath := filepath.Join(root, filepath.FromSlash(standardImpactReportPath))
+	if err := os.MkdirAll(filepath.Dir(reportPath), 0o755); err != nil {
+		t.Fatal(err)
+	}
+	content := "# Standard Impact\n\n- downstream_sync_required: `true`\n- primary_downstream: `github.com/ZoneCNH/kernel`\n"
+	if err := os.WriteFile(reportPath, []byte(content), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	chdir(t, root)
+
+	got, err := buildStandardImpactEvidence()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if got.Status != "present" {
+		t.Fatalf("status = %q, want present", got.Status)
+	}
+	if !strings.HasPrefix(got.ReportSHA256, "sha256:") {
+		t.Fatalf("report_sha256 = %q, want sha256 prefix", got.ReportSHA256)
+	}
+	if !got.DownstreamSyncRequired {
+		t.Fatal("downstream_sync_required = false, want true")
+	}
+	if got.PrimaryDownstream != "github.com/ZoneCNH/kernel" {
+		t.Fatalf("primary_downstream = %q, want github.com/ZoneCNH/kernel", got.PrimaryDownstream)
+	}
+}
+
+func TestBuildGeneratorEvidenceRecordsRepresentativeDownstreams(t *testing.T) {
+	got := buildGeneratorEvidence()
+
+	if got.Command != "GOWORK=off make integration" {
+		t.Fatalf("command = %q, want integration command", got.Command)
+	}
+	if !got.Required {
+		t.Fatal("required = false, want true")
+	}
+	if !hasGeneratorTarget(got.Targets, "kernel", "github.com/ZoneCNH/kernel", "kernel") {
+		t.Fatalf("targets = %+v, want kernel target", got.Targets)
+	}
+	if !hasGeneratorTarget(got.Targets, "corekit", "example.com/acme/corekit", "corekit") {
+		t.Fatalf("targets = %+v, want corekit target", got.Targets)
+	}
+}
+
 func TestVerifyManifestRequiresCleanTree(t *testing.T) {
 	t.Setenv("GOWORK", "off")
 	t.Setenv("CHECK_STATUS", "passed")
-	chdir(t, repoRoot(t))
+	chdir(t, releaseManifestFixtureRepo(t))
 
 	manifest, err := buildManifest()
 	if err != nil {
@@ -678,27 +794,6 @@ func TestToolVersionReportsMissingBinary(t *testing.T) {
 	}
 }
 
-func repoRoot(t *testing.T) string {
-	t.Helper()
-
-	dir, err := os.Getwd()
-	if err != nil {
-		t.Fatal(err)
-	}
-	for {
-		if _, err := os.Stat(filepath.Join(dir, "go.mod")); err == nil {
-			if _, err := os.Stat(filepath.Join(dir, "contracts")); err == nil {
-				return dir
-			}
-		}
-		parent := filepath.Dir(dir)
-		if parent == dir {
-			t.Fatal("could not find repository root")
-		}
-		dir = parent
-	}
-}
-
 func chdir(t *testing.T, dir string) {
 	t.Helper()
 
@@ -748,8 +843,23 @@ func releaseManifestFixtureRepo(t *testing.T) string {
 			t.Fatal(err)
 		}
 	}
+	writeFixtureOMCState(t, repo)
 	runTestCommand(t, repo, "git", "add", ".")
 	return repo
+}
+
+func writeFixtureOMCState(t *testing.T, repo string) {
+	t.Helper()
+
+	stateDir := filepath.Join(repo, ".omc", "state")
+	if err := os.MkdirAll(stateDir, 0o755); err != nil {
+		t.Fatal(err)
+	}
+	statePath := filepath.Join(stateDir, "agent-replay-fixture.jsonl")
+	content := []byte(`{"event":"fixture","source":"releasemanifest-test"}` + "\n")
+	if err := os.WriteFile(statePath, content, 0o644); err != nil {
+		t.Fatal(err)
+	}
 }
 
 func expectedSourceDigest(files map[string]string) string {
@@ -768,6 +878,15 @@ func expectedSourceDigest(files map[string]string) string {
 		digest.Write([]byte{0})
 	}
 	return "sha256:" + hex.EncodeToString(digest.Sum(nil))
+}
+
+func hasGeneratorTarget(targets []GeneratorTarget, name string, modulePath string, packageName string) bool {
+	for _, target := range targets {
+		if target.Name == name && target.ModulePath == modulePath && target.PackageName == packageName {
+			return true
+		}
+	}
+	return false
 }
 
 type errorWriter struct{}

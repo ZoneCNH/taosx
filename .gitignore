@@ -27,8 +27,11 @@ go.work.sum
 # Generated Evidence manifest. Recreate with `make evidence`; never commit latest.json.
 release/manifest/latest.json
 release/manifest/latest.json.sha256
+release/standard-impact/latest.md
 
-# Local OMX/team runtime worktrees
+# Local Agent/OMX runtime state
+.omc/
+.omx/
 .worktree/
 
 # env file
