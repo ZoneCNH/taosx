@@ -148,7 +148,7 @@ classify_file() {
     templates/context-consumer/*)
       add_category_file "downstream_context" "$file"
       ;;
-    AGENTS.md|Makefile|.github/workflows/*|.github/CODEOWNERS|.github/rulesets/*|infra/github-rules/*|.agent/gates.md)
+    AGENTS.md|Makefile|.github/CODEOWNERS|.github/rulesets/*|.github/workflows/*|infra/github-rules/*|.agent/gates.md)
       add_category_file "repository_rules" "$file"
       ;;
     cmd/xlibgate/*|.agent/context/*|docs/standard/xlibgate-cli-contract.md|docs/standard/release-standard.md|docs/standard/harness-gates.md|docs/standard/evidence-protocol.md)
@@ -198,6 +198,26 @@ fi
 repository_rules_release_decision="repository-rules-review-not-required"
 if (( ${#repository_rules_files[@]} > 0 )); then
   repository_rules_release_decision="repository-rules-review-required"
+fi
+
+context_runtime_change="false"
+if (( ${#context_runtime_files[@]} > 0 )); then
+  context_runtime_change="true"
+fi
+
+governance_registry_change="false"
+if (( ${#governance_registry_files[@]} > 0 )); then
+  governance_registry_change="true"
+fi
+
+downstream_release_decision="downstream-sync-not-required"
+if [[ "$downstream_sync_required" == "true" ]]; then
+  downstream_release_decision="downstream-sync-required"
+fi
+
+repository_rules_release_decision="repository-rules-release-not-required"
+if (( ${#repository_rules_files[@]} > 0 )); then
+  repository_rules_release_decision="repository-rules-release-required"
 fi
 
 context_runtime_change="false"

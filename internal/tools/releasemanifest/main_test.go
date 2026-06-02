@@ -839,10 +839,10 @@ func TestBuildStandardImpactEvidenceReadsReport(t *testing.T) {
 		"",
 		"- downstream_sync_required: `true`",
 		"- primary_downstream: `github.com/ZoneCNH/kernel`",
-		"- context_runtime_change: `changed`",
-		"- governance_registry_change: `changed`",
-		"- downstream_release_decision: `sync-required`",
-		"- repository_rules_release_decision: `release-review-required`",
+		"- context_runtime_change: `true`",
+		"- governance_registry_change: `true`",
+		"- downstream_release_decision: `downstream-sync-required`",
+		"- repository_rules_release_decision: `repository-rules-release-required`",
 		"",
 	}, "\n")
 	if err := os.WriteFile(reportPath, []byte(content), 0o644); err != nil {
@@ -879,17 +879,17 @@ func TestBuildStandardImpactEvidenceReadsReport(t *testing.T) {
 	if got.PrimaryDownstream != "github.com/ZoneCNH/kernel" {
 		t.Fatalf("primary_downstream = %q, want github.com/ZoneCNH/kernel", got.PrimaryDownstream)
 	}
-	if got.ContextRuntimeChange != "changed" {
-		t.Fatalf("context_runtime_change = %q, want changed", got.ContextRuntimeChange)
+	if !got.ContextRuntimeChange {
+		t.Fatal("context_runtime_change = false, want true")
 	}
-	if got.GovernanceRegistryChange != "changed" {
-		t.Fatalf("governance_registry_change = %q, want changed", got.GovernanceRegistryChange)
+	if !got.GovernanceRegistryChange {
+		t.Fatal("governance_registry_change = false, want true")
 	}
-	if got.DownstreamReleaseDecision != "sync-required" {
-		t.Fatalf("downstream_release_decision = %q, want sync-required", got.DownstreamReleaseDecision)
+	if got.DownstreamReleaseDecision != "downstream-sync-required" {
+		t.Fatalf("downstream_release_decision = %q, want downstream-sync-required", got.DownstreamReleaseDecision)
 	}
-	if got.RepositoryRulesReleaseDecision != "release-review-required" {
-		t.Fatalf("repository_rules_release_decision = %q, want release-review-required", got.RepositoryRulesReleaseDecision)
+	if got.RepositoryRulesReleaseDecision != "repository-rules-release-required" {
+		t.Fatalf("repository_rules_release_decision = %q, want repository-rules-release-required", got.RepositoryRulesReleaseDecision)
 	}
 }
 

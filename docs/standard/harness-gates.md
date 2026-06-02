@@ -86,11 +86,11 @@ CI、Release Check、Integration 和 Security workflow 引用的第三方 Action
 
 ## Context Runtime v4 profile gates
 
-Context Runtime v4.0 profile gate 在现有 governance harness 上追加执行：
+Context Runtime v4.0 profile gates 在现有 governance harness 之上递增：
 
-- `context-lite` 校验 local guard、registry、CLI contract 和 profile contract coverage。
-- `context-standard` 追加 P1 governance 和 documentation checks。
-- `context-full` 追加 P2 runtime dry-run coverage。
-- `context-release` 追加 standard impact、score、manifest generation、release evidence 和 checksum verification，但不得调用 `release-check` 或 `release-final-check`。
+- `context-lite` 验证 local guard、registry、CLI contract 和 profile contract 覆盖。
+- `context-standard` 增加 P1 governance 与 documentation checks。
+- `context-full` 只增加 P2 runtime dry-run 覆盖。
+- `context-release` 增加 standard impact、score、manifest generation、release evidence 与 checksum verification，且不得调用 `release-check` 或 `release-final-check`。
 
-为保持下游兼容，必须保留 legacy aliases（`context-fast-check`、`context-standard-check`、`context-full-check`）。
+为下游兼容保留 legacy aliases（`context-fast-check`、`context-standard-check`、`context-full-check`）。

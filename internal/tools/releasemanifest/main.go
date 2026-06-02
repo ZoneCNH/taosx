@@ -502,8 +502,8 @@ func buildStandardImpactEvidence() (StandardImpactEvidence, error) {
 	evidence.DownstreamReleaseDecision = parseReportValue(report, "downstream_release_decision")
 	evidence.RepositoryRulesReleaseDecision = parseReportValue(report, "repository_rules_release_decision")
 	evidence.PrimaryDownstream = parseReportValue(report, "primary_downstream")
-	evidence.ContextRuntimeChange = parseReportValue(report, "context_runtime_change")
-	evidence.GovernanceRegistryChange = parseReportValue(report, "governance_registry_change")
+	evidence.ContextRuntimeChange = strings.EqualFold(parseReportValue(report, "context_runtime_change"), "true")
+	evidence.GovernanceRegistryChange = strings.EqualFold(parseReportValue(report, "governance_registry_change"), "true")
 	evidence.DownstreamReleaseDecision = parseReportValue(report, "downstream_release_decision")
 	evidence.RepositoryRulesReleaseDecision = parseReportValue(report, "repository_rules_release_decision")
 	return evidence, nil

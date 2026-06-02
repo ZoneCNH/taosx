@@ -61,4 +61,4 @@ PR 或 release notes 必须说明：
 
 ## Context Runtime v4 release profile
 
-Context Runtime v4.0 将 `context-release` 作为发布 profile 基线。`context-full` 只覆盖 `governance-check`、`p1-governance-check` 和 `p2-runtime-check`；`standard-impact-check` 属于 `context-release`，不得写入 `context-full`。`context-release` 在 `context-full` 之上追加 `integration`、`dependency-check`、`standard-impact-check` 和 `score-check`，并由 `release-final-check` 委托执行；`context-release` 不得调用 `release-check` 或 `release-final-check`，以避免递归 release governance。Release manifest 必须包含 `governance_runtime` Evidence，记录 active profile set、`context-profile-check`、`context-release` 和 legacy profile aliases。
+Context Runtime v4.0 使用 `context-release` 作为 release profile baseline。`release-final-check` 委托给 `context-release`；`context-release` 绝不能调用 `release-check` 或 `release-final-check`，以避免 release governance 递归。Release manifest 必须包含 `governance_runtime` evidence，证明当前 profile 集合、`context-profile-check`、`context-release` 和 legacy profile aliases。
