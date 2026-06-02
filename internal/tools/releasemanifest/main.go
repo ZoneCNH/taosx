@@ -89,28 +89,28 @@ var governanceRuntimeProfileStatuses = map[string]string{
 }
 
 type Manifest struct {
-	Module                 string                 `json:"module"`
-	Version                string                 `json:"version"`
-	Commit                 string                 `json:"commit"`
-	TreeSHA                string                 `json:"tree_sha"`
-	SourceDigest           string                 `json:"source_digest"`
-	TrackedFileCount       int                    `json:"tracked_file_count"`
-	GoVersion              string                 `json:"go_version"`
-	GeneratedAt            string                 `json:"generated_at"`
-	GeneratedBy            string                 `json:"generated_by"`
-	TreeState              string                 `json:"tree_state"`
-	Checks                 map[string]string      `json:"checks"`
-	Workflow               WorkflowEvidence       `json:"workflow"`
-	Score                  releasequality.Report  `json:"score"`
-	Contracts              []FileDigest           `json:"contracts"`
-	Dependencies           []ModuleDigest         `json:"dependencies"`
-	StandardImpact         StandardImpactEvidence `json:"standard_impact"`
-	GovernanceRuntime      GovernanceRuntime      `json:"governance_runtime"`
-	DownstreamSyncRequired bool                   `json:"downstream_sync_required"`
-	GeneratorEvidence      GeneratorEvidence      `json:"generator_evidence"`
-	Tools                  map[string]string      `json:"tools"`
-	Artifacts              []string               `json:"artifacts"`
-	Notes                  Notes                  `json:"notes"`
+	Module                 string                    `json:"module"`
+	Version                string                    `json:"version"`
+	Commit                 string                    `json:"commit"`
+	TreeSHA                string                    `json:"tree_sha"`
+	SourceDigest           string                    `json:"source_digest"`
+	TrackedFileCount       int                       `json:"tracked_file_count"`
+	GoVersion              string                    `json:"go_version"`
+	GeneratedAt            string                    `json:"generated_at"`
+	GeneratedBy            string                    `json:"generated_by"`
+	TreeState              string                    `json:"tree_state"`
+	Checks                 map[string]string         `json:"checks"`
+	Workflow               WorkflowEvidence          `json:"workflow"`
+	Score                  releasequality.Report     `json:"score"`
+	Contracts              []FileDigest              `json:"contracts"`
+	Dependencies           []ModuleDigest            `json:"dependencies"`
+	StandardImpact         StandardImpactEvidence    `json:"standard_impact"`
+	GovernanceRuntime      GovernanceRuntimeEvidence `json:"governance_runtime"`
+	DownstreamSyncRequired bool                      `json:"downstream_sync_required"`
+	GeneratorEvidence      GeneratorEvidence         `json:"generator_evidence"`
+	Tools                  map[string]string         `json:"tools"`
+	Artifacts              []string                  `json:"artifacts"`
+	Notes                  Notes                     `json:"notes"`
 }
 
 type WorkflowEvidence struct {
@@ -144,14 +144,11 @@ type StandardImpactEvidence struct {
 	PrimaryDownstream      string `json:"primary_downstream"`
 }
 
-type GovernanceRuntime struct {
-	Runtime       string   `json:"runtime"`
-	SchemaVersion string   `json:"schema_version"`
-	Status        string   `json:"status"`
-	Profiles      []string `json:"profiles"`
-	ProfileCheck  string   `json:"profile_check"`
-	ReleaseTarget string   `json:"release_target"`
-	LegacyAliases []string `json:"legacy_aliases"`
+type GovernanceRuntimeEvidence struct {
+	SchemaVersion   string            `json:"schema_version"`
+	RuntimeVersion  string            `json:"runtime_version"`
+	GateStatuses    map[string]string `json:"gate_statuses"`
+	ProfileStatuses map[string]string `json:"profile_statuses"`
 }
 
 type GeneratorEvidence struct {
@@ -266,7 +263,7 @@ func buildManifest() (Manifest, error) {
 		Contracts:              contracts,
 		Dependencies:           dependencies,
 		StandardImpact:         standardImpact,
-		GovernanceRuntime:      buildGovernanceRuntime(),
+		GovernanceRuntime:      buildGovernanceRuntimeEvidence(),
 		DownstreamSyncRequired: standardImpact.DownstreamSyncRequired,
 		GeneratorEvidence:      buildGeneratorEvidence(),
 		Tools: map[string]string{
@@ -364,8 +361,9 @@ func verifyManifest(path string, requirePassed bool, requireClean bool, expectVe
 		failures = append(failures, "standard_impact does not match current standard impact evidence")
 	}
 	if !reflect.DeepEqual(got.GovernanceRuntime, current.GovernanceRuntime) {
-		failures = append(failures, "governance_runtime does not match current context runtime evidence")
+		failures = append(failures, "governance_runtime does not match current governance runtime evidence")
 	}
+	failures = append(failures, validateGovernanceRuntimeEvidence(got.GovernanceRuntime)...)
 	if got.DownstreamSyncRequired != current.DownstreamSyncRequired {
 		failures = append(failures, fmt.Sprintf("downstream_sync_required mismatch: got %t, want %t", got.DownstreamSyncRequired, current.DownstreamSyncRequired))
 	}
@@ -482,24 +480,12 @@ func buildStandardImpactEvidence() (StandardImpactEvidence, error) {
 	return evidence, nil
 }
 
-func buildGovernanceRuntime() GovernanceRuntime {
-	return GovernanceRuntime{
-		Runtime:       "context-runtime-v4.0",
-		SchemaVersion: "4.0",
-		Status:        "present",
-		Profiles: []string{
-			"context-lite",
-			"context-standard",
-			"context-full",
-			"context-release",
-		},
-		ProfileCheck:  "context-profile-check",
-		ReleaseTarget: "context-release",
-		LegacyAliases: []string{
-			"context-fast-check",
-			"context-standard-check",
-			"context-full-check",
-		},
+func buildGovernanceRuntimeEvidence() GovernanceRuntimeEvidence {
+	return GovernanceRuntimeEvidence{
+		SchemaVersion:   governanceRuntimeVersion,
+		RuntimeVersion:  governanceRuntimeVersion,
+		GateStatuses:    copyStringMap(governanceRuntimeGateStatuses),
+		ProfileStatuses: copyStringMap(governanceRuntimeProfileStatuses),
 	}
 }
 

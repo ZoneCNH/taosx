@@ -366,7 +366,9 @@ func TestRunCLIVerifyReportsDrift(t *testing.T) {
 		"ERROR: release evidence verification failed",
 		"source_digest does not match current tracked file contents",
 		"standard_impact does not match current standard impact evidence",
-		"governance_runtime does not match current context runtime evidence",
+		"governance_runtime does not match current governance runtime evidence",
+		`governance_runtime.runtime_version must be "v2.9.3", got "v2.9.2"`,
+		`governance_runtime.profile_statuses.p2_runtime must be passed, got "failed"`,
 		"generator_evidence does not match current integration evidence",
 		`checks.lint must be passed, got "failed"`,
 	} {
@@ -729,7 +731,7 @@ func TestVerifyManifestRejectsCorruptedManifestFields(t *testing.T) {
 	manifest.Score.Threshold = 0
 	manifest.Contracts = nil
 	manifest.Dependencies = nil
-	manifest.GovernanceRuntime = GovernanceRuntime{}
+	manifest.GovernanceRuntime = GovernanceRuntimeEvidence{}
 	manifest.GeneratorEvidence.Required = false
 	manifest.Tools = map[string]string{}
 
@@ -755,9 +757,11 @@ func TestVerifyManifestRejectsCorruptedManifestFields(t *testing.T) {
 		"score.threshold is required",
 		"contract fingerprints do not match current contract files",
 		"dependency inventory does not match go list -m -json all",
-		"governance_runtime.runtime is required",
-		"governance_runtime.profiles is required",
-		"governance_runtime.legacy_aliases is required",
+		`governance_runtime.schema_version must be "v2.9.3", got ""`,
+		`governance_runtime.runtime_version must be "v2.9.3", got ""`,
+		"governance_runtime.gate_statuses.governance is required",
+		"governance_runtime.profile_statuses.p1_governance is required",
+		"governance_runtime.profile_statuses.p2_runtime is required",
 		"generator_evidence.required must be true",
 		"tools.go must be recorded",
 	} {
