@@ -526,7 +526,7 @@ func TestRunGovernanceCommands(t *testing.T) {
 		}
 		if report.Command != "version" ||
 			report.Status != "passed" ||
-			!slicesContain(report.Details, "xlib-standard release v0.4.1") ||
+			!slicesContain(report.Details, "xlib-standard release v0.4.2") ||
 			!slicesContain(report.Details, "xlibgate governance runtime v2.9.3") {
 			t.Fatalf("report = %#v; want version gate report", report)
 		}

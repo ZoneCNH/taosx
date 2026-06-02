@@ -4,6 +4,21 @@
 
 暂无。
 
+## v0.4.2 - 2026-06-03
+
+### 修复
+
+- 渲染模板时保留 `release/manifest/template.json`，避免下游 release/version gate 缺少 manifest 模板。
+- 渲染后占位符扫描豁免 release manifest 模板中的有意占位符，保持下游检查与发布模板语义一致。
+
+### 治理
+
+- 将项目发布版本、release manifest 默认版本、xlibgate 治理版本和 release preflight 示例同步到 `v0.4.2`。
+
+### 兼容性
+
+- 本版本不改变 `pkg/templatex` 公共 API，仅修复 release Evidence/generator 交付口径。
+
 ## v0.4.1 - 2026-06-03
 
 ### 治理

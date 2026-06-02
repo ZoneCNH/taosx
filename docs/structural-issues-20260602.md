@@ -238,7 +238,7 @@ release-final-check → context-release → context-full → governance-check + 
 | 问题 | 状态 | 修复摘要 | 验证 |
 | ---- | ---- | -------- | ---- |
 | 问题 2：Planned Command 空壳验证 | 已修复最小语义层 | `runPlannedCommand` 不再只检查文件存在；会拒绝目录、空文件、非法 JSON，并对 `agent-team-contract`、`runtime-health`、`execution-context` 等核心 manifest 检查最小语义 marker。 | `GOWORK=off go run ./cmd/xlibgate agent-team-contract --dry-run --verify`、`runtime-health --dry-run --verify`、`execution-context --dry-run --verify` |
-| 问题 3：版本号体系混乱 | 已修复当前 release 口径 | 拆分项目发布版本 `projectReleaseVersion` 与治理运行时版本 `governanceRuntimeVersion`，并将 `templatex.Version`、release manifest template、release preflight 文档和 harness 版本同步到 `CHANGELOG.md` 最新版本 `v0.4.1`。 | `GOWORK=off go run ./cmd/xlibgate version --json`、`GOWORK=off go test ./cmd/xlibgate` |
+| 问题 3：版本号体系混乱 | 已修复当前 release 口径 | 拆分项目发布版本 `projectReleaseVersion` 与治理运行时版本 `governanceRuntimeVersion`，并将 `templatex.Version`、release manifest template、release preflight 文档和 harness 版本同步到 `CHANGELOG.md` 最新版本 `v0.4.2`。 | `GOWORK=off go run ./cmd/xlibgate version --json`、`GOWORK=off go test ./cmd/xlibgate` |
 | 问题 4：Issue Registry 硬编码计数 | 已修复 | 移除 Go 代码中的固定 P0/P1/P2/CTX 数量 needle，改为从 `.agent/issue-registry.yaml` 动态解析 issue ID，校验 ID 格式、重复、连续性、`status: implemented`、`command` 和非空 `evidence`。 | `GOWORK=off go run ./cmd/xlibgate issue-registry`、`GOWORK=off go run ./cmd/xlibgate context-profile-check` |
 
 回归验证：`GOWORK=off go test ./...` 已通过。

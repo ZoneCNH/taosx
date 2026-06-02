@@ -116,7 +116,7 @@ gates:
     current_mva_state: not_run
     release_usable: false
   - id: release_preflight
-    command: "XLIB_CONTEXT=release_verify GOWORK=off make release-preflight VERSION=v0.4.1"
+    command: "XLIB_CONTEXT=release_verify GOWORK=off make release-preflight VERSION=v0.4.2"
     required_for_release: true
     current_mva_state: not_run
     release_usable: false
