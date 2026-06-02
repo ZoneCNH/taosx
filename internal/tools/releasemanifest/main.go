@@ -783,11 +783,3 @@ func contains(values []string, want string) bool {
 	}
 	return false
 }
-
-func copyStringMap(src map[string]string) map[string]string {
-	dst := make(map[string]string, len(src))
-	for key, value := range src {
-		dst[key] = value
-	}
-	return dst
-}
