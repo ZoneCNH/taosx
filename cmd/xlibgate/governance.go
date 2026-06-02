@@ -182,12 +182,154 @@ func runMakefileBaseline(args []string, stdout io.Writer, stderr io.Writer) int 
 	if err := validateInternalCommandArgs("makefile-baseline", args, internalCommandFlagSpec{boolFlags: []string{"json"}}); err != nil {
 		return invalidInternalArgsExit("makefile-baseline", err, stderr)
 	}
-	requiredTargets := []string{"fmt", "vet", "lint", "test", "race", "boundary", "security", "contracts", "docs-check", "evidence", "score-check", "main-guard", "worktree-guard", "evidence-check", "cli-contract", "issue-registry", "command-registry", "makefile-baseline", "governance-check", "p1-governance-check", "execution-context", "p2-runtime-check", "release-check", "release-final-check"}
+	requiredTargets := []string{"fmt", "vet", "lint", "test", "race", "boundary", "security", "contracts", "docs-check", "evidence", "score-check", "main-guard", "worktree-guard", "evidence-check", "cli-contract", "issue-registry", "command-registry", "makefile-baseline", "context-profile", "context-profile-check", "context-schema-check", "context-lite", "context-standard", "context-full", "context-release", "context-fast-check", "context-standard-check", "context-full-check", "governance-check", "p1-governance-check", "execution-context", "p2-runtime-check", "release-check", "release-final-check"}
 	required := map[string][]string{"Makefile": {}, ".agent/makefile-target-registry.yaml": requiredTargets, ".agent/makefile-baseline.yaml": requiredTargets}
 	for _, target := range requiredTargets {
 		required["Makefile"] = append(required["Makefile"], ".PHONY: "+target, target+":")
 	}
 	return runRegistryCheck("makefile-baseline", required, stdout, stderr)
+}
+
+var contextProfileGates = map[string][]string{
+	"lite":     {"main-guard", "worktree-guard", "evidence-check", "cli-contract", "command-registry", "issue-registry", "makefile-baseline", "context-profile-check"},
+	"standard": {"context-lite", "p1-governance-check", "docs-check"},
+	"full":     {"context-standard", "p2-runtime-check"},
+	"release":  {"context-standard", "standard-impact-check", "score-check", "evidence", "release-evidence-hash", "release-evidence-check", "release-evidence-checksum-check"},
+}
+
+func runContextProfile(args []string, stdout io.Writer, stderr io.Writer) int {
+	flags := flag.NewFlagSet("xlibgate context-profile", flag.ContinueOnError)
+	flags.SetOutput(stderr)
+	profile := flags.String("profile", "standard", "context runtime profile")
+	flags.Bool("json", false, "")
+	if err := flags.Parse(args); err != nil {
+		if errors.Is(err, flag.ErrHelp) {
+			return 0
+		}
+		return 2
+	}
+	if flags.NArg() > 0 {
+		write(stderr, "ERROR: context-profile invalid arguments: unexpected positional argument %q\n", flags.Arg(0))
+		return 2
+	}
+	normalized := normalizeContextProfile(*profile)
+	gates, ok := contextProfileGates[normalized]
+	if !ok {
+		write(stderr, "ERROR: invalid context profile %q\n", *profile)
+		return 2
+	}
+	return emitReport(stdout, "context-profile", "passed", contextProfileDetails(normalized, gates), nil)
+}
+
+func runContextProfileAlias(command string, args []string, stdout io.Writer, stderr io.Writer) int {
+	if err := validateInternalCommandArgs(command, args, internalCommandFlagSpec{boolFlags: []string{"json", "strict"}}); err != nil {
+		return invalidInternalArgsExit(command, err, stderr)
+	}
+	profile := mapContextAliasToProfile(command)
+	gates := contextProfileGates[profile]
+	return emitReport(stdout, command, "passed", contextProfileDetails(profile, gates), nil)
+}
+
+func runContextProfileCheck(command string, args []string, stdout io.Writer, stderr io.Writer) int {
+	if err := validateInternalCommandArgs(command, args, internalCommandFlagSpec{boolFlags: []string{"json", "strict"}, stringFlags: []string{"profile"}}); err != nil {
+		return invalidInternalArgsExit(command, err, stderr)
+	}
+	contextTargets := []string{"context-profile", "context-profile-check", "context-schema-check", "context-lite", "context-standard", "context-full", "context-release", "context-fast-check", "context-standard-check", "context-full-check"}
+	required := map[string][]string{
+		".agent/command-registry.yaml":        requiredCommandRegistryNeedles(),
+		".agent/issue-registry.yaml":          requiredIssueRegistryNeedles(),
+		".agent/makefile-target-registry.yaml": contextTargets,
+		".agent/makefile-baseline.yaml":       contextTargets,
+		"docs/standard/xlibgate-cli-contract.md": commandRegistryRequiredCommands(),
+		"Makefile": {"release-final-check:", "$(MAKE) context-release"},
+	}
+	for _, target := range contextTargets {
+		required["Makefile"] = append(required["Makefile"], ".PHONY: "+target, target+":")
+	}
+	var gaps []string
+	for path, needles := range required {
+		content, err := os.ReadFile(path)
+		if err != nil {
+			gaps = append(gaps, "missing "+path)
+			continue
+		}
+		text := string(content)
+		for _, needle := range needles {
+			if !strings.Contains(text, needle) {
+				gaps = append(gaps, path+" missing "+needle)
+			}
+		}
+	}
+	if issueRegistry, err := os.ReadFile(".agent/issue-registry.yaml"); err == nil && strings.Contains(string(issueRegistry), "CTX-051") {
+		gaps = append(gaps, ".agent/issue-registry.yaml must not claim CTX-051")
+	}
+	if makefile, err := os.ReadFile("Makefile"); err == nil {
+		contextReleaseBlock := makefileTargetBlock(string(makefile), "context-release")
+		if strings.Contains(contextReleaseBlock, "release-check") || strings.Contains(contextReleaseBlock, "release-final-check") {
+			gaps = append(gaps, "context-release must not call release-check or release-final-check")
+		}
+		releaseFinalBlock := makefileTargetBlock(string(makefile), "release-final-check")
+		if !strings.Contains(releaseFinalBlock, "$(MAKE) context-release") {
+			gaps = append(gaps, "release-final-check must call context-release")
+		}
+	}
+	if len(gaps) > 0 {
+		write(stderr, "ERROR: %s found %d gap(s)\n", command, len(gaps))
+		return emitReport(stdout, command, "failed", nil, gaps)
+	}
+	return emitReport(stdout, command, "passed", []string{"context runtime v4.0 registry contract satisfied", ".agent/context not required or claimed", "context-release excludes release-check and release-final-check"}, nil)
+}
+
+func contextProfileDetails(profile string, gates []string) []string {
+	return []string{
+		"context_runtime=v4.0",
+		"profile=" + profile,
+		"gates=" + strings.Join(gates, ","),
+		"legacy_aliases=context-fast-check,context-standard-check,context-full-check",
+		"release_final_delegates=context-release",
+	}
+}
+
+func normalizeContextProfile(profile string) string {
+	switch profile {
+	case "fast":
+		return "lite"
+	default:
+		return profile
+	}
+}
+
+func mapContextAliasToProfile(command string) string {
+	switch command {
+	case "context-lite", "context-fast-check":
+		return "lite"
+	case "context-full", "context-full-check":
+		return "full"
+	case "context-release":
+		return "release"
+	default:
+		return "standard"
+	}
+}
+
+func makefileTargetBlock(content, target string) string {
+	lines := strings.Split(content, "\n")
+	var block []string
+	inBlock := false
+	for _, line := range lines {
+		if strings.HasPrefix(line, target+":") {
+			inBlock = true
+			block = append(block, line)
+			continue
+		}
+		if inBlock {
+			if line != "" && !strings.HasPrefix(line, "\t") && !strings.HasPrefix(line, " ") && strings.Contains(line, ":") {
+				break
+			}
+			block = append(block, line)
+		}
+	}
+	return strings.Join(block, "\n")
 }
 
 var plannedCommandFiles = map[string][]string{
