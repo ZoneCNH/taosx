@@ -120,3 +120,7 @@ Goal 或 Release 级完成声明必须覆盖以下字段，缺失项要写入 `k
 - 返回码或关键错误。
 - 已确认不受影响的范围。
 - 下一步修复条件。
+
+## Context Runtime v4 evidence
+
+Release manifests must record `governance_runtime` evidence for Context Runtime v4.0. Required evidence includes the runtime identifier, profile list, `context-profile-check`, `context-release`, and legacy alias preservation. Standard Impact reports should categorize governance registry, repository-rule, context-runtime, and context-consumer-template changes so downstream sync decisions are explicit.

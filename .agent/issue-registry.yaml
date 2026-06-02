@@ -262,3 +262,23 @@ issues:
     status: implemented
     command: release-check-extended
     evidence: [release-check-extended, p2-runtime-check]
+  - id: CTX-001
+    title: Context Runtime v4 profile registry bridge
+    status: implemented
+    command: context-profile-check
+    evidence: [context-profile, command-registry, issue-registry, makefile-baseline]
+  - id: CTX-002
+    title: Context Runtime v4 standard profile baseline
+    status: implemented
+    command: context-standard
+    evidence: [context-standard, context-profile-check, docs-check]
+  - id: CTX-003
+    title: Context Runtime v4 full profile baseline
+    status: implemented
+    command: context-full
+    evidence: [context-full, p2-runtime-check]
+  - id: CTX-004
+    title: Context Runtime v4 release profile baseline
+    status: implemented
+    command: context-release
+    evidence: [context-release, standard-impact-check, release-evidence-check]

@@ -82,6 +82,36 @@ commands:
   - name: standard-impact-check
     phase: P0
     target: standard-impact-check
+  - name: context-profile
+    phase: CTX
+    target: context-profile
+  - name: context-profile-check
+    phase: CTX
+    target: context-profile-check
+  - name: context-schema-check
+    phase: CTX
+    target: context-schema-check
+  - name: context-lite
+    phase: CTX
+    target: context-lite
+  - name: context-standard
+    phase: CTX
+    target: context-standard
+  - name: context-full
+    phase: CTX
+    target: context-full
+  - name: context-release
+    phase: CTX
+    target: context-release
+  - name: context-fast-check
+    phase: CTX
+    target: context-fast-check
+  - name: context-standard-check
+    phase: CTX
+    target: context-standard-check
+  - name: context-full-check
+    phase: CTX
+    target: context-full-check
   - name: agent-team-contract
     phase: P1
     target: p1-governance-check

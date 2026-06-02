@@ -19,6 +19,16 @@ targets:
   - issue-registry
   - command-registry
   - makefile-baseline
+  - context-profile
+  - context-profile-check
+  - context-schema-check
+  - context-lite
+  - context-standard
+  - context-full
+  - context-release
+  - context-fast-check
+  - context-standard-check
+  - context-full-check
   - governance-check
   - p1-governance-check
   - execution-context

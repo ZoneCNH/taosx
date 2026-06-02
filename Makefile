@@ -145,6 +145,43 @@ command-registry:
 makefile-baseline:
 	$(XLIBGATE) makefile-baseline
 
+.PHONY: context-profile
+context-profile:
+	$(XLIBGATE) context-profile --profile $${PROFILE:-standard}
+
+.PHONY: context-profile-check
+context-profile-check:
+	$(XLIBGATE) context-profile-check
+
+.PHONY: context-schema-check
+context-schema-check:
+	$(XLIBGATE) context-schema-check
+
+.PHONY: context-lite
+context-lite: require-gowork-off main-guard worktree-guard evidence-check cli-contract command-registry issue-registry makefile-baseline context-profile-check
+
+.PHONY: context-standard
+context-standard: context-lite p1-governance-check docs-check
+
+.PHONY: context-full
+context-full: context-standard p2-runtime-check
+
+.PHONY: context-release
+context-release: require-gowork-off context-standard standard-impact-check score-check
+	CHECK_STATUS=passed $(MAKE) evidence
+	$(MAKE) release-evidence-hash
+	$(MAKE) release-evidence-check
+	$(MAKE) release-evidence-checksum-check
+
+.PHONY: context-fast-check
+context-fast-check: context-lite
+
+.PHONY: context-standard-check
+context-standard-check: context-standard
+
+.PHONY: context-full-check
+context-full-check: context-full
+
 .PHONY: agent-team-contract scope-lock pr-template acceptance-matrix runtime-health upgrade-standard conformance-profile downstream-registry self-healing-skeleton goal-runtime github-governance supply-chain changelog governance-fixture-test autoresearch policy-schema github-settings toolchain evidence-artifacts naming
 agent-team-contract scope-lock pr-template acceptance-matrix runtime-health upgrade-standard conformance-profile downstream-registry self-healing-skeleton goal-runtime github-governance supply-chain changelog governance-fixture-test autoresearch policy-schema github-settings toolchain evidence-artifacts naming:
 	$(XLIBGATE) $@ --dry-run --verify

@@ -87,3 +87,20 @@
 - `--context` 仅允许 `local_write`、`local_readonly`、`ci_pull_request`、`ci_main_verify` 和 `release_verify`。
 - `--repo` 指向的 downstream 仓库不存在时，命令必须返回 `gap`，且不得自动创建目录。
 - 新增命令时必须同步 `run` dispatch、`plannedCommandFiles`、Makefile gate、CLI contract 和测试表。
+
+## Context Runtime v4 commands
+
+Context Runtime v4.0 adds an additive profile baseline without replacing the existing P0/P1/P2 command registry. These commands are registry-governed and must remain present in `run` dispatch, `.agent/command-registry.yaml`, `.agent/issue-registry.yaml`, Makefile targets, and this contract:
+
+- `context-profile --profile lite|standard|full|release`
+- `context-profile-check`
+- `context-schema-check`
+- `context-lite`
+- `context-standard`
+- `context-full`
+- `context-release`
+- `context-fast-check`
+- `context-standard-check`
+- `context-full-check`
+
+`context-release` must not call `release-check` or `release-final-check`; the allowed direction is `release-final-check` delegating to `context-release` before strict release evidence checks. Legacy aliases (`context-fast-check`, `context-standard-check`, `context-full-check`) must remain available. This baseline does not claim `.agent/context` files unless those files are present in the repository.

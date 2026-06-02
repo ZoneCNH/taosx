@@ -58,3 +58,7 @@ PR 或 release notes 必须说明：
 - 已运行命令。
 - Evidence artifact。
 - known gaps 或 blocked gate。
+
+## Context Runtime v4 release profile
+
+Context Runtime v4.0 introduces `context-release` as the release profile baseline. `release-final-check` delegates to `context-release`; `context-release` must never call `release-check` or `release-final-check`, which prevents recursive release governance. The release manifest must include `governance_runtime` evidence showing the active profile set, `context-profile-check`, `context-release`, and the legacy profile aliases.
