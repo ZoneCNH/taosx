@@ -43,7 +43,7 @@ collect_git_diff() {
 
   while IFS= read -r file; do
     add_file "$file"
-  done < <(git diff --name-only --diff-filter=ACMRTUXB "$range" --)
+  done < <(git diff --name-only --diff-filter=ACDMRTUXB "$range" --)
 }
 
 collect_worktree_changes() {

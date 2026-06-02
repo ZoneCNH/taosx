@@ -662,7 +662,9 @@ func TestBuildManifestReportsBuilderFailures(t *testing.T) {
 func TestVerifyManifestAcceptsFreshManifestAndRejectsDrift(t *testing.T) {
 	t.Setenv("GOWORK", "off")
 	t.Setenv("CHECK_STATUS", "passed")
-	chdir(t, releaseManifestFixtureRepo(t))
+	repo := releaseManifestFixtureRepo(t)
+	writeStandardImpactReportFixture(t, repo)
+	chdir(t, repo)
 
 	manifest, err := buildManifest()
 	if err != nil {
@@ -705,6 +707,42 @@ func TestVerifyManifestAcceptsFreshManifestAndRejectsDrift(t *testing.T) {
 		"governance_runtime does not match current governance runtime evidence",
 		`governance_runtime.gate_statuses.governance must be passed, got "failed"`,
 		"generator_evidence does not match current integration evidence",
+	} {
+		if !strings.Contains(message, want) {
+			t.Fatalf("error = %q, want substring %q", message, want)
+		}
+	}
+}
+
+func TestVerifyManifestRequiresStandardImpactEvidenceWhenChecksRequired(t *testing.T) {
+	t.Setenv("GOWORK", "off")
+	t.Setenv("CHECK_STATUS", "passed")
+	chdir(t, releaseManifestFixtureRepo(t))
+
+	manifest, err := buildManifest()
+	if err != nil {
+		t.Fatal(err)
+	}
+	if manifest.StandardImpact.Status != "missing" {
+		t.Fatalf("fixture standard_impact.status = %q, want missing", manifest.StandardImpact.Status)
+	}
+
+	path := filepath.Join(t.TempDir(), "latest.json")
+	if err := writeManifest(path, manifest); err != nil {
+		t.Fatal(err)
+	}
+
+	err = verifyManifest(path, true, false, "", 0)
+	if err == nil {
+		t.Fatal("verify manifest without standard impact report succeeded, want error")
+	}
+	message := err.Error()
+	for _, want := range []string{
+		`standard_impact.status must be present, got "missing"`,
+		"standard_impact.report_sha256 is required",
+		"standard_impact.downstream_release_decision is required",
+		"standard_impact.repository_rules_release_decision is required",
+		"standard_impact.primary_downstream is required",
 	} {
 		if !strings.Contains(message, want) {
 			t.Fatalf("error = %q, want substring %q", message, want)
@@ -984,7 +1022,9 @@ func TestValidateChecksRequiresStatusButOnlyRequiresPassedWhenRequested(t *testi
 func TestVerifyManifestRequiresCleanTree(t *testing.T) {
 	t.Setenv("GOWORK", "off")
 	t.Setenv("CHECK_STATUS", "passed")
-	chdir(t, releaseManifestFixtureRepo(t))
+	repo := releaseManifestFixtureRepo(t)
+	writeStandardImpactReportFixture(t, repo)
+	chdir(t, repo)
 
 	manifest, err := buildManifest()
 	if err != nil {
@@ -1352,6 +1392,29 @@ func releaseManifestFixtureRepo(t *testing.T) string {
 	writeFixtureOMCState(t, repo)
 	runTestCommand(t, repo, "git", "add", ".")
 	return repo
+}
+
+func writeStandardImpactReportFixture(t *testing.T, repo string) {
+	t.Helper()
+
+	reportPath := filepath.Join(repo, filepath.FromSlash(standardImpactReportPath))
+	if err := os.MkdirAll(filepath.Dir(reportPath), 0o755); err != nil {
+		t.Fatal(err)
+	}
+	content := strings.Join([]string{
+		"# Standard Impact",
+		"",
+		"- downstream_sync_required: `true`",
+		"- context_runtime_change: `true`",
+		"- governance_registry_change: `true`",
+		"- downstream_release_decision: `downstream-sync-required`",
+		"- repository_rules_release_decision: `repository-rules-review-required`",
+		"- primary_downstream: `github.com/ZoneCNH/kernel`",
+		"",
+	}, "\n")
+	if err := os.WriteFile(reportPath, []byte(content), 0o644); err != nil {
+		t.Fatal(err)
+	}
 }
 
 func writeFixtureOMCState(t *testing.T, repo string) {

@@ -73,6 +73,62 @@ func TestStandardImpactRequiresDownstreamSyncForContextRuntimeV4Categories(t *te
 	)
 }
 
+func TestStandardImpactRequiresDownstreamSyncForDeletedImpactFiles(t *testing.T) {
+	scriptsDir, err := os.Getwd()
+	if err != nil {
+		t.Fatalf("get working directory: %v", err)
+	}
+	scriptPath := filepath.Join(scriptsDir, "check_standard_impact.sh")
+
+	tempDir := t.TempDir()
+	repoDir := filepath.Join(tempDir, "repo")
+	if err := os.Mkdir(repoDir, 0o755); err != nil {
+		t.Fatalf("create temp repo: %v", err)
+	}
+
+	runGit(t, repoDir, "init", "-b", "main")
+	runGit(t, repoDir, "config", "user.name", "Standard Impact Test")
+	runGit(t, repoDir, "config", "user.email", "standard-impact@example.com")
+	writeFixtureFile(t, repoDir, "contracts/deleted.schema.json")
+	writeFixtureFile(t, repoDir, ".agent/context/runtime.md")
+	writeFixtureFile(t, repoDir, "internal/tools/releasemanifest/deleted.go")
+	runGit(t, repoDir, "add", ".")
+	runGit(t, repoDir, "commit", "-m", "base")
+	runGit(t, repoDir, "rm", "contracts/deleted.schema.json", ".agent/context/runtime.md", "internal/tools/releasemanifest/deleted.go")
+
+	reportPath := filepath.Join(tempDir, "standard-impact.md")
+	cmd := exec.Command("bash", scriptPath)
+	cmd.Dir = repoDir
+	cmd.Env = append(os.Environ(),
+		"STANDARD_IMPACT_REPORT="+reportPath,
+		"STANDARD_IMPACT_BASE=HEAD",
+		"STANDARD_IMPACT_GENERATED_AT=2026-06-02T00:00:00Z",
+	)
+	if output, err := cmd.CombinedOutput(); err != nil {
+		t.Fatalf("standard impact check failed: %v\n%s", err, output)
+	}
+
+	reportBytes, err := os.ReadFile(reportPath)
+	if err != nil {
+		t.Fatalf("read report: %v", err)
+	}
+	report := string(reportBytes)
+
+	assertReportContains(t, report,
+		"- downstream_sync_required: `true`",
+		"- context_runtime_change: `true`",
+		"- downstream_release_decision: `downstream-sync-required`",
+		"- changed_file_count: `3`",
+		"## contracts",
+		"- `contracts/deleted.schema.json`",
+		"## context_runtime",
+		"- `.agent/context/runtime.md`",
+		"## evidence",
+		"- `internal/tools/releasemanifest/deleted.go`",
+		"- `downstream-sync-required`",
+	)
+}
+
 func TestStandardImpactUsesUpstreamMergeBaseForCleanBranches(t *testing.T) {
 	scriptsDir, err := os.Getwd()
 	if err != nil {
