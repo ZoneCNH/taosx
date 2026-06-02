@@ -116,7 +116,7 @@ governance_registry_files=()
 harness_files=()
 repository_rules_files=()
 generator_files=()
-context_consumer_template_files=()
+downstream_context_files=()
 evidence_files=()
 other_files=()
 
@@ -132,7 +132,7 @@ add_category_file() {
     harness) harness_files+=("$file") ;;
     repository_rules) repository_rules_files+=("$file") ;;
     generator) generator_files+=("$file") ;;
-    context_consumer_template) context_consumer_template_files+=("$file") ;;
+    downstream_context) downstream_context_files+=("$file") ;;
     evidence) evidence_files+=("$file") ;;
     other) other_files+=("$file") ;;
   esac
@@ -146,9 +146,9 @@ classify_file() {
       add_category_file "governance_registry" "$file"
       ;;
     templates/context-consumer/*)
-      add_category_file "context_consumer_template" "$file"
+      add_category_file "downstream_context" "$file"
       ;;
-    AGENTS.md|Makefile|.github/workflows/*|.agent/gates.md)
+    AGENTS.md|Makefile|.github/CODEOWNERS|.github/rulesets/*|.github/workflows/*|infra/github-rules/*|.agent/gates.md)
       add_category_file "repository_rules" "$file"
       ;;
     cmd/xlibgate/*|.agent/context/*|docs/standard/xlibgate-cli-contract.md|docs/standard/release-standard.md|docs/standard/harness-gates.md|docs/standard/evidence-protocol.md)
@@ -180,8 +180,28 @@ for file in "${changed_files[@]}"; do
 done
 
 downstream_sync_required="false"
-if (( ${#contracts_files[@]} > 0 || ${#context_runtime_files[@]} > 0 || ${#governance_registry_files[@]} > 0 || ${#harness_files[@]} > 0 || ${#repository_rules_files[@]} > 0 || ${#generator_files[@]} > 0 || ${#context_consumer_template_files[@]} > 0 || ${#evidence_files[@]} > 0 )); then
+if (( ${#contracts_files[@]} > 0 || ${#context_runtime_files[@]} > 0 || ${#governance_registry_files[@]} > 0 || ${#harness_files[@]} > 0 || ${#repository_rules_files[@]} > 0 || ${#generator_files[@]} > 0 || ${#downstream_context_files[@]} > 0 || ${#evidence_files[@]} > 0 )); then
   downstream_sync_required="true"
+fi
+
+context_runtime_change="unchanged"
+if (( ${#context_runtime_files[@]} > 0 )); then
+  context_runtime_change="changed"
+fi
+
+governance_registry_change="unchanged"
+if (( ${#governance_registry_files[@]} > 0 )); then
+  governance_registry_change="changed"
+fi
+
+downstream_release_decision="sync-not-required"
+if [[ "$downstream_sync_required" == "true" ]]; then
+  downstream_release_decision="sync-required"
+fi
+
+repository_rules_release_decision="release-review-not-required"
+if (( ${#repository_rules_files[@]} > 0 )); then
+  repository_rules_release_decision="release-review-required"
 fi
 
 mkdir -p "$(dirname "$report_path")"
@@ -209,6 +229,10 @@ write_file_list() {
   printf -- '- generated_at: `%s`\n' "$(report_generated_at)"
   printf -- '- downstream_sync_required: `%s`\n' "$downstream_sync_required"
   printf -- '- primary_downstream: `%s`\n' "github.com/ZoneCNH/kernel"
+  printf -- '- context_runtime_change: `%s`\n' "$context_runtime_change"
+  printf -- '- governance_registry_change: `%s`\n' "$governance_registry_change"
+  printf -- '- downstream_release_decision: `%s`\n' "$downstream_release_decision"
+  printf -- '- repository_rules_release_decision: `%s`\n' "$repository_rules_release_decision"
   printf -- '- changed_file_count: `%s`\n\n' "${#changed_files[@]}"
 
   printf '## Downstream\n\n'
@@ -224,17 +248,17 @@ write_file_list() {
   write_file_list "harness" "${harness_files[@]}"
   write_file_list "repository_rules" "${repository_rules_files[@]}"
   write_file_list "generator" "${generator_files[@]}"
-  write_file_list "context_consumer_template" "${context_consumer_template_files[@]}"
+  write_file_list "downstream_context" "${downstream_context_files[@]}"
   write_file_list "evidence" "${evidence_files[@]}"
   write_file_list "other" "${other_files[@]}"
 
   printf '## Sync Decision\n\n'
   if [[ "$downstream_sync_required" == "true" ]]; then
     printf -- '- `downstream-sync-required`\n'
-    printf -- '- 原因：contracts、context_runtime、governance_registry、harness、repository_rules、generator、context_consumer_template 或 evidence 影响面发生变化。\n'
+    printf -- '- 原因：contracts、context_runtime、governance_registry、harness、repository_rules、generator、downstream_context 或 evidence 影响面发生变化。\n'
   else
     printf -- '- `downstream-sync-not-required`\n'
-    printf -- '- 原因：未发现 contracts、context_runtime、governance_registry、harness、repository_rules、generator、context_consumer_template 或 evidence 影响面变化。\n'
+    printf -- '- 原因：未发现 contracts、context_runtime、governance_registry、harness、repository_rules、generator、downstream_context 或 evidence 影响面变化。\n'
   fi
 } > "$report_path"
 
