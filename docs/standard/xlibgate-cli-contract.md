@@ -94,9 +94,9 @@
 - `--repo` 指向的 downstream 仓库不存在时，命令必须返回 `gap`，且不得自动创建目录。
 - 新增命令时必须同步 `run` dispatch、`plannedCommandFiles`、Makefile gate、CLI contract 和测试表。
 
-## Context Runtime v4 commands
+## Context Runtime v4 命令
 
-Context Runtime v4.0 增加增量 profile baseline，不替换现有 P0/P1/P2 command registry。以下命令受 registry governance 约束，必须同时保留在 `run` dispatch、`.agent/command-registry.yaml`、`.agent/issue-registry.yaml`、Makefile targets 和本 contract 中：
+Context Runtime v4.0 新增可叠加的 profile baseline，但不替换现有 P0/P1/P2 command registry。以下命令受 registry 治理，必须同时保留在 `run` dispatch、`.agent/command-registry.yaml`、`.agent/issue-registry.yaml`、Makefile targets 和本 contract 中：
 
 - `context-profile --profile lite|standard|full|release`
 - `context-profile-check`
