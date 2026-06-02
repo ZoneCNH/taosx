@@ -280,6 +280,26 @@ if (( ${#repository_rules_files[@]} > 0 )); then
   repository_rules_release_decision="release-review-required"
 fi
 
+context_runtime_change="unchanged"
+if (( ${#context_runtime_files[@]} > 0 )); then
+  context_runtime_change="changed"
+fi
+
+governance_registry_change="unchanged"
+if (( ${#governance_registry_files[@]} > 0 )); then
+  governance_registry_change="changed"
+fi
+
+downstream_release_decision="sync-not-required"
+if [[ "$downstream_sync_required" == "true" ]]; then
+  downstream_release_decision="sync-required"
+fi
+
+repository_rules_release_decision="release-review-not-required"
+if (( ${#repository_rules_files[@]} > 0 )); then
+  repository_rules_release_decision="release-review-required"
+fi
+
 mkdir -p "$(dirname "$report_path")"
 
 write_file_list() {
