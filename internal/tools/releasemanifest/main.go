@@ -263,6 +263,7 @@ func buildManifest() (Manifest, error) {
 		Contracts:              contracts,
 		Dependencies:           dependencies,
 		StandardImpact:         standardImpact,
+		GovernanceRuntime:      buildGovernanceRuntimeEvidence(),
 		DownstreamSyncRequired: standardImpact.DownstreamSyncRequired,
 		GeneratorEvidence:      buildGeneratorEvidence(),
 		Tools: map[string]string{
@@ -359,6 +360,10 @@ func verifyManifest(path string, requirePassed bool, requireClean bool, expectVe
 	if !reflect.DeepEqual(got.StandardImpact, current.StandardImpact) {
 		failures = append(failures, "standard_impact does not match current standard impact evidence")
 	}
+	if !reflect.DeepEqual(got.GovernanceRuntime, current.GovernanceRuntime) {
+		failures = append(failures, "governance_runtime does not match current governance runtime evidence")
+	}
+	failures = append(failures, validateGovernanceRuntimeEvidence(got.GovernanceRuntime)...)
 	if got.DownstreamSyncRequired != current.DownstreamSyncRequired {
 		failures = append(failures, fmt.Sprintf("downstream_sync_required mismatch: got %t, want %t", got.DownstreamSyncRequired, current.DownstreamSyncRequired))
 	}
@@ -464,6 +469,15 @@ func buildStandardImpactEvidence() (StandardImpactEvidence, error) {
 	return evidence, nil
 }
 
+func buildGovernanceRuntimeEvidence() GovernanceRuntimeEvidence {
+	return GovernanceRuntimeEvidence{
+		SchemaVersion:   governanceRuntimeVersion,
+		RuntimeVersion:  governanceRuntimeVersion,
+		GateStatuses:    copyStringMap(governanceRuntimeGateStatuses),
+		ProfileStatuses: copyStringMap(governanceRuntimeProfileStatuses),
+	}
+}
+
 func parseReportValue(report string, key string) string {
 	prefix := key + ":"
 	for _, line := range strings.Split(report, "\n") {
@@ -499,6 +513,32 @@ func validateChecks(checks map[string]string, requirePassed bool) []string {
 		}
 	}
 	return failures
+}
+
+func validateGovernanceRuntimeEvidence(evidence GovernanceRuntimeEvidence) []string {
+	var failures []string
+	if evidence.SchemaVersion != governanceRuntimeVersion {
+		failures = append(failures, fmt.Sprintf("governance_runtime.schema_version must be %q, got %q", governanceRuntimeVersion, evidence.SchemaVersion))
+	}
+	if evidence.RuntimeVersion != governanceRuntimeVersion {
+		failures = append(failures, fmt.Sprintf("governance_runtime.runtime_version must be %q, got %q", governanceRuntimeVersion, evidence.RuntimeVersion))
+	}
+	appendRequiredPassedStatuses(&failures, "governance_runtime.gate_statuses", evidence.GateStatuses, governanceRuntimeGateStatuses)
+	appendRequiredPassedStatuses(&failures, "governance_runtime.profile_statuses", evidence.ProfileStatuses, governanceRuntimeProfileStatuses)
+	return failures
+}
+
+func appendRequiredPassedStatuses(failures *[]string, field string, got map[string]string, required map[string]string) {
+	for name, want := range required {
+		status := strings.TrimSpace(got[name])
+		if status == "" {
+			*failures = append(*failures, fmt.Sprintf("%s.%s is required", field, name))
+			continue
+		}
+		if status != want {
+			*failures = append(*failures, fmt.Sprintf("%s.%s must be %s, got %q", field, name, want, status))
+		}
+	}
 }
 
 func sourceDigest() (string, int, error) {
