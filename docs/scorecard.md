@@ -32,7 +32,7 @@ Context Runtime v4.0 迁移期间，score 也不能替代 `context-standard`、`
 - `GOWORK=off make release-check` 会运行 `score-check`，默认要求 `score >= 9.8`。
 - `GOWORK=off make release-final-check` 会再次运行 `go run ./cmd/xlibgate score --min 9.8`，并要求 release manifest 内记录的 `score.value` 满足 `RELEASE_EVIDENCE_MIN_SCORE=9.5`。
 - `release/manifest/latest.json` 会记录 `score` 和 `workflow`，其中 `workflow_run_id`、`artifact_name`、`artifact_url` 用于连接 CI artifact；本地运行时使用 `local:*` evidence URL。
-- Standard Impact v4.0 需要能区分 `context_runtime`、`governance_registry`、repo rule 和 `templates/context-consumer/*` 影响面；在分类脚本扩展前，下游同步结论必须把该缺口写入 Evidence，而不能由 score 自动推断为无需同步。
+- Standard Impact v4.0 必须区分 `context_runtime`、`governance_registry`、`repository_rules` 和 `downstream_context` 影响面，并把 `downstream_release_decision` 与 `repository_rules_release_decision` 写入 Evidence；score 不能替代这些 release decision。
 
 ## JSON 形状
 

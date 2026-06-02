@@ -18,7 +18,7 @@ DONE with evidence:
 ## 必需 Artifact
 
 - `release/manifest/latest.json`：由 `make evidence` 生成。`latest.json is a generated Evidence artifact`，`MUST NOT be committed`。
-- `release/standard-impact/latest.md`：由 `GOWORK=off make standard-impact-check` 生成，记录标准影响面和 `downstream_sync_required` 结论。
+- `release/standard-impact/latest.md`：由 `GOWORK=off make standard-impact-check` 生成，记录标准影响面、`downstream_sync_required`、`downstream_release_decision` 和 `repository_rules_release_decision` 结论。
 - release score：来自 `GOWORK=off go run ./cmd/xlibgate score --min 9.8`，并写入 manifest 的 `score` 字段。
 - workflow artifact 元数据：manifest 的 `workflow_run_id`、`artifact_name`、`artifact_url` 必须能对齐 CI 上传的 release manifest artifact；本地运行时可记录 `local:*` Evidence URL。
 - gate 输出：来自本地命令或 CI job。
@@ -123,4 +123,4 @@ Goal 或 Release 级完成声明必须覆盖以下字段，缺失项要写入 `k
 
 ## Context Runtime v4 evidence
 
-Release manifests 必须记录 Context Runtime v4.0 的 `governance_runtime` evidence。必需 evidence 包含 runtime identifier、profile list、`context-profile-check`、`context-release` 和 legacy alias preservation。Standard Impact reports 必须分类 governance registry、repository-rule、context-runtime 和 downstream context 变化，使 downstream sync decisions 可显式追踪。
+Release manifest 必须记录 Context Runtime v4.0 的 `governance_runtime` Evidence。必需 Evidence 包括 runtime identifier、profile list、`context-profile-check`、`context-release` 和 legacy alias 保留情况。Standard Impact report 必须把 governance registry、`repository_rules`、`context_runtime` 和 `downstream_context` 变更分类清楚，使下游同步决策显式可审计。

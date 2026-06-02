@@ -74,11 +74,11 @@
     "report_sha256": "{{STANDARD_IMPACT_SHA256}}",
     "status": "{{STANDARD_IMPACT_STATUS}}",
     "downstream_sync_required": false,
-    "primary_downstream": "{{PRIMARY_DOWNSTREAM}}",
     "context_runtime_change": false,
     "governance_registry_change": false,
     "downstream_release_decision": "{{DOWNSTREAM_RELEASE_DECISION}}",
-    "repository_rules_release_decision": "{{REPOSITORY_RULES_RELEASE_DECISION}}"
+    "repository_rules_release_decision": "{{REPOSITORY_RULES_RELEASE_DECISION}}",
+    "primary_downstream": "{{PRIMARY_DOWNSTREAM}}"
   },
   "governance_runtime": {
     "runtime": "context-runtime-v4.0",

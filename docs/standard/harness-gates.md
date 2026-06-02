@@ -19,7 +19,7 @@ Full Goal Runtime v3.1 以 `cmd/xlibgate` 作为 Go gate runtime。Makefile targ
 | Docs Check | `GOWORK=off make docs-check` | 文档、链接、当前命名、下游同步策略、v3.1 runtime 和 release protocol |
 | Integration | `GOWORK=off make integration` | generator 和 downstream smoke |
 | Dependency Check | `GOWORK=off make dependency-check` | 校验 `renovate.json`、`.github/dependabot.yml` 和 Go dependency inventory |
-| Standard Impact Check | `GOWORK=off make standard-impact-check` | 生成 `release/standard-impact/latest.md` 并判定 `downstream_sync_required` |
+| Standard Impact Check | `GOWORK=off make standard-impact-check` | 生成 `release/standard-impact/latest.md` 并判定 `downstream_sync_required`、`downstream_release_decision` 和 `repository_rules_release_decision` |
 | Score | `GOWORK=off make score` / `GOWORK=off go run ./cmd/xlibgate score --min 9.8` | 校验 v3.1 gate runtime、CI 和文档契约一致性 |
 | Evidence | `CHECK_STATUS=passed GOWORK=off make evidence` | 生成 release manifest |
 | Release Evidence | `RELEASE_EVIDENCE_REQUIRE_PASSED=1 GOWORK=off make release-evidence-check` | 校验 manifest 与仓库事实 |
@@ -86,11 +86,11 @@ CI、Release Check、Integration 和 Security workflow 引用的第三方 Action
 
 ## Context Runtime v4 profile gates
 
-Context Runtime v4.0 profile gates 在现有 governance harness 之上递增：
+Context Runtime v4.0 profile gate 在现有 governance harness 上追加执行：
 
-- `context-lite` 验证 local guard、registry、CLI contract 和 profile contract 覆盖。
-- `context-standard` 增加 P1 governance 与 documentation checks。
-- `context-full` 只增加 P2 runtime dry-run 覆盖。
-- `context-release` 增加 standard impact、score、manifest generation、release evidence 与 checksum verification，且不得调用 `release-check` 或 `release-final-check`。
+- `context-lite` 校验 local guard、registry、CLI contract 和 profile contract coverage。
+- `context-standard` 追加 P1 governance 和 documentation checks。
+- `context-full` 追加 P2 runtime dry-run coverage。
+- `context-release` 追加 standard impact、score、manifest generation、release evidence 和 checksum verification，但不得调用 `release-check` 或 `release-final-check`。
 
-为下游兼容保留 legacy aliases（`context-fast-check`、`context-standard-check`、`context-full-check`）。
+为保持下游兼容，必须保留 legacy aliases（`context-fast-check`、`context-standard-check`、`context-full-check`）。
