@@ -123,4 +123,4 @@ Goal 或 Release 级完成声明必须覆盖以下字段，缺失项要写入 `k
 
 ## Context Runtime v4 evidence
 
-Release manifest 必须记录 Context Runtime v4.0 的 `governance_runtime` Evidence。必需 Evidence 包括 runtime identifier、profile list、`context-profile-check`、`context-release` 和 legacy alias 保留情况。Standard Impact report 必须把 governance registry、`repository_rules`、`context_runtime` 和 `downstream_context` 变更分类清楚，使下游同步决策显式可审计。
+Release manifests 必须记录 Context Runtime v4.0 的 `governance_runtime` evidence。必需 evidence 包含 runtime identifier、profile list、`context-profile-check`、`context-release` 和 legacy alias preservation。Standard Impact reports 必须分类 governance registry、repository-rule、context-runtime 和 downstream context 变化，使 downstream sync decisions 可显式追踪。

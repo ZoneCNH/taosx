@@ -240,6 +240,26 @@ if (( ${#repository_rules_files[@]} > 0 )); then
   repository_rules_release_decision="repository-rules-release-required"
 fi
 
+context_runtime_change="unchanged"
+if (( ${#context_runtime_files[@]} > 0 )); then
+  context_runtime_change="changed"
+fi
+
+governance_registry_change="unchanged"
+if (( ${#governance_registry_files[@]} > 0 )); then
+  governance_registry_change="changed"
+fi
+
+downstream_release_decision="sync-not-required"
+if [[ "$downstream_sync_required" == "true" ]]; then
+  downstream_release_decision="sync-required"
+fi
+
+repository_rules_release_decision="release-review-not-required"
+if (( ${#repository_rules_files[@]} > 0 )); then
+  repository_rules_release_decision="release-review-required"
+fi
+
 mkdir -p "$(dirname "$report_path")"
 
 write_file_list() {
@@ -294,10 +314,10 @@ write_file_list() {
 
   printf '## Sync Decision\n\n'
   if [[ "$downstream_sync_required" == "true" ]]; then
-    printf -- '- `%s`\n' "$downstream_release_decision"
+    printf -- '- `downstream-sync-required`\n'
     printf -- '- 原因：contracts、context_runtime、governance_registry、harness、repository_rules、generator、downstream_context 或 evidence 影响面发生变化。\n'
   else
-    printf -- '- `%s`\n' "$downstream_release_decision"
+    printf -- '- `downstream-sync-not-required`\n'
     printf -- '- 原因：未发现 contracts、context_runtime、governance_registry、harness、repository_rules、generator、downstream_context 或 evidence 影响面变化。\n'
   fi
   printf -- '- `%s`\n' "$repository_rules_release_decision"

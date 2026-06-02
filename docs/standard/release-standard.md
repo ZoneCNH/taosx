@@ -61,4 +61,4 @@ PR 或 release notes 必须说明：
 
 ## Context Runtime v4 release profile
 
-Context Runtime v4.0 使用 `context-release` 作为 release profile baseline。`release-final-check` 委托给 `context-release`；`context-release` 绝不能调用 `release-check` 或 `release-final-check`，以避免 release governance 递归。Release manifest 必须包含 `governance_runtime` evidence，证明当前 profile 集合、`context-profile-check`、`context-release` 和 legacy profile aliases。
+Context Runtime v4.0 将 `context-release` 定义为 release profile baseline。`release-final-check` 委托给 `context-release`；`context-release` 不得调用 `release-check` 或 `release-final-check`，以避免递归 release governance。release manifest 必须包含 `governance_runtime` evidence，记录启用的 profile 集合、`context-profile-check`、`context-release` 和 legacy profile aliases。

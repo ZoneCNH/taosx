@@ -109,4 +109,4 @@ Context Runtime v4.0 增加增量 profile baseline，不替换现有 P0/P1/P2 co
 - `context-standard-check`
 - `context-full-check`
 
-`context-release` 不得调用 `release-check` 或 `release-final-check`；唯一允许方向是 `release-final-check` 在严格 release evidence check 前委托执行 `context-release`。Legacy aliases（`context-fast-check`、`context-standard-check`、`context-full-check`）必须保持可用。除非仓库内实际存在 `.agent/context` 文件，否则该基线不得宣称已落地这些文件。
+`context-release` 不得调用 `release-check` 或 `release-final-check`；允许的方向是 `release-final-check` 在 strict release evidence checks 前委托给 `context-release`。Legacy aliases（`context-fast-check`、`context-standard-check`、`context-full-check`）必须保持可用。除非 `.agent/context` 文件实际存在于仓库中，否则该 baseline 不得宣称这些文件已落地。
