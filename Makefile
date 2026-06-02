@@ -166,6 +166,43 @@ p1-governance-check: agent-team-contract scope-lock pr-template acceptance-matri
 .PHONY: p2-runtime-check
 p2-runtime-check: install-runtime upgrade-runtime release-ready evidence-replay attest-conformance pack-standard pack-gate pack-evidence downstream-baseline downstream-adoption runtime-file-ownership execution-context
 
+.PHONY: context-profile
+context-profile:
+	$(XLIBGATE) context-profile
+
+.PHONY: context-profile-check
+context-profile-check:
+	$(XLIBGATE) context-profile-check
+
+.PHONY: context-schema-check
+context-schema-check:
+	$(XLIBGATE) context-schema-check
+
+.PHONY: context-lite
+context-lite: require-gowork-off governance-check context-profile-check
+
+.PHONY: context-standard
+context-standard: require-gowork-off governance-check p1-governance-check context-profile-check
+
+.PHONY: context-full
+context-full: require-gowork-off governance-check p1-governance-check p2-runtime-check context-profile-check
+
+.PHONY: context-release
+context-release: require-gowork-off context-full integration dependency-check standard-impact-check score-check
+	CHECK_STATUS=passed $(MAKE) evidence
+	$(MAKE) release-evidence-hash
+	$(MAKE) release-evidence-check
+	$(MAKE) release-evidence-checksum-check
+
+.PHONY: context-fast-check
+context-fast-check: context-lite
+
+.PHONY: context-standard-check
+context-standard-check: context-standard
+
+.PHONY: context-full-check
+context-full-check: context-full
+
 .PHONY: ci
 ci: fmt vet lint test race boundary security contracts governance-check score
 
@@ -188,7 +225,7 @@ release-check-extended: require-gowork-off ci-extended integration dependency-ch
 
 .PHONY: release-final-check
 release-final-check:
-	XLIB_CONTEXT=release_verify GOWORK=off $(MAKE) release-check
+	XLIB_CONTEXT=release_verify GOWORK=off $(MAKE) context-release
 	$(XLIBGATE) score --min 9.8
 	RELEASE_EVIDENCE_REQUIRE_PASSED=1 RELEASE_EVIDENCE_REQUIRE_CLEAN=1 RELEASE_EVIDENCE_MIN_SCORE=9.5 ./scripts/check_release_evidence.sh
 	$(MAKE) release-evidence-checksum-check
