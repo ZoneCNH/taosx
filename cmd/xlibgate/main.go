@@ -43,10 +43,10 @@ func run(args []string, stdin io.Reader, stdout io.Writer, stderr io.Writer) int
 		return runMakefileBaseline(args[1:], stdout, stderr)
 	case "context-profile":
 		return runContextProfile(args[1:], stdout, stderr)
-	case "context-profile-check", "context-schema-check":
-		return runContextProfileCheck(args[0], args[1:], stdout, stderr)
-	case "context-lite", "context-standard", "context-full", "context-release", "context-fast-check", "context-standard-check", "context-full-check":
-		return runContextProfileAlias(args[0], args[1:], stdout, stderr)
+	case "context-profile-check":
+		return runContextProfileCheck(args[1:], stdout, stderr)
+	case "context-schema-check":
+		return runContextSchemaCheck(args[1:], stdout, stderr)
 	case "minimal-kernel", "done-assertion", "agent-team-contract", "scope-lock", "pr-template", "acceptance-matrix", "runtime-health", "goal-runtime", "naming", "upgrade-standard", "conformance-profile", "downstream-registry", "self-healing-skeleton", "policy-schema", "github-settings", "toolchain", "evidence-artifacts", "install-runtime", "upgrade-runtime", "release-ready", "evidence-replay", "attest-conformance", "pack-standard", "pack-gate", "pack-evidence", "runtime-file-ownership", "downstream-baseline", "downstream-adoption", "autoresearch", "changelog", "github-governance", "governance-fixture-test", "supply-chain", "execution-context":
 		return runPlannedCommand(args[0], args[1:], stdout, stderr)
 	case "boundary":
@@ -69,6 +69,12 @@ func run(args []string, stdin io.Reader, stdout io.Writer, stderr io.Writer) int
 		return runExternal(stdin, stdout, stderr, "./scripts/hash_release_evidence.sh")
 	case "release-final-check":
 		return runExternal(stdin, stdout, stderr, "make", "release-final-check")
+	case "context-fast-check":
+		return runExternal(stdin, stdout, stderr, "make", "context-fast-check")
+	case "context-standard-check":
+		return runExternal(stdin, stdout, stderr, "make", "context-standard-check")
+	case "context-full-check":
+		return runExternal(stdin, stdout, stderr, "make", "context-full-check")
 	case "render-check":
 		return runExternal(stdin, stdout, stderr, "./scripts/check_rendered_template.sh", args[1:]...)
 	case "score":
@@ -149,14 +155,10 @@ commands:
   command-registry
   conformance-profile [--profile <name>]
   context-fast-check
-  context-full
   context-full-check
-  context-lite
-  context-profile [--profile lite|standard|full|release]
-  context-profile-check [--json|--strict]
-  context-release
-  context-schema-check [--json|--strict]
-  context-standard
+  context-profile [--json]
+  context-profile-check [--json]
+  context-schema-check [--json]
   context-standard-check
   contracts
   dependency-check

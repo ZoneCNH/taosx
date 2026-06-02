@@ -182,7 +182,7 @@ func runMakefileBaseline(args []string, stdout io.Writer, stderr io.Writer) int 
 	if err := validateInternalCommandArgs("makefile-baseline", args, internalCommandFlagSpec{boolFlags: []string{"json"}}); err != nil {
 		return invalidInternalArgsExit("makefile-baseline", err, stderr)
 	}
-	requiredTargets := []string{"fmt", "vet", "lint", "test", "race", "boundary", "security", "contracts", "docs-check", "evidence", "score-check", "main-guard", "worktree-guard", "evidence-check", "cli-contract", "issue-registry", "command-registry", "makefile-baseline", "context-profile", "context-profile-check", "context-schema-check", "context-lite", "context-standard", "context-full", "context-release", "context-fast-check", "context-standard-check", "context-full-check", "governance-check", "p1-governance-check", "execution-context", "p2-runtime-check", "release-check", "release-final-check"}
+	requiredTargets := append([]string{"fmt", "vet", "lint", "test", "race", "boundary", "security", "contracts", "docs-check", "evidence", "score-check", "main-guard", "worktree-guard", "evidence-check", "cli-contract", "issue-registry", "command-registry", "makefile-baseline", "governance-check", "p1-governance-check", "execution-context", "p2-runtime-check", "release-check", "release-final-check"}, contextRuntimeTargets()...)
 	required := map[string][]string{"Makefile": {}, ".agent/makefile-target-registry.yaml": requiredTargets, ".agent/makefile-baseline.yaml": requiredTargets}
 	for _, target := range requiredTargets {
 		required["Makefile"] = append(required["Makefile"], ".PHONY: "+target, target+":")
@@ -537,6 +537,12 @@ var commandRegistryCommands = []string{
 	"issue-registry",
 	"command-registry",
 	"makefile-baseline",
+	"context-profile",
+	"context-profile-check",
+	"context-schema-check",
+	"context-fast-check",
+	"context-standard-check",
+	"context-full-check",
 	"agent-team-contract",
 	"scope-lock",
 	"pr-template",
@@ -605,7 +611,7 @@ func requiredIssueRegistryNeedles() []string {
 		prefix string
 		count  int
 	}{
-		{prefix: "P0", count: 16},
+		{prefix: "P0", count: 18},
 		{prefix: "P1", count: 21},
 		{prefix: "P2", count: 15},
 	} {
