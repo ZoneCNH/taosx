@@ -96,7 +96,7 @@
 
 ## Context Runtime v4 commands
 
-Context Runtime v4.0 adds an additive profile baseline without replacing the existing P0/P1/P2 command registry. These commands are registry-governed and must remain present in `run` dispatch, `.agent/command-registry.yaml`, `.agent/issue-registry.yaml`, Makefile targets, and this contract:
+Context Runtime v4.0 增加增量 profile baseline，不替换现有 P0/P1/P2 command registry。以下命令受 registry governance 约束，必须同时保留在 `run` dispatch、`.agent/command-registry.yaml`、`.agent/issue-registry.yaml`、Makefile targets 和本 contract 中：
 
 - `context-profile --profile lite|standard|full|release`
 - `context-profile-check`
@@ -109,4 +109,4 @@ Context Runtime v4.0 adds an additive profile baseline without replacing the exi
 - `context-standard-check`
 - `context-full-check`
 
-`context-release` must not call `release-check` or `release-final-check`; the allowed direction is `release-final-check` delegating to `context-release` before strict release evidence checks. Legacy aliases (`context-fast-check`, `context-standard-check`, `context-full-check`) must remain available. This baseline does not claim `.agent/context` files unless those files are present in the repository.
+`context-release` 不得调用 `release-check` 或 `release-final-check`；允许的方向是 `release-final-check` 在 strict release evidence checks 前委托给 `context-release`。Legacy aliases（`context-fast-check`、`context-standard-check`、`context-full-check`）必须保持可用。除非 `.agent/context` 文件实际存在于仓库中，否则该 baseline 不得宣称这些文件已落地。

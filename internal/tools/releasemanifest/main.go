@@ -137,15 +137,15 @@ type ModuleReplace struct {
 }
 
 type StandardImpactEvidence struct {
-	ReportPath                       string `json:"report_path"`
-	ReportSHA256                     string `json:"report_sha256"`
-	Status                           string `json:"status"`
-	DownstreamSyncRequired           bool   `json:"downstream_sync_required"`
-	ContextRuntimeChange             bool   `json:"context_runtime_change"`
-	GovernanceRegistryChange         bool   `json:"governance_registry_change"`
-	DownstreamReleaseDecision        string `json:"downstream_release_decision"`
-	RepositoryRulesReleaseDecision   string `json:"repository_rules_release_decision"`
-	PrimaryDownstream                string `json:"primary_downstream"`
+	ReportPath                     string `json:"report_path"`
+	ReportSHA256                   string `json:"report_sha256"`
+	Status                         string `json:"status"`
+	DownstreamSyncRequired         bool   `json:"downstream_sync_required"`
+	PrimaryDownstream              string `json:"primary_downstream"`
+	ContextRuntimeChange           string `json:"context_runtime_change"`
+	GovernanceRegistryChange       string `json:"governance_registry_change"`
+	DownstreamReleaseDecision      string `json:"downstream_release_decision"`
+	RepositoryRulesReleaseDecision string `json:"repository_rules_release_decision"`
 }
 
 type GovernanceRuntime struct {
@@ -387,6 +387,12 @@ func verifyManifest(path string, requirePassed bool, requireClean bool, expectVe
 	}
 	requireNonEmpty(&failures, "standard_impact.report_path", got.StandardImpact.ReportPath)
 	requireNonEmpty(&failures, "standard_impact.status", got.StandardImpact.Status)
+	if got.StandardImpact.Status == "present" {
+		requireNonEmpty(&failures, "standard_impact.context_runtime_change", got.StandardImpact.ContextRuntimeChange)
+		requireNonEmpty(&failures, "standard_impact.governance_registry_change", got.StandardImpact.GovernanceRegistryChange)
+		requireNonEmpty(&failures, "standard_impact.downstream_release_decision", got.StandardImpact.DownstreamReleaseDecision)
+		requireNonEmpty(&failures, "standard_impact.repository_rules_release_decision", got.StandardImpact.RepositoryRulesReleaseDecision)
+	}
 	requireNonEmpty(&failures, "governance_runtime.runtime", got.GovernanceRuntime.Runtime)
 	requireNonEmpty(&failures, "governance_runtime.schema_version", got.GovernanceRuntime.SchemaVersion)
 	requireNonEmpty(&failures, "governance_runtime.status", got.GovernanceRuntime.Status)
@@ -496,8 +502,8 @@ func buildStandardImpactEvidence() (StandardImpactEvidence, error) {
 	evidence.DownstreamReleaseDecision = parseReportValue(report, "downstream_release_decision")
 	evidence.RepositoryRulesReleaseDecision = parseReportValue(report, "repository_rules_release_decision")
 	evidence.PrimaryDownstream = parseReportValue(report, "primary_downstream")
-	evidence.ContextRuntimeChange = strings.EqualFold(parseReportValue(report, "context_runtime_change"), "true")
-	evidence.GovernanceRegistryChange = strings.EqualFold(parseReportValue(report, "governance_registry_change"), "true")
+	evidence.ContextRuntimeChange = parseReportValue(report, "context_runtime_change")
+	evidence.GovernanceRegistryChange = parseReportValue(report, "governance_registry_change")
 	evidence.DownstreamReleaseDecision = parseReportValue(report, "downstream_release_decision")
 	evidence.RepositoryRulesReleaseDecision = parseReportValue(report, "repository_rules_release_decision")
 	return evidence, nil

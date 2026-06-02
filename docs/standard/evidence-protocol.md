@@ -52,7 +52,7 @@ make release-final-check
   -> 要求工作区 clean 后再次校验 release Evidence
 ```
 
-Context Runtime v4.0 的目标链路必须保持单向：`context-release` 不得依赖 `release-check` 或 `release-final-check`；迁移完成后 `release-final-check` 可以调用 `context-release`。在 wrapper、Makefile target、`cmd/xlibgate` 命令和 registry bridge 物理落地前，完成声明只能把该链路记录为目标态或 known gap，不能写成已执行。
+Context Runtime v4.0 的目标链路必须保持单向：`context-release` 不得依赖 `release-check` 或 `release-final-check`；迁移完成后 `release-final-check` 可以调用 `context-release`。在 wrapper、Makefile target、`cmd/xlibgate` 命令和 registry bridge 物理落地前，完成声明只能把该链路记录为目标态或 known gap，不能写成已执行。release manifest 和 release evidence proof artifacts 必须用实际 gate 输出支撑，不能用目标态文字替代。
 
 本地 release gate 必须运行 `GOWORK=off make dependency-check`、`GOWORK=off make standard-impact-check` 和 `GOWORK=off make docs-check`。
 
@@ -123,4 +123,4 @@ Goal 或 Release 级完成声明必须覆盖以下字段，缺失项要写入 `k
 
 ## Context Runtime v4 evidence
 
-Release manifests must record `governance_runtime` evidence for Context Runtime v4.0. Required evidence includes the runtime identifier, profile list, `context-profile-check`, `context-release`, and legacy alias preservation. Standard Impact reports should categorize governance registry, repository-rule, context-runtime, and context-consumer-template changes so downstream sync decisions are explicit.
+Release manifests 必须记录 Context Runtime v4.0 的 `governance_runtime` evidence。必需 evidence 包含 runtime identifier、profile list、`context-profile-check`、`context-release` 和 legacy alias preservation。Standard Impact reports 必须分类 governance registry、repository-rule、context-runtime 和 downstream context 变化，使 downstream sync decisions 可显式追踪。
