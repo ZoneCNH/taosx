@@ -12,8 +12,10 @@ import (
 )
 
 func main() {
-	os.Exit(run(os.Args[1:], os.Stdin, os.Stdout, os.Stderr))
+	exit(run(os.Args[1:], os.Stdin, os.Stdout, os.Stderr))
 }
+
+var exit = os.Exit
 
 func run(args []string, stdin io.Reader, stdout io.Writer, stderr io.Writer) int {
 	if len(args) == 0 {
@@ -68,19 +70,25 @@ func runScore(args []string, stdout io.Writer, stderr io.Writer) int {
 		}
 		return 2
 	}
-	report := releasequality.Compute(*minimum)
-	data, err := releasequality.Marshal(report)
+	report := computeReleaseQuality(*minimum)
+	data, err := marshalReleaseQuality(report)
 	if err != nil {
 		write(stderr, "ERROR: %v\n", err)
 		return 1
 	}
 	write(stdout, "%s\n", data)
-	if err := releasequality.Verify(report, *minimum); err != nil {
+	if err := verifyReleaseQuality(report, *minimum); err != nil {
 		write(stderr, "ERROR: %v\n", err)
 		return 1
 	}
 	return 0
 }
+
+var (
+	computeReleaseQuality = releasequality.Compute
+	marshalReleaseQuality = releasequality.Marshal
+	verifyReleaseQuality  = releasequality.Verify
+)
 
 func runExternal(stdin io.Reader, stdout io.Writer, stderr io.Writer, name string, args ...string) int {
 	cmd := exec.Command(name, args...)

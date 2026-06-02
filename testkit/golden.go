@@ -7,9 +7,13 @@ import (
 )
 
 func RequireGolden(t testing.TB, goldenPath string, actual []byte) {
+	requireGolden(t, os.ReadFile, goldenPath, actual)
+}
+
+func requireGolden(t fatalHelper, readFile func(string) ([]byte, error), goldenPath string, actual []byte) {
 	t.Helper()
 
-	expected, err := os.ReadFile(filepath.Clean(goldenPath))
+	expected, err := readFile(filepath.Clean(goldenPath))
 	if err != nil {
 		t.Fatalf("read golden file %s: %v", goldenPath, err)
 	}

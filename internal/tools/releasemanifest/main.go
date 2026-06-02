@@ -150,8 +150,10 @@ type Notes struct {
 	KnownRisks      []string `json:"known_risks"`
 }
 
+var exit = os.Exit
+
 func main() {
-	os.Exit(runCLI(os.Args[0], os.Args[1:], os.Stdout, os.Stderr))
+	exit(runCLI(os.Args[0], os.Args[1:], os.Stdout, os.Stderr))
 }
 
 func runCLI(name string, args []string, stdout io.Writer, stderr io.Writer) int {
@@ -378,13 +380,19 @@ func writeManifest(path string, manifest Manifest) error {
 		return err
 	}
 	var buf bytes.Buffer
-	encoder := json.NewEncoder(&buf)
-	encoder.SetIndent("", "  ")
-	if err := encoder.Encode(manifest); err != nil {
+	if err := encodeManifestFunc(&buf, manifest); err != nil {
 		return err
 	}
 	return os.WriteFile(path, buf.Bytes(), 0o644)
 }
+
+func encodeManifest(w io.Writer, manifest Manifest) error {
+	encoder := json.NewEncoder(w)
+	encoder.SetIndent("", "  ")
+	return encoder.Encode(manifest)
+}
+
+var encodeManifestFunc = encodeManifest
 
 func buildChecks() map[string]string {
 	defaultStatus := envDefault("CHECK_STATUS", "unknown")
@@ -476,7 +484,7 @@ func validateChecks(checks map[string]string, requirePassed bool) []string {
 }
 
 func sourceDigest() (string, int, error) {
-	raw, err := runRaw("git", "ls-files", "-z")
+	raw, err := runRawCommand("git", "ls-files", "-z")
 	if err != nil {
 		return "", 0, err
 	}
@@ -530,7 +538,7 @@ func fileDigest(path string) (FileDigest, error) {
 }
 
 func moduleDigests() ([]ModuleDigest, error) {
-	raw, err := runRaw("go", "list", "-m", "-json", "all")
+	raw, err := runRawCommand("go", "list", "-m", "-json", "all")
 	if err != nil {
 		return nil, err
 	}
@@ -602,7 +610,7 @@ func runTrimmedDefault(fallback string, name string, args ...string) string {
 }
 
 func runTrimmed(name string, args ...string) (string, error) {
-	output, err := runRaw(name, args...)
+	output, err := runRawCommand(name, args...)
 	if err != nil {
 		return "", err
 	}
@@ -617,6 +625,8 @@ func runRaw(name string, args ...string) ([]byte, error) {
 	}
 	return output, nil
 }
+
+var runRawCommand = runRaw
 
 func envDefault(name string, fallback string) string {
 	if value := strings.TrimSpace(os.Getenv(name)); value != "" {

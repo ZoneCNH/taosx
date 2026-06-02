@@ -185,6 +185,71 @@ func TestHealthCheckDeadlineAboveTimeoutHealthy(t *testing.T) {
 	}
 }
 
+func TestHealthCheckNilClientUnhealthy(t *testing.T) {
+	var client *Client
+
+	status := client.HealthCheck(context.Background())
+	if status.Status != HealthUnhealthy {
+		t.Fatalf("expected unhealthy status, got %q", status.Status)
+	}
+	if status.Name != "templatex" {
+		t.Fatalf("expected fallback health name, got %q", status.Name)
+	}
+}
+
+func TestHealthCheckElapsedDeadlineWithoutContextErrorUnhealthy(t *testing.T) {
+	metrics := &recordingMetrics{}
+	client, err := New(context.Background(), Config{
+		Name:    "templatex",
+		Timeout: time.Hour,
+	}, WithMetrics(metrics))
+	if err != nil {
+		t.Fatalf("new client: %v", err)
+	}
+
+	status := client.HealthCheck(deadlineOnlyContext{
+		Context:  context.Background(),
+		deadline: time.Now().Add(-time.Second),
+	})
+	if status.Status != HealthUnhealthy {
+		t.Fatalf("expected unhealthy status, got %q", status.Status)
+	}
+	if status.Message != context.DeadlineExceeded.Error() {
+		t.Fatalf("expected deadline message, got %q", status.Message)
+	}
+
+	labels := map[string]string{
+		"name":   "templatex",
+		"status": string(HealthUnhealthy),
+	}
+	if !metrics.gaugeWithLabels(MetricClientHealthStatus, 0, labels) {
+		t.Fatalf("expected unhealthy health status gauge, got %#v", metrics.gauges)
+	}
+}
+
+func TestHealthCheckElapsedDeadlineUsesCurrentContextError(t *testing.T) {
+	client, err := New(context.Background(), Config{
+		Name:    "templatex",
+		Timeout: time.Hour,
+	})
+	if err != nil {
+		t.Fatalf("new client: %v", err)
+	}
+
+	ctx := &changingErrDeadlineContext{
+		Context:  context.Background(),
+		deadline: time.Now().Add(-time.Second),
+		err:      context.Canceled,
+	}
+	status := client.HealthCheck(ctx)
+	if status.Status != HealthUnhealthy {
+		t.Fatalf("expected unhealthy status, got %q", status.Status)
+	}
+	if status.Message != context.Canceled.Error() {
+		t.Fatalf("expected current context error message, got %q", status.Message)
+	}
+}
+
 func TestHealthCheckZeroValueClientUnhealthy(t *testing.T) {
 	var client Client
 
@@ -215,4 +280,36 @@ func TestHealthStatusJSONContract(t *testing.T) {
 	if strings.Contains(encoded, "CheckedAt") || strings.Contains(encoded, "LatencyMs") {
 		t.Fatalf("expected snake_case JSON fields, got %s", encoded)
 	}
+}
+
+type deadlineOnlyContext struct {
+	context.Context
+	deadline time.Time
+}
+
+func (ctx deadlineOnlyContext) Deadline() (time.Time, bool) {
+	return ctx.deadline, true
+}
+
+func (ctx deadlineOnlyContext) Err() error {
+	return nil
+}
+
+type changingErrDeadlineContext struct {
+	context.Context
+	deadline time.Time
+	err      error
+	errCalls int
+}
+
+func (ctx *changingErrDeadlineContext) Deadline() (time.Time, bool) {
+	return ctx.deadline, true
+}
+
+func (ctx *changingErrDeadlineContext) Err() error {
+	ctx.errCalls++
+	if ctx.errCalls == 1 {
+		return nil
+	}
+	return ctx.err
 }

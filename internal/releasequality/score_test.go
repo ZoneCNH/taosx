@@ -148,6 +148,22 @@ func TestMarshalStableJSON(t *testing.T) {
 	}
 }
 
+func TestTextDimensionReportsMissingNeedles(t *testing.T) {
+	root := t.TempDir()
+	path := filepath.Join(root, "doc.txt")
+	if err := os.WriteFile(path, []byte("present"), 0o644); err != nil {
+		t.Fatalf("write doc fixture: %v", err)
+	}
+
+	dimension := textDimension("doc", 1, path, []string{"present", "missing"}, "doc has required text")
+	if dimension.Passed {
+		t.Fatal("expected text dimension to fail")
+	}
+	if !strings.Contains(dimension.Detail, "missing missing") {
+		t.Fatalf("dimension detail = %q; want missing needle", dimension.Detail)
+	}
+}
+
 func chdir(t *testing.T, dir string) {
 	t.Helper()
 

@@ -5,12 +5,27 @@ import (
 	"io"
 	"os"
 	"testing"
+
+	"github.com/ZoneCNH/xlib-standard/pkg/templatex"
 )
 
 func TestMainPrintsHealthyStatus(t *testing.T) {
 	output := captureStdout(t, main)
 	if output != "healthy\n" {
 		t.Fatalf("unexpected output: %q", output)
+	}
+}
+
+func TestRunReportsInvalidConfig(t *testing.T) {
+	var stdout, stderr bytes.Buffer
+
+	run(&stdout, &stderr, templatex.Config{})
+
+	if stdout.String() != "" {
+		t.Fatalf("unexpected stdout: %q", stdout.String())
+	}
+	if stderr.String() != "create client: validation: Config.Validate: name is required\n" {
+		t.Fatalf("unexpected stderr: %q", stderr.String())
 	}
 }
 

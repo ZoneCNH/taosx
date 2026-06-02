@@ -6,6 +6,7 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"errors"
+	"io"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -450,6 +451,30 @@ func TestPrintCLIMessageReportsWriterFailure(t *testing.T) {
 	}
 }
 
+func TestMainDelegatesToRunCLIAndExit(t *testing.T) {
+	previousArgs := os.Args
+	previousExit := exit
+	t.Cleanup(func() {
+		os.Args = previousArgs
+		exit = previousExit
+	})
+
+	var gotCode *int
+	exit = func(code int) {
+		gotCode = &code
+	}
+	os.Args = []string{"releasemanifest", "-h"}
+
+	main()
+
+	if gotCode == nil {
+		t.Fatal("main did not call exit")
+	}
+	if *gotCode != 0 {
+		t.Fatalf("main exit code = %d, want 0", *gotCode)
+	}
+}
+
 func TestBuildManifestRecordsFixtureRepositoryFacts(t *testing.T) {
 	t.Setenv("GOWORK", "off")
 	t.Setenv("VERSION", "v9.9.9-test")
@@ -522,6 +547,87 @@ func TestBuildManifestRecordsFixtureRepositoryFacts(t *testing.T) {
 	}
 }
 
+func TestBuildManifestReportsBuilderFailures(t *testing.T) {
+	cases := []struct {
+		name      string
+		setup     func(t *testing.T) string
+		mock      func(name string, args ...string) ([]byte, error)
+		wantError string
+	}{
+		{
+			name: "module name",
+			setup: func(t *testing.T) string {
+				return t.TempDir()
+			},
+			mock: func(name string, args ...string) ([]byte, error) {
+				if name == "go" && strings.Join(args, " ") == "list -m" {
+					return nil, errors.New("module command failed")
+				}
+				return runRaw(name, args...)
+			},
+			wantError: "module command failed",
+		},
+		{
+			name: "source digest",
+			setup: func(t *testing.T) string {
+				t.Setenv("GOWORK", "off")
+				return releaseManifestFixtureRepo(t)
+			},
+			mock: func(name string, args ...string) ([]byte, error) {
+				if name == "git" && strings.Join(args, " ") == "ls-files -z" {
+					return nil, errors.New("source command failed")
+				}
+				return runRaw(name, args...)
+			},
+			wantError: "source command failed",
+		},
+		{
+			name: "module digests",
+			setup: func(t *testing.T) string {
+				t.Setenv("GOWORK", "off")
+				return releaseManifestFixtureRepo(t)
+			},
+			mock: func(name string, args ...string) ([]byte, error) {
+				if name == "go" && strings.Join(args, " ") == "list -m -json all" {
+					return nil, errors.New("dependency command failed")
+				}
+				return runRaw(name, args...)
+			},
+			wantError: "dependency command failed",
+		},
+		{
+			name: "standard impact",
+			setup: func(t *testing.T) string {
+				t.Setenv("GOWORK", "off")
+				repo := releaseManifestFixtureRepo(t)
+				reportPath := filepath.Join(repo, filepath.FromSlash(standardImpactReportPath))
+				if err := os.MkdirAll(reportPath, 0o755); err != nil {
+					t.Fatal(err)
+				}
+				return repo
+			},
+			wantError: "is a directory",
+		},
+	}
+
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			chdir(t, tc.setup(t))
+			if tc.mock != nil {
+				withRunRawCommand(t, tc.mock)
+			}
+
+			_, err := buildManifest()
+			if err == nil {
+				t.Fatal("buildManifest succeeded, want error")
+			}
+			if !strings.Contains(err.Error(), tc.wantError) {
+				t.Fatalf("error = %q, want substring %q", err.Error(), tc.wantError)
+			}
+		})
+	}
+}
+
 func TestVerifyManifestAcceptsFreshManifestAndRejectsDrift(t *testing.T) {
 	t.Setenv("GOWORK", "off")
 	t.Setenv("CHECK_STATUS", "passed")
@@ -567,6 +673,84 @@ func TestVerifyManifestAcceptsFreshManifestAndRejectsDrift(t *testing.T) {
 		if !strings.Contains(message, want) {
 			t.Fatalf("error = %q, want substring %q", message, want)
 		}
+	}
+}
+
+func TestVerifyManifestRejectsCorruptedManifestFields(t *testing.T) {
+	t.Setenv("GOWORK", "off")
+	t.Setenv("CHECK_STATUS", "passed")
+	chdir(t, releaseManifestFixtureRepo(t))
+
+	manifest, err := buildManifest()
+	if err != nil {
+		t.Fatal(err)
+	}
+	manifest.GeneratedAt = "not-rfc3339"
+	manifest.Module = "example.com/wrong"
+	manifest.Commit = "wrong-commit"
+	manifest.TreeSHA = "wrong-tree"
+	manifest.TrackedFileCount++
+	manifest.TreeState = "wrong-state"
+	manifest.Score.Value++
+	manifest.Score.Status = ""
+	manifest.Score.Threshold = 0
+	manifest.Contracts = nil
+	manifest.Dependencies = nil
+	manifest.GeneratorEvidence.Required = false
+	manifest.Tools = map[string]string{}
+
+	path := filepath.Join(t.TempDir(), "corrupt.json")
+	if err := writeManifest(path, manifest); err != nil {
+		t.Fatal(err)
+	}
+
+	err = verifyManifest(path, false, false, "", 0)
+	if err == nil {
+		t.Fatal("verify corrupt manifest succeeded, want error")
+	}
+	message := err.Error()
+	for _, want := range []string{
+		"generated_at must be RFC3339",
+		"module mismatch:",
+		"commit mismatch:",
+		"tree_sha mismatch:",
+		"tracked_file_count mismatch:",
+		"tree_state mismatch:",
+		"score.value mismatch:",
+		"score.status is required",
+		"score.threshold is required",
+		"contract fingerprints do not match current contract files",
+		"dependency inventory does not match go list -m -json all",
+		"generator_evidence.required must be true",
+		"tools.go must be recorded",
+	} {
+		if !strings.Contains(message, want) {
+			t.Fatalf("error = %q, want substring %q", message, want)
+		}
+	}
+}
+
+func TestVerifyManifestReportsFileAndDecodeAndCurrentBuildErrors(t *testing.T) {
+	if err := verifyManifest(filepath.Join(t.TempDir(), "missing.json"), false, false, "", 0); err == nil {
+		t.Fatal("verify missing file succeeded, want error")
+	}
+
+	invalidPath := filepath.Join(t.TempDir(), "invalid.json")
+	if err := os.WriteFile(invalidPath, []byte("{"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	if err := verifyManifest(invalidPath, false, false, "", 0); err == nil {
+		t.Fatal("verify invalid JSON succeeded, want error")
+	}
+
+	root := t.TempDir()
+	validPath := filepath.Join(root, "manifest.json")
+	if err := writeManifest(validPath, Manifest{GeneratedAt: "2026-01-02T03:04:05Z"}); err != nil {
+		t.Fatal(err)
+	}
+	chdir(t, root)
+	if err := verifyManifest(validPath, false, false, "", 0); err == nil {
+		t.Fatal("verify without current build context succeeded, want error")
 	}
 }
 
@@ -623,6 +807,29 @@ func TestBuildStandardImpactEvidenceReadsReport(t *testing.T) {
 	}
 }
 
+func TestBuildStandardImpactEvidenceReportsReadError(t *testing.T) {
+	root := t.TempDir()
+	reportPath := filepath.Join(root, filepath.FromSlash(standardImpactReportPath))
+	if err := os.MkdirAll(reportPath, 0o755); err != nil {
+		t.Fatal(err)
+	}
+	chdir(t, root)
+
+	if _, err := buildStandardImpactEvidence(); err == nil {
+		t.Fatal("buildStandardImpactEvidence succeeded for directory report, want error")
+	}
+}
+
+func TestParseReportValueHandlesMissingAndFirstMatch(t *testing.T) {
+	report := "- other: `ignored`\n- primary_downstream: ` first value `\n- primary_downstream: `second value`\n"
+	if got := parseReportValue(report, "primary_downstream"); got != "first value" {
+		t.Fatalf("parseReportValue first match = %q, want first value", got)
+	}
+	if got := parseReportValue(report, "missing"); got != "" {
+		t.Fatalf("parseReportValue missing = %q, want empty", got)
+	}
+}
+
 func TestBuildGeneratorEvidenceRecordsRepresentativeDownstreams(t *testing.T) {
 	got := buildGeneratorEvidence()
 
@@ -637,6 +844,19 @@ func TestBuildGeneratorEvidenceRecordsRepresentativeDownstreams(t *testing.T) {
 	}
 	if !hasGeneratorTarget(got.Targets, "corekit", "example.com/acme/corekit", "corekit") {
 		t.Fatalf("targets = %+v, want corekit target", got.Targets)
+	}
+}
+
+func TestValidateChecksRequiresStatusButOnlyRequiresPassedWhenRequested(t *testing.T) {
+	checks := make(map[string]string, len(checkNames))
+	for _, name := range checkNames {
+		checks[name] = "failed"
+	}
+	checks["fmt"] = " "
+
+	failures := validateChecks(checks, false)
+	if len(failures) != 1 || !strings.Contains(failures[0], "checks.fmt is required") {
+		t.Fatalf("failures = %v, want only missing fmt", failures)
 	}
 }
 
@@ -699,6 +919,35 @@ func TestSourceDigestUsesTrackedFileNamesAndContents(t *testing.T) {
 	}
 }
 
+func TestSourceDigestReportsGitAndTrackedFileReadErrors(t *testing.T) {
+	withRunRawCommand(t, func(name string, args ...string) ([]byte, error) {
+		if name == "git" && strings.Join(args, " ") == "ls-files -z" {
+			return nil, errors.New("git ls-files failed")
+		}
+		return runRaw(name, args...)
+	})
+	if _, _, err := sourceDigest(); err == nil || !strings.Contains(err.Error(), "git ls-files failed") {
+		t.Fatalf("sourceDigest git error = %v, want git ls-files failed", err)
+	}
+
+	repo := t.TempDir()
+	runTestCommand(t, repo, "git", "init")
+	path := filepath.Join(repo, "tracked.txt")
+	if err := os.WriteFile(path, []byte("tracked\n"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	runTestCommand(t, repo, "git", "add", ".")
+	if err := os.Remove(path); err != nil {
+		t.Fatal(err)
+	}
+	chdir(t, repo)
+
+	withRunRawCommand(t, runRaw)
+	if _, _, err := sourceDigest(); err == nil {
+		t.Fatal("sourceDigest succeeded for missing tracked file, want error")
+	}
+}
+
 func TestModuleDigestsIncludesReplaceMetadata(t *testing.T) {
 	root := t.TempDir()
 	if err := os.WriteFile(filepath.Join(root, "go.mod"), []byte(`module example.com/root
@@ -745,6 +994,22 @@ replace example.com/dep => ./dep
 	}
 }
 
+func TestModuleDigestsReportsCommandAndDecodeErrors(t *testing.T) {
+	withRunRawCommand(t, func(name string, args ...string) ([]byte, error) {
+		return nil, errors.New("go list modules failed")
+	})
+	if _, err := moduleDigests(); err == nil || !strings.Contains(err.Error(), "go list modules failed") {
+		t.Fatalf("moduleDigests command error = %v, want go list modules failed", err)
+	}
+
+	withRunRawCommand(t, func(name string, args ...string) ([]byte, error) {
+		return []byte("{"), nil
+	})
+	if _, err := moduleDigests(); err == nil {
+		t.Fatal("moduleDigests succeeded for malformed JSON, want error")
+	}
+}
+
 func TestWriteManifestCreatesParentAndWritesIndentedJSON(t *testing.T) {
 	manifest := Manifest{
 		Module:           "example.com/lib",
@@ -787,10 +1052,120 @@ func TestWriteManifestCreatesParentAndWritesIndentedJSON(t *testing.T) {
 	}
 }
 
+func TestWriteManifestReportsMkdirAndEncodeErrors(t *testing.T) {
+	blocker := filepath.Join(t.TempDir(), "blocker")
+	if err := os.WriteFile(blocker, []byte("file"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	if err := writeManifest(filepath.Join(blocker, "latest.json"), Manifest{}); err == nil {
+		t.Fatal("writeManifest succeeded with file parent, want error")
+	}
+	if err := encodeManifest(errorWriter{}, Manifest{}); err == nil {
+		t.Fatal("encodeManifest succeeded with failing writer, want error")
+	}
+
+	previousEncode := encodeManifestFunc
+	encodeManifestFunc = func(io.Writer, Manifest) error {
+		return errors.New("encode failed")
+	}
+	t.Cleanup(func() {
+		encodeManifestFunc = previousEncode
+	})
+	if err := writeManifest(filepath.Join(t.TempDir(), "latest.json"), Manifest{}); err == nil || !strings.Contains(err.Error(), "encode failed") {
+		t.Fatalf("writeManifest encode error = %v, want encode failed", err)
+	}
+}
+
 func TestToolVersionReportsMissingBinary(t *testing.T) {
 	got := toolVersion("definitely-missing-releasemanifest-test-binary")
 	if got != "missing" {
 		t.Fatalf("toolVersion missing binary = %q, want missing", got)
+	}
+}
+
+func TestWorkflowEvidenceBuildsGitHubAndLocalURLs(t *testing.T) {
+	server := "https://github.com/"
+	repo := "/ZoneCNH/xlib-standard/"
+	t.Setenv("WORKFLOW_RUN_ID", "123")
+	t.Setenv("GITHUB_SERVER_URL", server)
+	t.Setenv("GITHUB_REPOSITORY", repo)
+	t.Setenv("ARTIFACT_NAME", "")
+	t.Setenv("ARTIFACT_URL", "")
+
+	got := buildWorkflowEvidence()
+	if got.WorkflowRunID != "123" {
+		t.Fatalf("workflow_run_id = %q, want 123", got.WorkflowRunID)
+	}
+	if got.ArtifactName != "release-manifest-123" {
+		t.Fatalf("artifact_name = %q, want release-manifest-123", got.ArtifactName)
+	}
+	wantArtifactURL := strings.TrimRight(server, "/") + "/" + strings.Trim(repo, "/") + "/actions/runs/123"
+	if got.ArtifactURL != wantArtifactURL {
+		t.Fatalf("artifact_url = %q, want GitHub Actions URL", got.ArtifactURL)
+	}
+
+	t.Setenv("WORKFLOW_RUN_ID", "")
+	t.Setenv("GITHUB_RUN_ID", "")
+	t.Setenv("GITHUB_SERVER_URL", "")
+	t.Setenv("GITHUB_REPOSITORY", "")
+	t.Setenv("ARTIFACT_NAME", "")
+	t.Setenv("ARTIFACT_URL", "")
+	got = buildWorkflowEvidence()
+	if got.WorkflowRunID != "local" || got.ArtifactURL != "local:release-manifest-local" {
+		t.Fatalf("local workflow evidence = %+v, want local fallback", got)
+	}
+}
+
+func TestTreeStateBranches(t *testing.T) {
+	withRunRawCommand(t, func(name string, args ...string) ([]byte, error) {
+		return nil, errors.New("git status failed")
+	})
+	if got := treeState(); got != "unknown" {
+		t.Fatalf("treeState error = %q, want unknown", got)
+	}
+
+	repo := t.TempDir()
+	runTestCommand(t, repo, "git", "init")
+	runTestCommand(t, repo, "git", "config", "user.email", "test@example.com")
+	runTestCommand(t, repo, "git", "config", "user.name", "Release Manifest Test")
+	if err := os.WriteFile(filepath.Join(repo, "clean.txt"), []byte("clean\n"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	runTestCommand(t, repo, "git", "add", ".")
+	runTestCommand(t, repo, "git", "commit", "-m", "fixture")
+	chdir(t, repo)
+
+	withRunRawCommand(t, runRaw)
+	if got := treeState(); got != "clean" {
+		t.Fatalf("treeState clean = %q, want clean", got)
+	}
+}
+
+func TestToolVersionReportsCommandError(t *testing.T) {
+	dir := t.TempDir()
+	name := "releasemanifest-failing-tool"
+	path := filepath.Join(dir, name)
+	if err := os.WriteFile(path, []byte("#!/bin/sh\necho first line\necho second line\nexit 7\n"), 0o755); err != nil {
+		t.Fatal(err)
+	}
+	t.Setenv("PATH", dir+string(os.PathListSeparator)+os.Getenv("PATH"))
+
+	got := toolVersion(name)
+	if !strings.HasPrefix(got, "error: ") {
+		t.Fatalf("toolVersion failing binary = %q, want error prefix", got)
+	}
+	if strings.Contains(got, "\n") {
+		t.Fatalf("toolVersion failing binary = %q, want first line only", got)
+	}
+}
+
+func TestRequireNonEmptyAppendsOnlyForBlankValues(t *testing.T) {
+	failures := []string{"existing"}
+	requireNonEmpty(&failures, "blank", " \t")
+	requireNonEmpty(&failures, "filled", "value")
+
+	if strings.Join(failures, "|") != "existing|blank is required" {
+		t.Fatalf("failures = %v, want blank appended only", failures)
 	}
 }
 
@@ -808,6 +1183,16 @@ func chdir(t *testing.T, dir string) {
 		if err := os.Chdir(previous); err != nil {
 			t.Fatalf("restore working directory: %v", err)
 		}
+	})
+}
+
+func withRunRawCommand(t *testing.T, runner func(name string, args ...string) ([]byte, error)) {
+	t.Helper()
+
+	previous := runRawCommand
+	runRawCommand = runner
+	t.Cleanup(func() {
+		runRawCommand = previous
 	})
 }
 

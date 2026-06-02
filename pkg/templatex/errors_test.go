@@ -38,6 +38,32 @@ func TestWrapErrorPreservesCauseAndKind(t *testing.T) {
 	}
 }
 
+func TestErrorHandlesNilReceiverAndCauseOnlyMessage(t *testing.T) {
+	var nilError *Error
+	if got := nilError.Error(); got != "" {
+		t.Fatalf("nil Error.Error() = %q; want empty string", got)
+	}
+	if got := nilError.Unwrap(); got != nil {
+		t.Fatalf("nil Error.Unwrap() = %v; want nil", got)
+	}
+
+	cause := errors.New("root cause")
+	err := &Error{Kind: ErrorKindInternal, Op: "templatex.Test", Cause: cause}
+	if got := err.Error(); got != "internal: templatex.Test: root cause" {
+		t.Fatalf("cause-only Error() = %q", got)
+	}
+}
+
+func TestErrorKindFallbacksForPlainErrors(t *testing.T) {
+	err := errors.New("plain")
+	if IsKind(err, ErrorKindInternal) {
+		t.Fatal("plain errors should not match templatex error kinds")
+	}
+	if got := errorKind(err); got != ErrorKindInternal {
+		t.Fatalf("errorKind(plain) = %q; want %q", got, ErrorKindInternal)
+	}
+}
+
 func TestContextErrorClassifiesDeadlineAsRetryableTimeout(t *testing.T) {
 	err := contextError("templatex.Test", context.DeadlineExceeded)
 	if !IsKind(err, ErrorKindTimeout) {

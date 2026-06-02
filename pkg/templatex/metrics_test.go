@@ -1,6 +1,9 @@
 package templatex
 
-import "sync"
+import (
+	"sync"
+	"testing"
+)
 
 type metricCall struct {
 	name   string
@@ -120,4 +123,12 @@ func cloneLabels(labels map[string]string) map[string]string {
 		cloned[key] = value
 	}
 	return cloned
+}
+
+func TestNoopMetricsAcceptsCalls(t *testing.T) {
+	metrics := NoopMetrics{}
+
+	metrics.IncCounter(MetricClientCreatedTotal, map[string]string{"name": "templatex"})
+	metrics.ObserveHistogram(MetricClientHealthLatencyMS, 1, nil)
+	metrics.SetGauge(MetricClientHealthStatus, 1, map[string]string{"status": string(HealthHealthy)})
 }

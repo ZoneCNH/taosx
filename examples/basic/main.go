@@ -3,20 +3,25 @@ package main
 import (
 	"context"
 	"fmt"
+	"io"
 	"os"
 
 	"github.com/ZoneCNH/xlib-standard/pkg/templatex"
 )
 
 func main() {
-	client, err := templatex.New(context.Background(), templatex.Config{Name: "templatex"})
+	run(os.Stdout, os.Stderr, templatex.Config{Name: "templatex"})
+}
+
+func run(stdout, stderr io.Writer, cfg templatex.Config) {
+	client, err := templatex.New(context.Background(), cfg)
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "create client: %v\n", err)
+		_, _ = fmt.Fprintf(stderr, "create client: %v\n", err)
 		return
 	}
 	defer func() {
 		_ = client.Close(context.Background())
 	}()
 
-	fmt.Println(templatex.ModuleName)
+	_, _ = fmt.Fprintln(stdout, templatex.ModuleName)
 }
