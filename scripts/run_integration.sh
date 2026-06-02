@@ -34,6 +34,7 @@ for spec in "${cases[@]}"; do
     GOWORK=off go test ./...
     GOWORK=off make contracts
     GOWORK=off make boundary
+    GOWORK=off make standard-impact-check
     CHECK_STATUS=passed GOWORK=off make evidence
     RELEASE_EVIDENCE_REQUIRE_PASSED=1 GOWORK=off make release-evidence-check
   )
