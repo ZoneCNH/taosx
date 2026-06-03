@@ -49,6 +49,12 @@ Release manifest 相关测试必须在临时 fixture 仓库构造所需 `.omc` s
 - 版本应与 release notes、tag 和 manifest 一致。
 - 未创建 tag 或工作区 dirty 时，不得宣称最终发布完成。
 
+## GitHub Release 对象
+
+Tag 推送触发的 `.github/workflows/release.yml` 不只运行 `release-final-check` 和上传 manifest artifact；在 gate 通过后必须使用 `gh release create` 或 `gh release edit` 为同名 tag 发布 GitHub Release，并紧接着使用 `gh release view` 校验该对象存在且不是 draft 或 prerelease。
+
+只有 tag 而没有 GitHub Release 对象时，发布视为未完成。Release workflow 必须声明 `contents: write`，并对发布命令使用 `--verify-tag`，保证 Release 对象只能绑定到已存在的远端 tag。
+
 ## 变更说明
 
 PR 或 release notes 必须说明：

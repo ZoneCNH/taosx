@@ -154,6 +154,11 @@ require_text ".github/workflows/ci.yml" "release/manifest/latest.json.sha256"
 require_text ".github/workflows/release.yml" "make release-final-check"
 require_text ".github/workflows/release.yml" "release/manifest/latest.json.sha256"
 require_text ".github/workflows/release.yml" "ARTIFACT_URL"
+require_text ".github/workflows/release.yml" "contents: write"
+require_text ".github/workflows/release.yml" "gh release create"
+require_text ".github/workflows/release.yml" "gh release edit"
+require_text ".github/workflows/release.yml" "gh release view"
+require_text ".github/workflows/release.yml" "--verify-tag"
 require_text ".github/workflows/ci.yml" "ARTIFACT_URL"
 
 

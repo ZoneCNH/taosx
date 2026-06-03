@@ -45,6 +45,10 @@ XLIB_CONTEXT=release_verify GOWORK=off make release-preflight VERSION=v0.4.6
 
 `release-preflight` 会先检查版本号、当前分支、工作区洁净状态、`main` 与 `origin/main` 是否一致、目标 tag 是否已存在、`CHANGELOG.md` 是否包含目标版本，以及 `golangci-lint` / `govulncheck` 是否已安装；随后以 `GOWORK=off` 和 `XLIB_CONTEXT=release_verify` 运行 `release-final-check`。tag 应在该入口通过后再创建和推送。
 
+## GitHub Release 发布对象
+
+推送 `v*` tag 后，`.github/workflows/release.yml` 必须在 `release-final-check` 通过后自动创建或更新同名 GitHub Release。workflow 使用 `gh release create` / `gh release edit` 发布，并用 `gh release view` 校验 Release 对象存在、不是 draft、不是 prerelease。只有 tag 而没有 GitHub Release 对象时，发布视为未完成。
+
 ## Required Release Check
 
 `make release-check` 是默认发布门禁，必须通过：

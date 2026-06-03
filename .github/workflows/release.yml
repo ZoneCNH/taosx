@@ -5,6 +5,9 @@ on:
     tags:
       - "v*"
 
+permissions:
+  contents: write
+
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: false
@@ -59,3 +62,43 @@ jobs:
             release/manifest/latest.json
             release/manifest/latest.json.sha256
           if-no-files-found: error
+
+      - name: Publish GitHub Release
+        if: ${{ success() && startsWith(github.ref, 'refs/tags/v') }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_TAG: ${{ github.ref_name }}
+        run: |
+          set -euo pipefail
+
+          if gh release view "${RELEASE_TAG}" >/dev/null 2>&1; then
+            gh release edit "${RELEASE_TAG}" \
+              --title "${RELEASE_TAG}" \
+              --latest \
+              --draft=false \
+              --prerelease=false \
+              --verify-tag
+          else
+            gh release create "${RELEASE_TAG}" \
+              --title "${RELEASE_TAG}" \
+              --generate-notes \
+              --latest \
+              --verify-tag
+          fi
+
+      - name: Verify GitHub Release
+        if: ${{ success() && startsWith(github.ref, 'refs/tags/v') }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_TAG: ${{ github.ref_name }}
+        run: |
+          set -euo pipefail
+
+          release_json="$(gh release view "${RELEASE_TAG}" --json isDraft,isPrerelease,tagName,url)"
+          printf '%s\n' "${release_json}"
+          printf '%s\n' "${release_json}" | jq -e --arg tag "${RELEASE_TAG}" '
+            .tagName == $tag
+            and .isDraft == false
+            and .isPrerelease == false
+            and (.url | length > 0)
+          '
