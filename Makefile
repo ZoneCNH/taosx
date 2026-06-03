@@ -371,3 +371,25 @@ doctor-hooks:
 	  exit 1; \
 	}
 	@echo "✅ hooks 配置正确"
+
+# sync-main: 拉取远端 main 并尽量 fast-forward 本地 main。
+# 对应 .agent/standard/goal-runtime-canonical.md RULE-MAIN-SYNC-002：
+# 每个 worktree 创建前必须基于最新 main。
+sync-main:
+	@git fetch origin main
+	@CUR=$$(git rev-parse --abbrev-ref HEAD); \
+	if [ "$$CUR" = "main" ]; then \
+	  git merge --ff-only origin/main && echo "✅ main 已同步至 origin/main"; \
+	else \
+	  LOCAL=$$(git rev-parse main 2>/dev/null || echo ""); \
+	  REMOTE=$$(git rev-parse origin/main); \
+	  if [ "$$LOCAL" = "$$REMOTE" ]; then \
+	    echo "✅ 本地 main 已是最新（当前在 $$CUR）"; \
+	  else \
+	    echo "⚠️  当前不在 main 分支（$$CUR）"; \
+	    echo "   本地 main: $$LOCAL"; \
+	    echo "   远端 main: $$REMOTE"; \
+	    echo "   请到主 worktree 执行: git merge --ff-only origin/main"; \
+	    exit 1; \
+	  fi; \
+	fi
