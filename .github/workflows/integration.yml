@@ -1,6 +1,9 @@
 name: Integration
 
 on:
+  pull_request:
+    branches:
+      - main
   workflow_dispatch:
 
 concurrency:
@@ -21,4 +24,4 @@ jobs:
           cache-dependency-path: go.sum
 
       - name: Integration
-        run: make integration
+        run: GOWORK=off make integration
