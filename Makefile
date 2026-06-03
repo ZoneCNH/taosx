@@ -289,7 +289,7 @@ context-standard-check: context-standard
 context-full-check: context-full
 
 .PHONY: ci
-ci: fmt vet lint test race boundary architecture domain security security-debt contracts governance-check debt score
+ci: doctor-hooks-local fmt vet lint test race boundary architecture domain security security-debt contracts governance-check debt score
 
 .PHONY: ci-extended
 ci-extended: ci property golden fuzz-smoke docs-drift
@@ -371,6 +371,21 @@ doctor-hooks:
 	  exit 1; \
 	}
 	@echo "✅ hooks 配置正确"
+
+# doctor-hooks-local: ci 链的本地 fail-fast 检查。
+# CI 环境（$$CI 或 $$GITHUB_ACTIONS 已设）跳过，因为 CI 不需要 git hooks；
+# 本地环境强制要求 core.hooksPath=.githooks，避免开发者跳过 pre-commit secret 扫描。
+doctor-hooks-local:
+	@if [ -n "$$CI" ] || [ -n "$$GITHUB_ACTIONS" ]; then \
+	  echo "doctor-hooks-local: CI 环境，跳过 hooks 检查"; \
+	else \
+	  [ "$$(git config --get core.hooksPath)" = ".githooks" ] || { \
+	    echo "ERROR: 本地 git hooks 未启用 (core.hooksPath != .githooks)"; \
+	    echo "       这会跳过 pre-commit secret 扫描，请运行: make install-hooks"; \
+	    exit 1; \
+	  }; \
+	  echo "✅ 本地 hooks 已启用"; \
+	fi
 
 # sync-main: 拉取远端 main 并尽量 fast-forward 本地 main。
 # 对应 .agent/standard/goal-runtime-canonical.md RULE-MAIN-SYNC-002：

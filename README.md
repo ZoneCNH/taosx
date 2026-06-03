@@ -70,7 +70,7 @@ make doctor-hooks    # 验证 core.hooksPath=.githooks 已生效
 make sync-main       # 拉取并 fast-forward 本地 main（RULE-MAIN-SYNC-002）
 ```
 
-`make install-hooks` 把 `git config core.hooksPath` 指向仓库内的 `.githooks/` 目录。**未启用 hooks 时，`pre-commit` 与 `pre-push` 不会被 Git 调用，本地 P0 防线（禁止在 main commit、secret 提前拦截）形同虚设。** 此外，`go run ./cmd/xlibgate doctor` 会在 details 中报告当前 hooks 启用状态，配合 `make doctor-hooks` 形成自检闭环。
+`make install-hooks` 把 `git config core.hooksPath` 指向仓库内的 `.githooks/` 目录。**未启用 hooks 时，`pre-commit` 与 `pre-push` 不会被 Git 调用，本地 P0 防线（禁止在 main commit、secret 提前拦截）形同虚设。** 此外，`go run ./cmd/xlibgate doctor` 会在 details 中报告当前 hooks 启用状态，配合 `make doctor-hooks` 形成自检闭环。`make ci` 链首位的 `doctor-hooks-local` 也会在本地环境强制 fail-fast（CI 环境通过 `$CI` / `$GITHUB_ACTIONS` 自动跳过）。
 
 ### 标准 gate
 
