@@ -49,6 +49,12 @@ XLIB_CONTEXT=release_verify GOWORK=off make release-preflight VERSION=v0.4.6
 
 推送 `v*` tag 后，`.github/workflows/release.yml` 必须在 `release-final-check` 通过后自动创建或更新同名 GitHub Release。workflow 使用 `gh release create` / `gh release edit` 发布，并用 `gh release view` 校验 Release 对象存在、不是 draft、不是 prerelease。只有 tag 而没有 GitHub Release 对象时，发布视为未完成。
 
+## Main 合并自动 patch 发布
+
+合并到 `main` 后，`.github/workflows/release-auto-patch.yml` 是自动发布入口。它获取当前所有稳定 semver tag，按最新 `vX.Y.Z` 计算 `vX.Y.(Z+1)`，并把该值作为 `VERSION` 传给 `XLIB_CONTEXT=release_verify GOWORK=off make release-final-check`。校验通过后，workflow 在当前 `GITHUB_SHA` 上执行 `git tag -a` 和 `git push origin "refs/tags/${RELEASE_TAG}"`，随后用 `gh release create` / `gh release edit` 发布 GitHub Release，并用 `gh release view` 验证 Release 对象。
+
+该 workflow 不依赖 tag push 再触发二次 workflow；合并发布的 tag 创建、Release 发布和 Release 校验必须在同一次 `main` push workflow 内完成。若 workflow rerun 时发现当前 commit 已有稳定 release tag，则记录 `already_released=true` 并复用该 tag，避免同一 merge commit 再次把 patch 版本末位加 1。`release-auto-patch-main` 并发组必须保持串行，防止多个 `main` push 同时抢占同一个版本号。
+
 ## Required Release Check
 
 `make release-check` 是默认发布门禁，必须通过：

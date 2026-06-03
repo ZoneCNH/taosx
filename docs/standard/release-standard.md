@@ -48,6 +48,9 @@ Release manifest 相关测试必须在临时 fixture 仓库构造所需 `.omc` s
 - `VERSION` 必须显式传入 release-preflight。
 - 版本应与 release notes、tag 和 manifest 一致。
 - 未创建 tag 或工作区 dirty 时，不得宣称最终发布完成。
+- 合并到 `main` 的自动发布由 `.github/workflows/release-auto-patch.yml` 负责，必须读取最新稳定 `vX.Y.Z` tag 并生成 `vX.Y.(Z+1)`，再以该版本运行 `GOWORK=off make release-final-check`。
+- 自动 patch workflow 必须在同一次 `main` push workflow 内完成 `git tag -a`、`git push origin "refs/tags/${RELEASE_TAG}"`、GitHub Release 发布和 `gh release view` 校验，不得依赖 tag push 触发二次 workflow。
+- 自动 patch workflow rerun 时若当前 commit 已有稳定 release tag，必须设置 `already_released=true` 并复用该 tag，不得继续递增 patch 版本。
 
 ## GitHub Release 对象
 
