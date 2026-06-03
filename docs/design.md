@@ -17,4 +17,4 @@
 
 ## 发布
 
-发布前必须通过 Harness Gate，并确认入口文档仍引用 [`https://github.com/ZoneCNH/xlib-standard`](https://github.com/ZoneCNH/xlib-standard)，然后生成 `release/manifest/latest.json` 与 `release/manifest/latest.json.sha256`。这些文件是 release Evidence artifact，不提交到源码历史。`make release-check` 会先运行 CI 和 integration gate，再以 `CHECK_STATUS=passed` 生成 manifest。最终发布使用 `GOWORK=off make release-final-check`、`GOWORK=off make release-preflight VERSION=<version>` 和 `xlibgate score --min 9.8`。
+发布前必须通过 Harness Gate，并确认入口文档仍引用 [`https://github.com/ZoneCNH/xlib-standard`](https://github.com/ZoneCNH/xlib-standard)，然后生成 `release/manifest/latest.json` 与 `release/manifest/latest.json.sha256`。这些文件是 release Evidence artifact，不提交到源码历史。`make release-check` 会先运行 CI 和 integration gate，再以 `CHECK_STATUS=passed` 生成 manifest。最终发布使用 `GOWORK=off make release-final-check`、`GOWORK=off make release-preflight VERSION=<version>` 和 `goalcli score --min 9.8`。

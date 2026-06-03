@@ -16,7 +16,7 @@
 | **Standard Source**       | 维护基础库 P0 标准、仓库角色、分层、模块边界、DoD、安全、release 和 Evidence 协议          |
 | **Go Reference Template** | 提供可编译参考包 `pkg/templatex`，证明标准可落地                                           |
 | **Generator**             | 通过 `scripts/render_template.sh` 渲染下游基础库（kernel、configx、observex 等 10 个目标） |
-| **Harness**               | 通过 Makefile + `cmd/xlibgate` 固化 60+ 门禁命令                                           |
+| **Harness**               | 通过 Makefile + `cmd/goalcli` 固化 60+ 门禁命令                                           |
 | **Evidence Runtime**      | 通过 `.agent/` 和 release manifest 记录可追溯完成状态                                      |
 
 旧名 `baselib-template` 和 `foundationx` 只允许出现在迁移文档语境中。
@@ -35,7 +35,7 @@ xlib-standard/
 │   ├── metrics.go          # Metrics 接口 + NoopMetrics
 │   ├── options.go          # 函数选项模式
 │   └── version.go          # 版本常量
-├── cmd/xlibgate/           # 统一治理 CLI（~2000 行）
+├── cmd/goalcli/           # 统一治理 CLI（~2000 行）
 │   ├── main.go             # 命令路由（60+ 子命令）
 │   └── governance.go       # gate 实现、registry 检查、context profile DAG
 ├── internal/
@@ -82,7 +82,7 @@ xlib-standard/
 ### 4.2 权威顺序（CONSTITUTION.md）
 
 ```
-docs/goal.md + docs/standard/  →  .agent/*.yaml + cmd/xlibgate  →  release/manifest/
+docs/goal.md + docs/standard/  →  .agent/*.yaml + cmd/goalcli  →  release/manifest/
 ```
 
 标准文档 > 机器可执行门禁 > 发布证据，形成三层验证链。
@@ -107,7 +107,7 @@ docs/goal.md + docs/standard/  →  .agent/*.yaml + cmd/xlibgate  →  release/m
 | ------------------------- | ------------------------------------------------------ |
 | scorecard_doc             | `docs/scorecard.md` 存在                               |
 | manifest_score_schema     | manifest 包含 `score`/`workflow_run_id`/`artifact_url` |
-| score_cli                 | xlibgate score 命令可运行                              |
+| score_cli                 | goalcli score 命令可运行                              |
 | score_gate                | Makefile 中有 score-check                              |
 | manifest_min_score_verify | release evidence 验证脚本检查分数阈值                  |
 | security_gate             | secret scanner 覆盖 token 和私钥                       |

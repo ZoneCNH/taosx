@@ -69,6 +69,6 @@
 
 - `GOWORK=off make release-final-check`
 - `GOWORK=off make release-preflight VERSION=<version>`
-- `xlibgate score --min 9.8`
+- `goalcli score --min 9.8`
 
 最终声明必须使用 `DONE with evidence:`，并列出 manifest、checksum、score、kernel downstream smoke 和所有未运行项。

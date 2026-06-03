@@ -31,7 +31,7 @@ issues:
     title: CLI 契约和报告模式
     status: implemented
     command: cli-contract
-    evidence: [xlibgate-report, xlibgate-cli-contract]
+    evidence: [goalcli-report, goalcli-cli-contract]
   - id: P0-007
     title: 边界和反向依赖防护
     status: implemented
@@ -51,7 +51,7 @@ issues:
     title: 文档契约一致性检查
     status: implemented
     command: docs-check
-    evidence: [docs-check, xlibgate-cli-contract]
+    evidence: [docs-check, goalcli-cli-contract]
   - id: P0-011
     title: 发布证据哈希链
     status: implemented
@@ -273,7 +273,7 @@ issues:
     command: release-check-extended
     evidence: [release-check-extended, p2-runtime-check]
   - id: P2-016
-    title: goalkit v0.1.0 MVA 本地证据门
+    title: goalcli v0.1.0 MVA 本地证据门
     status: implemented
     command: goal-runtime-final
     evidence: [goal-acceptance, goal-delivery, goal-handover, goal-downstream-adoption, goal-certify, goal-runtime-final]

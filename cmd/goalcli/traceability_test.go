@@ -23,7 +23,7 @@ const traceabilityValidMatrix = `# Traceability
 
 | REQ | 需求摘要 | 主要产物 | 验证/Evidence | 收敛 owner |
 | --- | --- | --- | --- | --- |
-| REQ-001 | 示例需求 A | docs/standard/foo.md; .agent/state.yaml | docs/release.md; cmd/xlibgate/main.go | agent-runtime |
+| REQ-001 | 示例需求 A | docs/standard/foo.md; .agent/state.yaml | docs/release.md; cmd/goalcli/main.go | agent-runtime |
 | REQ-002 | 示例需求 B 含说明文字 | docs/spec.md; object-model; harness yaml | docs/release.md | agent-runtime |
 `
 
@@ -34,7 +34,7 @@ func TestTraceabilityCheckPasses(t *testing.T) {
 	writeTraceFile(t, dir, "docs/standard/foo.md", "x")
 	writeTraceFile(t, dir, ".agent/state.yaml", "x")
 	writeTraceFile(t, dir, "docs/release.md", "x")
-	writeTraceFile(t, dir, "cmd/xlibgate/main.go", "x")
+	writeTraceFile(t, dir, "cmd/goalcli/main.go", "x")
 	writeTraceFile(t, dir, "docs/spec.md", "x")
 
 	var stdout, stderr bytes.Buffer
@@ -94,7 +94,7 @@ func TestLooksLikePath(t *testing.T) {
 	cases := map[string]bool{
 		".agent/foo.yaml": true,
 		"docs/spec.md":    true,
-		"cmd/xlibgate":    true,
+		"cmd/goalcli":     true,
 		"Makefile":        true,
 		"README.md":       true,
 		"object-model":    false,

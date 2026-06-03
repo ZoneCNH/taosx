@@ -7,8 +7,8 @@
 ## 项目结构与模块组织
 
 - `pkg/templatex`：公共 API 参考实现（config、client、health、errors、metrics、options、version），渲染后移到 `pkg/<package-name>`。
-- `internal/`：内部辅助——`sanitize`（配置脱敏）、`validation`（校验）、`releasequality`（分数计算）、`tools/releasemanifest`（manifest 生成器）、`xlibgate`（gate 辅助）。
-- `cmd/xlibgate/`：统一 CLI 门禁工具，所有 Makefile gate 目标最终调用此命令。子命令分 Go 原生实现和 shell 脚本委托两类。
+- `internal/`：内部辅助——`sanitize`（配置脱敏）、`validation`（校验）、`releasequality`（分数计算）、`tools/releasemanifest`（manifest 生成器）、`goalcli`（gate 辅助）。
+- `cmd/goalcli/`：统一 CLI 门禁工具，所有 Makefile gate 目标最终调用此命令。子命令分 Go 原生实现和 shell 脚本委托两类。
 - `testkit/`：可复用测试夹具、断言、golden 文件工具，以及 `governance/` 治理测试夹具。
 - `examples/basic`、`examples/config`、`examples/health`：最小示例，各有 smoke 测试验证输出不漂移。
 - `contracts/`：JSON schema 定义和 `contracts_test.go` 验证映射。
@@ -46,7 +46,7 @@ go test ./... -run 'Test.*Golden|Test.*Snapshot'       # golden 测试
 - `make docs-check`：文档结构 gate（链接、占位符、命名、release manifest 协议）。
 - `make dependency-check`：依赖漂移检查（读取 renovate.json、dependabot.yml、go.mod）。
 - `make standard-impact-check`：生成标准影响报告。
-- `make score`：`xlibgate score --min 9.8`，发布门禁阈值。
+- `make score`：`goalcli score --min 9.8`，发布门禁阈值。
 - `make governance-check`：P0 治理全量检查。
 - `make p1-governance-check`：P1 本地 dry-run 治理契约。
 - `make p2-runtime-check`：P2 运行时/downstream/execution-context dry-run 契约。
@@ -58,7 +58,7 @@ go test ./... -run 'Test.*Golden|Test.*Snapshot'       # golden 测试
 ```bash
 GOWORK=off make release-check
 XLIB_CONTEXT=release_verify GOWORK=off make release-final-check
-XLIB_CONTEXT=release_verify GOWORK=off make release-preflight VERSION=v0.4.5
+XLIB_CONTEXT=release_verify GOWORK=off make release-preflight VERSION=v0.4.6
 make evidence                                    # 生成 release/manifest/latest.json
 ```
 
@@ -76,9 +76,9 @@ scripts/render_template.sh \
 
 ## 架构要点
 
-### xlibgate CLI
+### goalcli CLI
 
-`cmd/xlibgate` 是所有治理 gate 的统一入口（Makefile 中 `XLIBGATE ?= go run ./cmd/xlibgate`）。命令类别：
+`cmd/goalcli` 是所有治理 gate 的统一入口（Makefile 中 `GOALCLI ?= go run ./cmd/goalcli`）。命令类别：
 
 - **质量 gate**：score、boundary、contracts、security/secrets
 - **文档 gate**：docs-check、dependency-check、standard-impact-check
@@ -90,7 +90,7 @@ scripts/render_template.sh \
 ### 权威顺序（CONSTITUTION.md）
 
 1. `docs/goal.md` 与 `docs/standard/` 描述目标、边界和标准条款。
-2. `.agent/*.yaml` 与 `cmd/xlibgate` 描述机器可执行的门禁契约。
+2. `.agent/*.yaml` 与 `cmd/goalcli` 描述机器可执行的门禁契约。
 3. `release/manifest/` 与 `release/evidence/` 保存发布证据。
 
 ### Goal Runtime v3.1
@@ -122,7 +122,7 @@ scripts/render_template.sh \
 - **x.go 独立**：基础库不得依赖 `x.go` 或其内部包；`x.go` 只能作为调用方组合层。
 - **无真实凭据**：不得提交 `.env` 或 `/home/k8s/secrets/env/*` 内容，`scripts/check_secrets.sh` 会扫描。
 - **Evidence 完成**：最终完成声明必须包含 `DONE with evidence:`。
-- **Release score**：`xlibgate score --min 9.8` 是发布门禁阈值。
+- **Release score**：`goalcli score --min 9.8` 是发布门禁阈值。
 - **latest.json**：是生成产物，不提交到源码历史（已在 .gitignore）。
 - **Release manifest 测试**：必须在临时 fixture 仓库中构造所需 `.omc` state，不得依赖当前工作区的 Agent 运行态文件。
 

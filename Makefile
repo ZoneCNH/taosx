@@ -1,6 +1,6 @@
-XLIBGATE ?= go run ./cmd/xlibgate
+GOALCLI ?= go run ./cmd/goalcli
 XLIB_CONTEXT ?= local_write
-GOAL_ID ?= GOAL-20260603-XLIB-GOALKIT-001
+GOAL_ID ?= GOAL-20260603-XLIB-GOALCLI-001
 GOAL_RUNTIME_MODE ?= FULL
 
 .PHONY: require-gowork-off
@@ -41,96 +41,90 @@ lint:
 
 .PHONY: integration
 integration:
-	$(XLIBGATE) integration
+	$(GOALCLI) integration
 
 .PHONY: dependency-check
 dependency-check:
-	$(XLIBGATE) dependency-check
+	$(GOALCLI) dependency-check
 
 .PHONY: standard-impact-check
 standard-impact-check:
-	$(XLIBGATE) standard-impact-check
+	$(GOALCLI) standard-impact-check
 
 .PHONY: docs-check
 docs-check:
-	$(XLIBGATE) docs-check
+	$(GOALCLI) docs-check
 
 .PHONY: rules-verify
 rules-verify:
-	python3 scripts/verify_rules.py
+	$(GOALCLI) rules-verify
 
 .PHONY: debt architecture domain docs-drift dependency-debt security-debt testing-debt implementation-debt downstream-debt
 
 .PHONY: debt-evidence
 debt-evidence:
-	$(XLIBGATE) debt-evidence
+	$(GOALCLI) debt-evidence
 
 .PHONY: debt-evidence-hash
 debt-evidence-hash:
-	$(XLIBGATE) debt-evidence-hash
+	$(GOALCLI) debt-evidence-hash
 
 .PHONY: debt-evidence-checksum-check
 debt-evidence-checksum-check:
-	$(XLIBGATE) debt-evidence-checksum-check
+	$(GOALCLI) debt-evidence-checksum-check
 
 .PHONY: security
 
 architecture:
-	$(XLIBGATE) debt --section architecture --mode enforce
+	$(GOALCLI) debt --section architecture --mode enforce
 
 domain:
-	$(XLIBGATE) debt --section domain --mode enforce
+	$(GOALCLI) debt --section domain --mode enforce
 
 docs-drift:
-	$(XLIBGATE) debt --section docs --mode warn
+	$(GOALCLI) debt --section docs --mode warn
 
 dependency-debt:
-	$(XLIBGATE) debt --section dependency --mode warn
+	$(GOALCLI) debt --section dependency --mode warn
 
 testing-debt:
-	$(XLIBGATE) debt --section testing --mode warn
+	$(GOALCLI) debt --section testing --mode warn
 
 implementation-debt:
-	$(XLIBGATE) debt --section implementation --mode observe
+	$(GOALCLI) debt --section implementation --mode observe
 
 security-debt:
-	$(XLIBGATE) debt --section security --mode warn
+	$(GOALCLI) debt --section security --mode warn
 
 downstream-debt:
-	$(XLIBGATE) downstream-debt
+	$(GOALCLI) downstream-debt
 
 debt:
-	$(XLIBGATE) debt --config .agent/debt/rules.yaml --exceptions .agent/debt/exceptions.yaml --dependency-purpose .agent/debt/dependency-purpose.yaml --mode enforce --min-score 9.8
+	$(GOALCLI) debt --config .agent/debt/rules.yaml --exceptions .agent/debt/exceptions.yaml --dependency-purpose .agent/debt/dependency-purpose.yaml --mode enforce --min-score 9.8
 
 .PHONY: debt-register-update debt-trend debt-patch-suggest debt-lifecycle-check
 debt-register-update:
-	$(XLIBGATE) debt register-update
+	$(GOALCLI) debt register-update
 
 debt-trend:
-	$(XLIBGATE) debt trend
+	$(GOALCLI) debt trend
 
 debt-patch-suggest:
-	$(XLIBGATE) debt patch-suggest
+	$(GOALCLI) debt patch-suggest
 
 debt-lifecycle-check:
-	$(XLIBGATE) debt lifecycle-check
+	$(GOALCLI) debt lifecycle-check
 
 security:
-	@if command -v govulncheck >/dev/null 2>&1; then \
-		govulncheck ./...; \
-	else \
-		echo "govulncheck not installed"; \
-		exit 1; \
-	fi
-	$(XLIBGATE) security
+	$(GOALCLI) security
 
 .PHONY: boundary
 boundary:
-	$(XLIBGATE) boundary
+	$(GOALCLI) boundary
 
 .PHONY: contracts
 contracts:
-	$(XLIBGATE) contracts
+	$(GOALCLI) contracts
 
 .PHONY: property
 property:
@@ -146,23 +140,23 @@ golden:
 
 .PHONY: evidence
 evidence:
-	$(XLIBGATE) evidence
+	$(GOALCLI) evidence
 
 .PHONY: goal-score-check
 goal-score-check:
-	go run ./cmd/xlibgate score --min 9.8
+	go run ./cmd/goalcli score --min 9.8
 
 .PHONY: release-evidence-hash
 release-evidence-hash:
-	$(XLIBGATE) release-evidence-hash
+	$(GOALCLI) release-evidence-hash
 
 .PHONY: release-evidence-check
 release-evidence-check:
-	$(XLIBGATE) release-evidence-check
+	$(GOALCLI) release-evidence-check
 
 .PHONY: release-evidence-checksum-check
 release-evidence-checksum-check:
-	$(XLIBGATE) release-evidence-checksum-check
+	$(GOALCLI) release-evidence-checksum-check
 
 .PHONY: score
 score: score-check
@@ -170,92 +164,92 @@ score: score-check
 .PHONY: score-check
 score-check:
 	# Release evidence verifier default: RELEASE_EVIDENCE_MIN_SCORE=9.8
-	# Direct equivalent for docs/CI drift checks: go run ./cmd/xlibgate score --min 9.8
-	$(XLIBGATE) score --min 9.8
+	# Direct equivalent for docs/CI drift checks: go run ./cmd/goalcli score --min 9.8
+	$(GOALCLI) score --min 9.8
 
 .PHONY: version
 version:
-	$(XLIBGATE) version
+	$(GOALCLI) version
 
 .PHONY: doctor
 doctor:
-	$(XLIBGATE) doctor
+	$(GOALCLI) doctor
 
 .PHONY: main-guard
 main-guard:
-	$(XLIBGATE) main-guard --context $(XLIB_CONTEXT)
+	$(GOALCLI) main-guard --context $(XLIB_CONTEXT)
 
 .PHONY: worktree-guard
 worktree-guard:
-	$(XLIBGATE) worktree-guard --context $(XLIB_CONTEXT)
+	$(GOALCLI) worktree-guard --context $(XLIB_CONTEXT)
 
 .PHONY: evidence-check
 evidence-check:
-	$(XLIBGATE) evidence-check
+	$(GOALCLI) evidence-check
 
 .PHONY: cli-contract
 cli-contract:
-	$(XLIBGATE) cli-contract
+	$(GOALCLI) cli-contract
 
 .PHONY: issue-registry
 issue-registry:
-	$(XLIBGATE) issue-registry
+	$(GOALCLI) issue-registry
 
 .PHONY: command-registry
 command-registry:
-	$(XLIBGATE) command-registry
+	$(GOALCLI) command-registry
 
 .PHONY: makefile-baseline
 makefile-baseline:
-	$(XLIBGATE) makefile-baseline
+	$(GOALCLI) makefile-baseline
 
 .PHONY: agent-team-contract scope-lock pr-template acceptance-matrix runtime-health upgrade-standard conformance-profile downstream-registry self-healing-skeleton goal-runtime github-governance supply-chain changelog governance-fixture-test autoresearch policy-schema github-settings toolchain evidence-artifacts naming
 agent-team-contract scope-lock pr-template acceptance-matrix runtime-health upgrade-standard conformance-profile downstream-registry self-healing-skeleton goal-runtime github-governance supply-chain changelog governance-fixture-test autoresearch policy-schema github-settings toolchain evidence-artifacts naming:
-	$(XLIBGATE) $@ --dry-run --verify
+	$(GOALCLI) $@ --dry-run --verify
 
 
 .PHONY: install-runtime upgrade-runtime release-ready evidence-replay attest-conformance pack-standard pack-gate pack-evidence downstream-baseline downstream-adoption runtime-file-ownership
 install-runtime upgrade-runtime release-ready evidence-replay attest-conformance pack-standard pack-gate pack-evidence downstream-baseline downstream-adoption runtime-file-ownership:
-	$(XLIBGATE) $@ --dry-run --verify
+	$(GOALCLI) $@ --dry-run --verify
 
 .PHONY: execution-context
 execution-context:
-	$(XLIBGATE) $@ --dry-run --verify
+	$(GOALCLI) $@ --dry-run --verify
 
 .PHONY: goal-acceptance
 goal-acceptance: require-gowork-off
-	$(XLIBGATE) $@ --goal-id "$(GOAL_ID)" --mode "$(GOAL_RUNTIME_MODE)" --json --write-evidence
+	$(GOALCLI) $@ --goal-id "$(GOAL_ID)" --mode "$(GOAL_RUNTIME_MODE)" --json --write-evidence
 
 .PHONY: goal-delivery
 goal-delivery: require-gowork-off
-	$(XLIBGATE) $@ --goal-id "$(GOAL_ID)" --mode "$(GOAL_RUNTIME_MODE)" --json --write-evidence
+	$(GOALCLI) $@ --goal-id "$(GOAL_ID)" --mode "$(GOAL_RUNTIME_MODE)" --json --write-evidence
 
 .PHONY: goal-handover
 goal-handover: require-gowork-off
-	$(XLIBGATE) $@ --goal-id "$(GOAL_ID)" --mode "$(GOAL_RUNTIME_MODE)" --json --write-evidence
+	$(GOALCLI) $@ --goal-id "$(GOAL_ID)" --mode "$(GOAL_RUNTIME_MODE)" --json --write-evidence
 
 .PHONY: goal-downstream-adoption
 goal-downstream-adoption: require-gowork-off
-	$(XLIBGATE) $@ --goal-id "$(GOAL_ID)" --mode "$(GOAL_RUNTIME_MODE)" --json --write-evidence
+	$(GOALCLI) $@ --goal-id "$(GOAL_ID)" --mode "$(GOAL_RUNTIME_MODE)" --json --write-evidence
 
 .PHONY: goal-certify
 goal-certify: require-gowork-off
-	$(XLIBGATE) $@ --goal-id "$(GOAL_ID)" --mode "$(GOAL_RUNTIME_MODE)" --json --write-evidence
+	$(GOALCLI) $@ --goal-id "$(GOAL_ID)" --mode "$(GOAL_RUNTIME_MODE)" --json --write-evidence
 
 .PHONY: goal-runtime-final
 goal-runtime-final: require-gowork-off goal-acceptance goal-delivery goal-handover goal-downstream-adoption goal-certify
-	$(XLIBGATE) $@ --goal-id "$(GOAL_ID)" --mode "$(GOAL_RUNTIME_MODE)" --json --write-evidence
+	$(GOALCLI) $@ --goal-id "$(GOAL_ID)" --mode "$(GOAL_RUNTIME_MODE)" --json --write-evidence
 
 .PHONY: traceability-check
 traceability-check:
-	$(XLIBGATE) traceability-check
+	$(GOALCLI) traceability-check
 
 .PHONY: governance-check
 governance-check: require-gowork-off main-guard worktree-guard evidence-check boundary architecture domain security security-debt contracts docs-check cli-contract issue-registry command-registry makefile-baseline rules-consistency-check debt traceability-check
 
 .PHONY: rules-consistency-check
 rules-consistency-check:
-	$(XLIBGATE) rules-consistency-check
+	$(GOALCLI) rules-consistency-check
 
 .PHONY: p1-governance-check
 p1-governance-check: agent-team-contract scope-lock pr-template acceptance-matrix runtime-health upgrade-standard conformance-profile downstream-registry self-healing-skeleton goal-runtime github-governance supply-chain changelog governance-fixture-test autoresearch policy-schema github-settings toolchain evidence-artifacts naming
@@ -265,15 +259,15 @@ p2-runtime-check: install-runtime upgrade-runtime release-ready evidence-replay 
 
 .PHONY: context-profile
 context-profile:
-	$(XLIBGATE) context-profile --profile $${PROFILE:-standard}
+	$(GOALCLI) context-profile --profile $${PROFILE:-standard}
 
 .PHONY: context-profile-check
 context-profile-check:
-	$(XLIBGATE) context-profile-check
+	$(GOALCLI) context-profile-check
 
 .PHONY: context-schema-check
 context-schema-check:
-	$(XLIBGATE) context-schema-check
+	$(GOALCLI) context-schema-check
 
 .PHONY: context-lite
 context-lite: require-gowork-off governance-check
@@ -324,7 +318,7 @@ release-check-extended: require-gowork-off ci-extended integration dependency-ch
 release-final-check:
 	XLIB_CONTEXT=release_verify GOWORK=off $(MAKE) context-release
 	$(MAKE) debt-evidence-checksum-check
-	$(XLIBGATE) score --min 9.8
+	$(GOALCLI) score --min 9.8
 	RELEASE_EVIDENCE_REQUIRE_PASSED=1 RELEASE_EVIDENCE_REQUIRE_CLEAN=1 RELEASE_EVIDENCE_MIN_SCORE=9.8 ./scripts/check_release_evidence.sh
 	$(MAKE) release-evidence-checksum-check
 
@@ -338,41 +332,33 @@ release-preflight:
 
 .PHONY: worktree-check
 worktree-check:
-	bash scripts/harness/no-main-dev.sh
+	$(GOALCLI) worktree-check --context $(XLIB_CONTEXT)
 
 .PHONY: context-check
 context-check:
-	@echo "context-check: 验证 Goal Context 完整性..."
-	@test -d docs/goal || (echo "ERROR: docs/goal/ 目录不存在" && exit 1)
-	@echo "context-check: 通过。"
+	$(GOALCLI) context-check
 
 .PHONY: spec-check
 spec-check:
-	@echo "spec-check: 验证 Spec 存在且包含 REQ-xxx..."
-	@find docs/ -name '*.md' -exec grep -l 'REQ-' {} + > /dev/null 2>&1 || (echo "WARNING: 未找到包含 REQ-xxx 的文档" && exit 0)
-	@echo "spec-check: 通过。"
+	$(GOALCLI) spec-check
 
 .PHONY: design-check
 design-check:
-	@echo "design-check: 验证 Design 文档存在..."
-	@test -d docs/adr || (echo "WARNING: docs/adr/ 目录不存在" && exit 0)
-	@echo "design-check: 通过。"
+	$(GOALCLI) design-check
 
 .PHONY: task-check
 task-check:
-	@echo "task-check: 验证 Task 可追溯性..."
-	@test -f .agent/registry/commands.yaml || (echo "WARNING: commands.yaml 不存在" && exit 0)
-	@echo "task-check: 通过。"
+	$(GOALCLI) task-check
 
 .PHONY: pr-check
-pr-check: worktree-check lint test
-	@echo "pr-check: worktree + lint + test 全部通过。"
+pr-check:
+	$(GOALCLI) pr-check --context $(XLIB_CONTEXT)
 
 .PHONY: retro-check self-improving-check
 retro-check: self-improving-check
 
 self-improving-check:
-	$(XLIBGATE) self-improving-check
+	$(GOALCLI) self-improving-check
 
 install-hooks:
 	@git config core.hooksPath .githooks

@@ -23,6 +23,7 @@ targets:
   - security
   - contracts
   - docs-check
+  - rules-verify
   - debt
   - architecture
   - domain
@@ -39,6 +40,12 @@ targets:
   - score-check
   - main-guard
   - worktree-guard
+  - worktree-check
+  - context-check
+  - spec-check
+  - design-check
+  - task-check
+  - pr-check
   - evidence-check
   - cli-contract
   - issue-registry

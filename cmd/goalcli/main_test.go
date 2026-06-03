@@ -27,7 +27,7 @@ func TestMainDispatchesUsageHelpAndUnknownCommand(t *testing.T) {
 		{
 			name:       "no command",
 			wantCode:   2,
-			wantStderr: "usage: xlibgate <command>",
+			wantStderr: "usage: goalcli <command>",
 		},
 		{
 			name:       "help",
@@ -118,7 +118,7 @@ func TestMainUsesRunExitCode(t *testing.T) {
 	t.Cleanup(func() { _ = devNull.Close() })
 	os.Stdout = devNull
 	os.Stderr = devNull
-	os.Args = []string{"xlibgate", "help"}
+	os.Args = []string{"goalcli", "help"}
 
 	var got int
 	exit = func(code int) {
@@ -169,8 +169,10 @@ func TestRunDispatchesExternalCommands(t *testing.T) {
 	writeGateScript(t, root, "scripts/check_secrets.sh")
 	writeGateScript(t, root, "scripts/check_standard_impact.sh")
 	writeGateScript(t, root, "scripts/check_rendered_template.sh")
+	writePathTool(t, root, "govulncheck")
 	writePathTool(t, root, "go")
 	writePathTool(t, root, "make")
+	writePathTool(t, root, "python3")
 	chdir(t, root)
 	t.Setenv("PATH", root+string(os.PathListSeparator)+os.Getenv("PATH"))
 
@@ -194,6 +196,7 @@ func TestRunDispatchesExternalCommands(t *testing.T) {
 		{name: "release-evidence-hash", args: []string{"release-evidence-hash"}, wantStdout: "hash_release_evidence.sh"},
 		{name: "release-final-check", args: []string{"release-final-check"}, wantStdout: "make release-final-check"},
 		{name: "render-check", args: []string{"render-check", "rendered"}, wantStdout: "check_rendered_template.sh rendered"},
+		{name: "rules-verify", args: []string{"rules-verify"}, wantStdout: "python3 scripts/verify_rules.py"},
 		{name: "secrets", args: []string{"secrets"}, wantStdout: "check_secrets.sh"},
 		{name: "security", args: []string{"security"}, wantStdout: "check_secrets.sh"},
 		{name: "standard-impact-check", args: []string{"standard-impact-check"}, wantStdout: "check_standard_impact.sh"},
@@ -375,9 +378,9 @@ func TestGoalGovernanceCommandSurface(t *testing.T) {
 	}
 }
 
-func TestGoalkitMVACommandSurfaceRequiresG12ThroughG16Equivalents(t *testing.T) {
+func TestGoalcliMVACommandSurfaceRequiresG12ThroughG16Equivalents(t *testing.T) {
 	chdir(t, repoRoot(t))
-	const fixtureGoalID = "GOAL-20260603-XLIB-GOALKIT-001"
+	const fixtureGoalID = "GOAL-20260603-XLIB-GOALCLI-001"
 	tests := []struct {
 		command   string
 		wantGates int
@@ -393,9 +396,9 @@ func TestGoalkitMVACommandSurfaceRequiresG12ThroughG16Equivalents(t *testing.T) 
 	for _, tt := range tests {
 		t.Run(tt.command, func(t *testing.T) {
 			root := t.TempDir()
-			writeGoalkitAuthorityFixture(t, root)
+			writeGoalcliAuthorityFixture(t, root)
 			if tt.command == "goal-runtime-final" {
-				writeGoalkitPrerequisiteLedgerFixture(t, root, fixtureGoalID)
+				writeGoalcliPrerequisiteLedgerFixture(t, root, fixtureGoalID)
 			}
 			chdir(t, root)
 
@@ -429,7 +432,7 @@ func TestGoalkitMVACommandSurfaceRequiresG12ThroughG16Equivalents(t *testing.T) 
 				} `json:"gates"`
 			}
 			if err := json.Unmarshal(stdout.Bytes(), &report); err != nil {
-				t.Fatalf("stdout is not goalkit report JSON: %v; stdout %q", err, stdout.String())
+				t.Fatalf("stdout is not goalcli report JSON: %v; stdout %q", err, stdout.String())
 			}
 			if report.Command != tt.command || report.Status != "passed" {
 				t.Fatalf("report = %#v; want command %q with passed status", report, tt.command)
@@ -437,11 +440,11 @@ func TestGoalkitMVACommandSurfaceRequiresG12ThroughG16Equivalents(t *testing.T) 
 			if report.GoalID != fixtureGoalID {
 				t.Fatalf("goal_id = %q; want fixture goal id", report.GoalID)
 			}
-			if report.Executor != "xlibgate" || report.ControlPlane != "Harness Runtime" {
-				t.Fatalf("executor/control_plane = %q/%q; want xlibgate/Harness Runtime", report.Executor, report.ControlPlane)
+			if report.Executor != "goalcli" || report.ControlPlane != "Harness Runtime" {
+				t.Fatalf("executor/control_plane = %q/%q; want goalcli/Harness Runtime", report.Executor, report.ControlPlane)
 			}
 			if !report.Blocking {
-				t.Fatalf("blocking = false; want %s to be goalkit MVA-blocking", tt.command)
+				t.Fatalf("blocking = false; want %s to be goalcli MVA-blocking", tt.command)
 			}
 			if report.MVAStatus != "complete" {
 				t.Fatalf("mva_status = %q; want complete for %s", report.MVAStatus, tt.command)
@@ -452,7 +455,7 @@ func TestGoalkitMVACommandSurfaceRequiresG12ThroughG16Equivalents(t *testing.T) 
 			if !slicesContain(report.Evidence, "generated_evidence_pack="+goalruntime.EvidenceLedgerPath) {
 				t.Fatalf("evidence = %#v; want generated evidence pack path", report.Evidence)
 			}
-			if report.LedgerPath != ".agent/evidence/ledger.jsonl" || !strings.HasPrefix(report.EvidencePackPath, "release/evidence/goalkit") {
+			if report.LedgerPath != ".agent/evidence/ledger.jsonl" || !strings.HasPrefix(report.EvidencePackPath, "release/evidence/goalcli") {
 				t.Fatalf("ledger/evidence paths = %q/%q; want source ledger and generated pack split", report.LedgerPath, report.EvidencePackPath)
 			}
 			if len(report.Gates) != tt.wantGates {
@@ -467,16 +470,16 @@ func TestGoalkitMVACommandSurfaceRequiresG12ThroughG16Equivalents(t *testing.T) 
 	}
 }
 
-func TestGoalkitRuntimeFinalWritesEvidenceWhenRequested(t *testing.T) {
+func TestGoalcliRuntimeFinalWritesEvidenceWhenRequested(t *testing.T) {
 	root := t.TempDir()
-	writeGoalkitAuthorityFixture(t, root)
-	writeGoalkitPrerequisiteLedgerFixture(t, root, "GOAL-20260603-XLIB-GOALKIT-001")
+	writeGoalcliAuthorityFixture(t, root)
+	writeGoalcliPrerequisiteLedgerFixture(t, root, "GOAL-20260603-XLIB-GOALCLI-001")
 	chdir(t, root)
 
 	var stdout, stderr bytes.Buffer
 	got := run([]string{
 		"goal-runtime-final",
-		"--goal-id", "GOAL-20260603-XLIB-GOALKIT-001",
+		"--goal-id", "GOAL-20260603-XLIB-GOALCLI-001",
 		"--mode", "FULL",
 		"--json",
 		"--write-evidence",
@@ -491,7 +494,7 @@ func TestGoalkitRuntimeFinalWritesEvidenceWhenRequested(t *testing.T) {
 		Blocking         bool   `json:"blocking"`
 	}
 	if err := json.Unmarshal(stdout.Bytes(), &report); err != nil {
-		t.Fatalf("stdout is not goalkit report JSON: %v; stdout %q", err, stdout.String())
+		t.Fatalf("stdout is not goalcli report JSON: %v; stdout %q", err, stdout.String())
 	}
 	if report.MVAStatus != "complete" || !report.Blocking {
 		t.Fatalf("report = %#v; want complete blocking report", report)
@@ -508,9 +511,12 @@ func TestGoalkitRuntimeFinalWritesEvidenceWhenRequested(t *testing.T) {
 	}
 }
 
-func TestGoalkitRuntimeTargetsRouteThroughXlibgate(t *testing.T) {
+func TestGoalcliRuntimeTargetsRouteThroughGoalcli(t *testing.T) {
 	chdir(t, repoRoot(t))
 	makefile := readText(t, "Makefile")
+	if !strings.Contains(makefile, "GOALCLI ?= go run ./cmd/goalcli") {
+		t.Fatalf("Makefile must define GOALCLI as the cmd/goalcli execution surface")
+	}
 	for _, command := range []string{
 		"goal-acceptance",
 		"goal-delivery",
@@ -525,37 +531,48 @@ func TestGoalkitRuntimeTargetsRouteThroughXlibgate(t *testing.T) {
 		if !strings.Contains(makefile, command+": require-gowork-off") {
 			t.Fatalf("Makefile target %s must require GOWORK=off", command)
 		}
-		if !strings.Contains(makefile, "$(XLIBGATE) $@ --goal-id") {
-			t.Fatalf("Makefile target %s must route through xlibgate", command)
+		if !strings.Contains(makefile, "$(GOALCLI) $@ --goal-id") {
+			t.Fatalf("Makefile target %s must route through goalcli", command)
 		}
 	}
-	if strings.Contains(makefile, "$(GOALKIT)") || strings.Contains(makefile, "goalkit goal-") {
-		t.Fatalf("Makefile must not route goalkit v0.1.0 through a standalone goalkit CLI")
+	legacyRuntimeNames := []string{
+		"$(" + "XLIB" + "GATE)",
+		"$(" + "GOAL" + "KIT)",
+		"go run ./cmd/" + "xlib" + "gate",
+		"cmd/" + "xlib" + "gate",
+		"go run ./cmd/" + "goal" + "kit",
+		"cmd/" + "goal" + "kit",
+		"release/evidence/" + "goal" + "kit",
 	}
-	if !strings.Contains(makefile, "$(XLIBGATE) $@ --goal-id \"$(GOAL_ID)\" --mode \"$(GOAL_RUNTIME_MODE)\" --json --write-evidence") {
+	for _, legacy := range legacyRuntimeNames {
+		if strings.Contains(makefile, legacy) {
+			t.Fatalf("Makefile must not route goalcli v0.1.0 through legacy authority %q", legacy)
+		}
+	}
+	if !strings.Contains(makefile, "$(GOALCLI) $@ --goal-id \"$(GOAL_ID)\" --mode \"$(GOAL_RUNTIME_MODE)\" --json --write-evidence") {
 		t.Fatalf("goal-runtime-final must explicitly request evidence writing")
 	}
 }
 
-func TestGoalkitControlPlaneDocumentsEvidenceLedgerAndCompleteMVA(t *testing.T) {
+func TestGoalcliControlPlaneDocumentsEvidenceLedgerAndCompleteMVA(t *testing.T) {
 	root := repoRoot(t)
 	chdir(t, root)
 	files := map[string][]string{
 		".agent/harness.yaml": {
-			"goalkit_v0_1_0",
-			"goalkit_mva_gates:",
+			"goalcli_v0_1_0",
+			"goalcli_mva_gates:",
 			"control_plane: Harness Runtime",
-			"executor: xlibgate",
+			"executor: goalcli",
 			"source_evidence_ledger: .agent/evidence/ledger.jsonl",
-			"generated_evidence_pack: release/evidence/goalkit/",
+			"generated_evidence_pack: release/evidence/goalcli/",
 			"blocking: true",
 		},
 		".agent/registry/runtime.yaml": {
 			"mva_status: complete",
 			"control_plane: Harness Runtime",
-			"executor: xlibgate",
+			"executor: goalcli",
 			"source_evidence_ledger: .agent/evidence/ledger.jsonl",
-			"generated_evidence_pack: release/evidence/goalkit/",
+			"generated_evidence_pack: release/evidence/goalcli/",
 		},
 		".agent/registry/commands.yaml": {
 			"goal-acceptance",
@@ -565,23 +582,23 @@ func TestGoalkitControlPlaneDocumentsEvidenceLedgerAndCompleteMVA(t *testing.T) 
 			"blocking: true",
 		},
 		".agent/command-implementation-status.yaml": {
-			"goalkit_v0_1_0_mva_blocking",
+			"goalcli_v0_1_0_mva_blocking",
 			"mva_status: complete",
 			"evidence_strength: full_mva_evidence",
 		},
 		".agent/evidence/README.md": {
 			".agent/evidence/ledger.jsonl",
-			"release/evidence/goalkit/",
+			"release/evidence/goalcli/",
 			"mva_status: complete",
 		},
-		"docs/standard/goalkit-runtime.md": {
-			"不是独立外部 CLI",
-			"xlibgate",
+		"docs/standard/goalcli-runtime.md": {
+			"不引入第二套并列执行面",
+			"cmd/goalcli",
 			"Harness Runtime",
 			".agent/evidence/ledger.jsonl",
 			"mva_status: complete",
 		},
-		"docs/plans/goalkit-v0.1.0-roadmap.md": {
+		"docs/plans/goalcli-v0.1.0-roadmap.md": {
 			"PR-4",
 			"G12-G16",
 			"MVA-blocking",
@@ -590,10 +607,10 @@ func TestGoalkitControlPlaneDocumentsEvidenceLedgerAndCompleteMVA(t *testing.T) 
 		},
 	}
 	if isStandardSourceRepo(t, root) {
-		files["docs/adr/ADR-20260603-001-goalkit-xlibgate-runtime.md"] = []string{
+		files["docs/adr/ADR-20260603-001-goalcli-runtime.md"] = []string{
 			"Accepted",
-			"拒绝 standalone `goalkit` CLI",
-			"xlibgate",
+			"拒绝第二套并列执行面",
+			"cmd/goalcli",
 			"Harness Runtime",
 		}
 	}
@@ -845,8 +862,8 @@ func TestRunGovernanceCommands(t *testing.T) {
 		}
 		if report.Command != "version" ||
 			report.Status != "passed" ||
-			!slicesContain(report.Details, "xlib-standard release v0.4.5") ||
-			!slicesContain(report.Details, "xlibgate governance runtime v2.9.3") {
+			!slicesContain(report.Details, "xlib-standard release v0.4.6") ||
+			!slicesContain(report.Details, "goalcli governance runtime v2.9.3") {
 			t.Fatalf("report = %#v; want version gate report", report)
 		}
 	})
@@ -856,9 +873,9 @@ func TestRunGovernanceCommands(t *testing.T) {
 		commandSurface := strings.Join(commandRegistryRequiredCommands(), "\n")
 		registrySurface := strings.Join(requiredCommandRegistryNeedles(), "\n")
 		files := map[string]string{
-			"docs/standard/xlibgate-cli-contract.md": "xlibgate\n" + commandSurface + "\n",
-			"contracts/xlibgate-report.schema.json":  "command status details gaps\n",
-			".agent/command-registry.yaml":           registrySurface + "\n",
+			"docs/standard/goalcli-cli-contract.md": "goalcli\n" + commandSurface + "\n",
+			"contracts/goalcli-report.schema.json":  "command status details gaps\n",
+			".agent/command-registry.yaml":          registrySurface + "\n",
 		}
 		for rel, content := range files {
 			path := filepath.Join(root, filepath.FromSlash(rel))
@@ -889,9 +906,9 @@ func TestRunGovernanceCommands(t *testing.T) {
 		fullRegistry := strings.Join(commandRegistryRequiredCommands(), "\n") + "\n"
 		fullCommandRegistry := strings.Join(requiredCommandRegistryNeedles(), "\n") + "\n"
 		files := map[string]string{
-			"docs/standard/xlibgate-cli-contract.md": strings.Replace(fullRegistry, "execution-context\n", "", 1),
-			"contracts/xlibgate-report.schema.json":  "command status details gaps\n",
-			".agent/command-registry.yaml":           fullCommandRegistry,
+			"docs/standard/goalcli-cli-contract.md": strings.Replace(fullRegistry, "execution-context\n", "", 1),
+			"contracts/goalcli-report.schema.json":  "command status details gaps\n",
+			".agent/command-registry.yaml":          fullCommandRegistry,
 		}
 		for rel, content := range files {
 			path := filepath.Join(root, filepath.FromSlash(rel))
@@ -909,7 +926,7 @@ func TestRunGovernanceCommands(t *testing.T) {
 		if got != 1 {
 			t.Fatalf("cli-contract incomplete docs exit = %d, stderr %q, stdout %q; want 1", got, stderr.String(), stdout.String())
 		}
-		if !strings.Contains(stdout.String(), "docs/standard/xlibgate-cli-contract.md missing execution-context") {
+		if !strings.Contains(stdout.String(), "docs/standard/goalcli-cli-contract.md missing execution-context") {
 			t.Fatalf("stdout = %q; want missing execution-context gap", stdout.String())
 		}
 		if !strings.Contains(stderr.String(), "cli-contract found") {
@@ -955,15 +972,15 @@ func TestRunExternalErrorPaths(t *testing.T) {
 func TestRunDoctorAllowsRenderedDownstreamWithoutSourceGoal(t *testing.T) {
 	root := t.TempDir()
 	files := map[string]string{
-		"go.mod":                                 "module github.com/ZoneCNH/kernel\n\nreplace github.com/ZoneCNH/xlib-standard => ../xlib-standard\n",
-		".agent/harness.yaml":                    "checks: [version, doctor]\n",
-		".agent/issue-registry.yaml":             issueRegistryFixture("P0-001", "P1-001", "P2-001", "CTX-001"),
-		".agent/command-registry.yaml":           "commands: [version, doctor]\n",
-		".agent/makefile-target-registry.yaml":   "targets: []\n",
-		".agent/makefile-baseline.yaml":          "targets: []\n",
-		"docs/standard/xlibgate-cli-contract.md": "xlibgate doctor\n",
-		"contracts/xlibgate-report.schema.json":  "{\"type\":\"object\"}\n",
-		"Makefile":                               "doctor:\n\tgo run ./cmd/xlibgate doctor\n",
+		"go.mod":                                "module github.com/ZoneCNH/kernel\n\nreplace github.com/ZoneCNH/xlib-standard => ../xlib-standard\n",
+		".agent/harness.yaml":                   "checks: [version, doctor]\n",
+		".agent/issue-registry.yaml":            issueRegistryFixture("P0-001", "P1-001", "P2-001", "CTX-001"),
+		".agent/command-registry.yaml":          "commands: [version, doctor]\n",
+		".agent/makefile-target-registry.yaml":  "targets: []\n",
+		".agent/makefile-baseline.yaml":         "targets: []\n",
+		"docs/standard/goalcli-cli-contract.md": "goalcli doctor\n",
+		"contracts/goalcli-report.schema.json":  "{\"type\":\"object\"}\n",
+		"Makefile":                              "doctor:\n\tgo run ./cmd/goalcli doctor\n",
 	}
 	for rel, content := range files {
 		path := filepath.Join(root, filepath.FromSlash(rel))
@@ -1104,19 +1121,19 @@ issues:
     status: implemented
     command: issue-registry
     evidence:
-      - go test ./cmd/xlibgate
+      - go test ./cmd/goalcli
   - id: P2-001
     title: implemented issue
     status: implemented
     command: issue-registry
     evidence:
-      - go test ./cmd/xlibgate
+      - go test ./cmd/goalcli
   - id: CTX-001
     title: implemented issue
     status: implemented
     command: issue-registry
     evidence:
-      - go test ./cmd/xlibgate
+      - go test ./cmd/goalcli
 `,
 		})
 		chdir(t, root)
@@ -1152,6 +1169,12 @@ func TestRunInternalGovernanceCommands(t *testing.T) {
 		{name: "doctor", args: []string{"doctor"}, wantStdout: `"status": "passed"`},
 		{name: "main guard", args: []string{"main-guard", "--context", "local_readonly"}, wantStdout: `"command": "main-guard"`},
 		{name: "worktree guard", args: []string{"worktree-guard", "--context", "local_readonly"}, wantStdout: `"command": "worktree-guard"`},
+		{name: "worktree check", args: []string{"worktree-check", "--context", "local_readonly"}, wantStdout: `"command": "worktree-check"`},
+		{name: "context check", args: []string{"context-check"}, wantStdout: `"status": "passed"`},
+		{name: "spec check", args: []string{"spec-check"}, wantStdout: `"command": "spec-check"`},
+		{name: "design check", args: []string{"design-check"}, wantStdout: `"status": "passed"`},
+		{name: "task check", args: []string{"task-check"}, wantStdout: `"status": "passed"`},
+		{name: "pr check dry-run", args: []string{"pr-check", "--context", "local_readonly", "--dry-run"}, wantStdout: `"command": "pr-check"`},
 		{name: "evidence check", args: []string{"evidence-check"}, wantStdout: `"status": "passed"`},
 		{name: "cli contract", args: []string{"cli-contract"}, wantStdout: `"command": "cli-contract"`},
 		{name: "issue registry", args: []string{"issue-registry"}, wantStdout: `"command": "issue-registry"`},
@@ -1423,7 +1446,7 @@ roles:
 	}
 }
 
-func TestGoalkitMVAGoalCommandsRequireHarnessMarkers(t *testing.T) {
+func TestGoalcliMVAGoalCommandsRequireHarnessMarkers(t *testing.T) {
 	tests := []struct {
 		command string
 		marker  string
@@ -1440,7 +1463,7 @@ func TestGoalkitMVAGoalCommandsRequireHarnessMarkers(t *testing.T) {
 		t.Run(tt.command, func(t *testing.T) {
 			root := t.TempDir()
 			writeTestFiles(t, root, map[string]string{
-				".agent/harness.yaml": "goalkit_mva_gates:\n  command: " + tt.command + "\n  status: dry_run_ready\n",
+				".agent/harness.yaml": "goalcli_mva_gates:\n  command: " + tt.command + "\n  status: dry_run_ready\n",
 			})
 			chdir(t, root)
 
@@ -1566,8 +1589,8 @@ func TestMakefileReleaseGuardsUseContextVariable(t *testing.T) {
 	text := string(content)
 
 	for _, want := range []string{
-		"$(XLIBGATE) main-guard --context $(XLIB_CONTEXT)",
-		"$(XLIBGATE) worktree-guard --context $(XLIB_CONTEXT)",
+		"$(GOALCLI) main-guard --context $(XLIB_CONTEXT)",
+		"$(GOALCLI) worktree-guard --context $(XLIB_CONTEXT)",
 		"XLIB_CONTEXT=release_verify GOWORK=off $(MAKE) context-release",
 		"$(MAKE) debt-evidence-checksum-check",
 		"GOWORK=off XLIB_CONTEXT=release_verify VERSION=\"$(VERSION)\" $(MAKE) release-final-check",
@@ -1778,7 +1801,7 @@ func issueRegistryFixture(ids ...string) string {
 		b.WriteString("    status: implemented\n")
 		b.WriteString("    command: issue-registry\n")
 		b.WriteString("    evidence:\n")
-		b.WriteString("      - go test ./cmd/xlibgate\n")
+		b.WriteString("      - go test ./cmd/goalcli\n")
 	}
 	return b.String()
 }
@@ -1816,21 +1839,21 @@ func contextProfileMakefileFixture(overrides map[string]string, releaseFinalBody
 	return b.String()
 }
 
-func writeGoalkitAuthorityFixture(t *testing.T, root string) {
+func writeGoalcliAuthorityFixture(t *testing.T, root string) {
 	t.Helper()
 	for _, path := range []string{
-		".worktree/goalkit-v0.1.0-plan.md",
-		".omx/context/goalkit-v0.1.0-team-20260603T005302Z.md",
-		"docs/standard/xlibgate-cli-contract.md",
+		".worktree/goalcli-v0.1.0-plan.md",
+		".omx/context/goalcli-v0.1.0-team-20260603T005302Z.md",
+		"docs/standard/goalcli-cli-contract.md",
 		".agent/harness.yaml",
 		".agent/command-registry.yaml",
 		".agent/registry/runtime.yaml",
 		".agent/registry/commands.yaml",
 		".agent/command-implementation-status.yaml",
 		".agent/evidence/README.md",
-		"docs/standard/goalkit-runtime.md",
-		"docs/plans/goalkit-v0.1.0-roadmap.md",
-		"docs/adr/ADR-20260603-001-goalkit-xlibgate-runtime.md",
+		"docs/standard/goalcli-runtime.md",
+		"docs/plans/goalcli-v0.1.0-roadmap.md",
+		"docs/adr/ADR-20260603-001-goalcli-runtime.md",
 		"Makefile",
 	} {
 		full := filepath.Join(root, filepath.FromSlash(path))
@@ -1843,7 +1866,7 @@ func writeGoalkitAuthorityFixture(t *testing.T, root string) {
 	}
 }
 
-func writeGoalkitPrerequisiteLedgerFixture(t *testing.T, root string, goalID string) {
+func writeGoalcliPrerequisiteLedgerFixture(t *testing.T, root string, goalID string) {
 	t.Helper()
 	for _, command := range []string{
 		"goal-acceptance",

@@ -1,16 +1,16 @@
 {
-  "schema_version": "goalkit-mva/v1",
+  "schema_version": "goalcli-mva/v1",
   "command": "goal-runtime-final",
   "status": "passed",
-  "goal_id": "GOAL-20260603-XLIB-GOALKIT-001",
+  "goal_id": "GOAL-20260603-XLIB-GOALCLI-001",
   "gate": "G12_G16_FINAL",
   "mode": "FULL",
-  "executor": "xlibgate",
+  "executor": "goalcli",
   "control_plane": "Harness Runtime",
   "blocking": true,
   "mva_status": "complete",
   "ledger_path": ".agent/evidence/ledger.jsonl",
-  "evidence_pack_path": "release/evidence/goalkit/GOAL-20260603-XLIB-GOALKIT-001.json",
+  "evidence_pack_path": "release/evidence/goalcli/GOAL-20260603-XLIB-GOALCLI-001.json",
   "gates": [
     {
       "id": "G12_ACCEPTANCE",
@@ -44,15 +44,15 @@
     }
   ],
   "details": [
-    "G12-G16 本地 contract 汇总为 goalkit v0.1.0 MVA final evidence",
-    "goalkit v0.1.0 不提供独立 CLI；xlibgate 是当前执行面",
-    "G12-G16 是 goalkit MVA evidence gates，不是全局 release blocking gates",
+    "G12-G16 本地 contract 汇总为 goalcli v0.1.0 MVA final evidence",
+    "goalcli v0.1.0 使用 cmd/goalcli 作为唯一执行面；不再保留历史并列入口",
+    "G12-G16 是 goalcli MVA evidence gates，不是全局 release blocking gates",
     "root plan 是 authority；完成状态由本地 authority 校验和 evidence 写入共同证明"
   ],
   "evidence": [
-    "fixture_id=GOAL-20260603-XLIB-GOALKIT-001",
+    "fixture_id=GOAL-20260603-XLIB-GOALCLI-001",
     "source_evidence_ledger=.agent/evidence/ledger.jsonl",
-    "generated_evidence_pack=release/evidence/goalkit/",
+    "generated_evidence_pack=release/evidence/goalcli/",
     "runtime_logic=internal/goalruntime",
     "requires=goal-acceptance",
     "requires=goal-delivery",
@@ -61,18 +61,18 @@
     "requires=goal-certify"
   ],
   "authority_paths": [
-    ".worktree/goalkit-v0.1.0-plan.md",
-    ".omx/context/goalkit-v0.1.0-team-20260603T005302Z.md",
-    "docs/standard/xlibgate-cli-contract.md",
+    ".worktree/goalcli-v0.1.0-plan.md",
+    ".omx/context/goalcli-v0.1.0-team-20260603T005302Z.md",
+    "docs/standard/goalcli-cli-contract.md",
     ".agent/harness.yaml",
     ".agent/command-registry.yaml",
     ".agent/registry/runtime.yaml",
     ".agent/registry/commands.yaml",
     ".agent/command-implementation-status.yaml",
     ".agent/evidence/README.md",
-    "docs/standard/goalkit-runtime.md",
-    "docs/plans/goalkit-v0.1.0-roadmap.md",
-    "docs/adr/ADR-20260603-001-goalkit-xlibgate-runtime.md",
+    "docs/standard/goalcli-runtime.md",
+    "docs/plans/goalcli-v0.1.0-roadmap.md",
+    "docs/adr/ADR-20260603-001-goalcli-runtime.md",
     "Makefile"
   ]
 }

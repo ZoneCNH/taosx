@@ -14,7 +14,7 @@
 
 ### **[P1]** `RULE-REGISTRY-001`：所有 Goal 必须登记
 
-<sub>level: P1 · status: active · enforced_by: `xlibgate command-registry` · exit: 1 · source: §33 L1723</sub>
+<sub>level: P1 · status: active · enforced_by: `goalcli command-registry` · exit: 1 · source: §33 L1723</sub>
 
 必须存在：
 
@@ -40,7 +40,7 @@ goals:
 
 ### **[P1]** `RULE-REGISTRY-002`：Goal 状态必须同步
 
-<sub>level: P1 · status: active · enforced_by: `xlibgate command-registry` · exit: 1 · source: §33 L1749</sub>
+<sub>level: P1 · status: active · enforced_by: `goalcli command-registry` · exit: 1 · source: §33 L1749</sub>
 
 当 Goal 进入新阶段，必须同步：
 
@@ -98,7 +98,7 @@ rollback option
 
 ### **[P1]** `RULE-SCHEMA-001`：Goal 核心对象必须有 Schema
 
-<sub>level: P1 · status: active · enforced_by: `xlibgate policy-schema` · exit: 6 · source: §55 L2592</sub>
+<sub>level: P1 · status: active · enforced_by: `goalcli policy-schema` · exit: 6 · source: §55 L2592</sub>
 
 必须为以下对象定义 JSON Schema / YAML Schema：
 
@@ -136,12 +136,12 @@ Patch
 
 ### **[P1]** `RULE-SCHEMA-002`：没有通过 Schema 校验的对象不得进入下一阶段
 
-<sub>level: P1 · status: active · enforced_by: `xlibgate policy-schema` · exit: 6 · source: §55 L2630</sub>
+<sub>level: P1 · status: active · enforced_by: `goalcli policy-schema` · exit: 6 · source: §55 L2630</sub>
 
 例如：
 
 ```bash
-goalkit schema validate .agent/goals/GOAL-20260603-001/tasks.yaml
+goalcli schema validate .agent/goals/GOAL-20260603-001/tasks.yaml
 ```
 
 失败则：
@@ -159,7 +159,7 @@ Goal state = INCONSISTENT_STATE
 
 ### **[P1]** `RULE-GOALPACK-001`：每个 Goal 必须形成 Goal Pack
 
-<sub>level: P1 · status: active · enforced_by: `xlibgate pack-gate` · exit: 1 · source: §56 L2651</sub>
+<sub>level: P1 · status: active · enforced_by: `goalcli pack-gate` · exit: 1 · source: §56 L2651</sub>
 
 Goal Pack 是一个 Goal 的完整事实包。
 
@@ -187,7 +187,7 @@ Goal Pack 是一个 Goal 的完整事实包。
 
 ### **[P1]** `RULE-GOALPACK-002`：Goal Pack 必须可离线审计
 
-<sub>level: P1 · status: active · enforced_by: `xlibgate pack-gate` · exit: 1 · source: §56 L2679</sub>
+<sub>level: P1 · status: active · enforced_by: `goalcli pack-gate` · exit: 1 · source: §56 L2679</sub>
 
 即使 GitHub、CI、外部系统不可用，仍然能从 Goal Pack 看出：
 
@@ -209,7 +209,7 @@ Goal Pack 是一个 Goal 的完整事实包。
 
 ### **[P1]** `RULE-FILE-001`：Task 必须声明预计变更文件
 
-<sub>level: P1 · status: indexed · enforced_by: `（待机器化）` · source: §61 L2914</sub>
+<sub>level: P1 · status: active · enforced_by: `goalcli runtime-file-ownership` · exit: 1 · source: §61 L2914</sub>
 
 Task 中必须包含：
 
@@ -222,7 +222,7 @@ files_to_change:
 
 ### **[P1]** `RULE-FILE-002`：实际变更超出范围必须解释
 
-<sub>level: P1 · status: indexed · enforced_by: `（待机器化）` · source: §61 L2927</sub>
+<sub>level: P1 · status: active · enforced_by: `goalcli runtime-file-ownership` · exit: 1 · source: §61 L2927</sub>
 
 如果实际变更文件不在 `files_to_change` 中，必须：
 
@@ -241,7 +241,7 @@ files_to_change:
 
 ### **[P1]** `RULE-DOC-001`：禁止无边界文档膨胀
 
-<sub>level: P1 · status: active · enforced_by: `xlibgate docs-check` · exit: 1 · source: §63 L2989</sub>
+<sub>level: P1 · status: active · enforced_by: `goalcli docs-check` · exit: 1 · source: §63 L2989</sub>
 
 任何新增文档必须回答：
 
@@ -255,7 +255,7 @@ files_to_change:
 
 ### **[P1]** `RULE-DOC-002`：文档必须分类
 
-<sub>level: P1 · status: active · enforced_by: `xlibgate docs-check` · exit: 1 · source: §63 L3003</sub>
+<sub>level: P1 · status: active · enforced_by: `goalcli docs-check` · exit: 1 · source: §63 L3003</sub>
 
 推荐分类：
 
@@ -274,7 +274,7 @@ files_to_change:
 
 ### **[P1]** `RULE-DOC-003`：长期规则文档必须有 SSOT
 
-<sub>level: P1 · status: active · enforced_by: `xlibgate docs-check` · exit: 1 · source: §63 L3022</sub>
+<sub>level: P1 · status: active · enforced_by: `goalcli docs-check` · exit: 1 · source: §63 L3022</sub>
 
 如果多个文档描述同一规则，必须指定唯一事实源：
 
@@ -322,7 +322,7 @@ NEEDS_HUMAN_APPROVAL
 
 ### **[P1]** `RULE-TEMPLATE-001`：规则变更必须同步模板
 
-<sub>level: P1 · status: indexed · enforced_by: `（待机器化）` · source: §74 L3339</sub>
+<sub>level: P1 · status: active · enforced_by: `goalcli docs-check` · exit: 1 · source: §74 L3339</sub>
 
 例如新增 Evidence 字段后必须同步：
 
@@ -336,7 +336,7 @@ retrospective-template.md
 
 ### **[P1]** `RULE-TEMPLATE-002`：模板必须有版本号
 
-<sub>level: P1 · status: indexed · enforced_by: `（待机器化）` · source: §74 L3353</sub>
+<sub>level: P1 · status: active · enforced_by: `goalcli docs-check` · exit: 1 · source: §74 L3353</sub>
 
 ```yaml
 template_id: TEMPLATE-PR-v1.2
@@ -352,7 +352,7 @@ compatible_rules:
 
 ### **[P1]** `RULE-GOLDEN-001`：必须维护一个最小成功样例
 
-<sub>level: P1 · status: indexed · enforced_by: `（待机器化）` · source: §76 L3400</sub>
+<sub>level: P1 · status: active · enforced_by: `goalcli governance-fixture-test` · exit: 1 · source: §76 L3400</sub>
 
 Golden Path 是标准成功路径。
 
@@ -374,7 +374,7 @@ Retrospective
 
 ### **[P1]** `RULE-GOLDEN-002`：每次规则升级都必须跑 Golden Test
 
-<sub>level: P1 · status: indexed · enforced_by: `（待机器化）` · source: §76 L3422</sub>
+<sub>level: P1 · status: active · enforced_by: `goalcli governance-fixture-test` · exit: 1 · source: §76 L3422</sub>
 
 防止规则升级把正常流程误杀。
 
@@ -384,7 +384,7 @@ Retrospective
 
 ### **[P1]** `RULE-DEBT-001`：结构债必须可检测
 
-<sub>level: P1 · status: active · enforced_by: `xlibgate debt` · exit: 1 · source: §105 L4468</sub>
+<sub>level: P1 · status: active · enforced_by: `goalcli debt` · exit: 1 · source: §105 L4468</sub>
 
 结构债包括：
 
@@ -400,7 +400,7 @@ Evidence 缺失
 
 ### **[P1]** `RULE-DEBT-002`：结构债必须进入 Debt Registry
 
-<sub>level: P1 · status: active · enforced_by: `xlibgate debt` · exit: 1 · source: §105 L4484</sub>
+<sub>level: P1 · status: active · enforced_by: `goalcli debt` · exit: 1 · source: §105 L4484</sub>
 
 ```yaml
 debt_id: DEBT-20260603-001
@@ -417,7 +417,7 @@ fix_issue: "#166"
 
 ### **[P1]** `RULE-SCHEMA-MIN-001`：Goal Schema 最小字段
 
-<sub>level: P1 · status: active · enforced_by: `xlibgate policy-schema` · exit: 6 · source: §122 L5243</sub>
+<sub>level: P1 · status: active · enforced_by: `goalcli policy-schema` · exit: 6 · source: §122 L5243</sub>
 
 ```yaml
 goal_id:
@@ -436,7 +436,7 @@ updated_at:
 
 ### **[P1]** `RULE-SCHEMA-MIN-002`：Task Schema 最小字段
 
-<sub>level: P1 · status: active · enforced_by: `xlibgate policy-schema` · exit: 6 · source: §122 L5262</sub>
+<sub>level: P1 · status: active · enforced_by: `goalcli policy-schema` · exit: 6 · source: §122 L5262</sub>
 
 ```yaml
 task_id:
@@ -454,7 +454,7 @@ status:
 
 ### **[P1]** `RULE-SCHEMA-MIN-003`：Evidence Schema 最小字段
 
-<sub>level: P1 · status: active · enforced_by: `xlibgate policy-schema` · exit: 6 · source: §122 L5280</sub>
+<sub>level: P1 · status: active · enforced_by: `goalcli policy-schema` · exit: 6 · source: §122 L5280</sub>
 
 ```yaml
 evidence_id:
@@ -476,7 +476,7 @@ timestamp:
 
 ### **[P1]** `RULE-OWNERSHIP-001`：关键文件必须有 Owner
 
-<sub>level: P1 · status: indexed · enforced_by: `（待机器化）` · source: §147 L6084</sub>
+<sub>level: P1 · status: active · enforced_by: `goalcli runtime-file-ownership` · exit: 1 · source: §147 L6084</sub>
 
 建议新增：
 
@@ -500,14 +500,14 @@ owners:
     owner: "harness"
     review_required: true
 
-  - path: "goalkit.yaml"
+  - path: "goalcli.yaml"
     owner: "runtime"
     review_required: true
 ```
 
 ### **[P1]** `RULE-OWNERSHIP-002`：修改关键文件必须触发 Review
 
-<sub>level: P1 · status: indexed · enforced_by: `（待机器化）` · source: §147 L6115</sub>
+<sub>level: P1 · status: active · enforced_by: `goalcli runtime-file-ownership` · exit: 1 · source: §147 L6115</sub>
 
 关键路径：
 
@@ -517,7 +517,7 @@ owners:
 .agent/harness/
 .github/workflows/
 Makefile
-goalkit.yaml
+goalcli.yaml
 scripts/harness/
 CONSTITUTION.md
 ```
@@ -536,7 +536,7 @@ requires: ci-review
 
 ### **[P1]** `RULE-CHANGE-TYPE-001`：每个 Task 必须声明变更类型
 
-<sub>level: P1 · status: indexed · enforced_by: `（待机器化）` · source: §148 L6142</sub>
+<sub>level: P1 · status: active · enforced_by: `goalcli traceability-check` · exit: 9 · source: §148 L6142</sub>
 
 允许类型：
 
@@ -557,7 +557,7 @@ security
 
 ### **[P1]** `RULE-CHANGE-TYPE-002`：不同类型触发不同 Gate
 
-<sub>level: P1 · status: indexed · enforced_by: `（待机器化）` · source: §148 L6163</sub>
+<sub>level: P1 · status: active · enforced_by: `goalcli traceability-check` · exit: 9 · source: §148 L6163</sub>
 
 | Change Type | Required Gate                         |
 | ----------- | ------------------------------------- |
@@ -567,7 +567,7 @@ security
 | harness     | harness-test / violation-fixture-test |
 | ci          | ci-dry-run / workflow-check           |
 | template    | template-check                        |
-| automation  | goalkit-test                          |
+| automation  | goalcli-test                          |
 | code        | lint / test                           |
 | release     | release-check                         |
 | security    | secret-check / security-review        |
@@ -579,7 +579,7 @@ security
 
 ### **[P1]** `RULE-IMPACT-001`：P0/P1 变更必须有影响分析
 
-<sub>level: P1 · status: indexed · enforced_by: `（待机器化）` · source: §149 L6183</sub>
+<sub>level: P1 · status: active · enforced_by: `goalcli standard-impact-check` · exit: 1 · source: §149 L6183</sub>
 
 必须回答：
 
@@ -596,7 +596,7 @@ security
 
 ### **[P1]** `RULE-IMPACT-002`：影响分析必须进入 PR
 
-<sub>level: P1 · status: indexed · enforced_by: `（待机器化）` · source: §149 L6200</sub>
+<sub>level: P1 · status: active · enforced_by: `goalcli standard-impact-check` · exit: 1 · source: §149 L6200</sub>
 
 PR 中必须有：
 
@@ -608,13 +608,13 @@ PR 中必须有：
 
 ### **[P1]** `RULE-COMPAT-001`：规则升级必须兼容旧 Goal Pack
 
-<sub>level: P1 · status: indexed · enforced_by: `（待机器化）` · source: §150 L6221</sub>
+<sub>level: P1 · status: active · enforced_by: `goalcli policy-schema` · exit: 6 · source: §150 L6221</sub>
 
-除非明确标记 breaking，否则新版本 goalkit 必须能读取旧版本 Goal Pack。
+除非明确标记 breaking，否则新版本 goalcli 必须能读取旧版本 Goal Pack。
 
 ### **[P1]** `RULE-COMPAT-002`：Breaking 规则必须有迁移计划
 
-<sub>level: P1 · status: indexed · enforced_by: `（待机器化）` · source: §150 L6227</sub>
+<sub>level: P1 · status: active · enforced_by: `goalcli policy-schema` · exit: 6 · source: §150 L6227</sub>
 
 Breaking 规则包括：
 
@@ -641,7 +641,7 @@ affected repos
 
 ### **[P1]** `RULE-MIGRATION-001`：结构性变更必须有迁移脚本
 
-<sub>level: P1 · status: indexed · enforced_by: `（待机器化）` · source: §151 L6252</sub>
+<sub>level: P1 · status: active · enforced_by: `goalcli policy-schema` · exit: 6 · source: §151 L6252</sub>
 
 目录：
 
@@ -654,11 +654,11 @@ affected repos
 
 ### **[P1]** `RULE-MIGRATION-002`：迁移必须可 dry-run
 
-<sub>level: P1 · status: indexed · enforced_by: `（待机器化）` · source: §151 L6265</sub>
+<sub>level: P1 · status: active · enforced_by: `goalcli policy-schema` · exit: 6 · source: §151 L6265</sub>
 
 ```bash
-goalkit migrate --from rules-v1.4 --to rules-v1.5 --dry-run
-goalkit migrate --from rules-v1.4 --to rules-v1.5 --apply
+goalcli migrate --from rules-v1.4 --to rules-v1.5 --dry-run
+goalcli migrate --from rules-v1.4 --to rules-v1.5 --apply
 ```
 
 ---
@@ -667,7 +667,7 @@ goalkit migrate --from rules-v1.4 --to rules-v1.5 --apply
 
 ### **[P1]** `RULE-REGISTRY-CONSISTENCY-001`：Registry 之间必须一致
 
-<sub>level: P1 · status: indexed · enforced_by: `（待机器化）` · source: §152 L6276</sub>
+<sub>level: P1 · status: active · enforced_by: `goalcli command-registry` · exit: 1 · source: §152 L6276</sub>
 
 必须检查：
 
@@ -681,7 +681,7 @@ adoption.yaml 中的下游状态有证据
 
 ### **[P1]** `RULE-REGISTRY-CONSISTENCY-002`：Registry 漂移必须阻断 Release
 
-<sub>level: P1 · status: indexed · enforced_by: `（待机器化）` · source: §152 L6290</sub>
+<sub>level: P1 · status: active · enforced_by: `goalcli command-registry` · exit: 1 · source: §152 L6290</sub>
 
 ```bash
 make registry-check
@@ -700,7 +700,7 @@ Release blocked
 
 ### **[P1]** `RULE-GOAL-TEST-001`：Goal Runtime 自身也需要测试金字塔
 
-<sub>level: P1 · status: indexed · enforced_by: `（待机器化）` · source: §154 L6347</sub>
+<sub>level: P1 · status: active · enforced_by: `goalcli governance-fixture-test` · exit: 1 · source: §154 L6347</sub>
 
 ```text
 Unit Tests:
@@ -731,7 +731,7 @@ End-to-End Tests:
 
 ### **[P1]** `RULE-GOAL-TEST-002`：每个新增 Gate 必须有正反样例
 
-<sub>level: P1 · status: indexed · enforced_by: `（待机器化）` · source: §154 L6378</sub>
+<sub>level: P1 · status: active · enforced_by: `goalcli governance-fixture-test` · exit: 1 · source: §154 L6378</sub>
 
 新增 Gate 时必须同时增加：
 
@@ -747,7 +747,7 @@ expected report
 
 ### **[P1]** `RULE-GOLDEN-PACK-001`：Golden Pack 是系统最小正确样例
 
-<sub>level: P1 · status: indexed · enforced_by: `（待机器化）` · source: §155 L6392</sub>
+<sub>level: P1 · status: active · enforced_by: `goalcli pack-gate` · exit: 1 · source: §155 L6392</sub>
 
 目录：
 
@@ -769,12 +769,12 @@ retrospective.md
 
 ### **[P1]** `RULE-GOLDEN-PACK-002`：Golden Pack 必须进入 CI
 
-<sub>level: P1 · status: indexed · enforced_by: `（待机器化）` · source: §155 L6414</sub>
+<sub>level: P1 · status: active · enforced_by: `goalcli pack-gate` · exit: 1 · source: §155 L6414</sub>
 
 CI 必须跑：
 
 ```bash
-goalkit audit goal --fixture .agent/harness/fixtures/golden/minimal-goal-pack
+goalcli audit goal --fixture .agent/harness/fixtures/golden/minimal-goal-pack
 ```
 
 ---
@@ -783,7 +783,7 @@ goalkit audit goal --fixture .agent/harness/fixtures/golden/minimal-goal-pack
 
 ### **[P1]** `RULE-VIOLATION-FIXTURE-001`：每个 P0 规则必须有违规样例
 
-<sub>level: P1 · status: indexed · enforced_by: `（待机器化）` · source: §156 L6426</sub>
+<sub>level: P1 · status: active · enforced_by: `goalcli governance-fixture-test` · exit: 1 · source: §156 L6426</sub>
 
 至少：
 
@@ -798,7 +798,7 @@ invalid-schema/
 
 ### **[P1]** `RULE-VIOLATION-FIXTURE-002`：违规样例必须断言失败原因
 
-<sub>level: P1 · status: indexed · enforced_by: `（待机器化）` · source: §156 L6441</sub>
+<sub>level: P1 · status: active · enforced_by: `goalcli governance-fixture-test` · exit: 1 · source: §156 L6441</sub>
 
 每个 violation fixture 必须定义：
 
@@ -843,7 +843,7 @@ new patch release
 
 ### **[P1]** `RULE-RULE-BLOAT-001`：新增规则必须给出机器化路径
 
-<sub>level: P1 · status: indexed · enforced_by: `（待机器化）` · source: §183 L7473</sub>
+<sub>level: P1 · status: active · enforced_by: `goalcli docs-check` · exit: 1 · source: §183 L7473</sub>
 
 新增 P0 / P1 规则必须回答：
 
@@ -860,7 +860,7 @@ new patch release
 
 ### **[P1]** `RULE-RULE-BLOAT-002`：规则必须定期清理
 
-<sub>level: P1 · status: indexed · enforced_by: `（待机器化）` · source: §183 L7490</sub>
+<sub>level: P1 · status: active · enforced_by: `goalcli docs-check` · exit: 1 · source: §183 L7490</sub>
 
 每个版本周期必须检查：
 
@@ -885,7 +885,7 @@ rule-prune-report.md
 
 ### **[P1]** `RULE-DOC-DEBT-001`：文档重复即债务
 
-<sub>level: P1 · status: indexed · enforced_by: `（待机器化）` · source: §184 L7513</sub>
+<sub>level: P1 · status: active · enforced_by: `goalcli debt` · exit: 1 · source: §184 L7513</sub>
 
 当同一事实出现在 3 个以上文档中，必须抽取 SSOT。
 
@@ -905,7 +905,7 @@ pr-template.md
 
 ### **[P1]** `RULE-DOC-DEBT-002`：文档必须有生命周期
 
-<sub>level: P1 · status: indexed · enforced_by: `（待机器化）` · source: §184 L7533</sub>
+<sub>level: P1 · status: active · enforced_by: `goalcli debt` · exit: 1 · source: §184 L7533</sub>
 
 每个长期文档建议包含：
 
@@ -923,7 +923,7 @@ related_rules:
 
 ### **[P1]** `RULE-REGISTRY-LOCK-001`：Registry 更新必须加锁
 
-<sub>level: P1 · status: indexed · enforced_by: `（待机器化）` · source: §185 L7549</sub>
+<sub>level: P1 · status: active · enforced_by: `goalcli command-registry` · exit: 1 · source: §185 L7549</sub>
 
 修改以下文件时必须持有 lock：
 
@@ -937,7 +937,7 @@ related_rules:
 
 ### **[P1]** `RULE-REGISTRY-LOCK-002`：锁超时必须可恢复
 
-<sub>level: P1 · status: indexed · enforced_by: `（待机器化）` · source: §185 L7563</sub>
+<sub>level: P1 · status: active · enforced_by: `goalcli command-registry` · exit: 1 · source: §185 L7563</sub>
 
 锁文件必须有：
 
@@ -952,7 +952,7 @@ pid:
 超时后：
 
 ```bash
-goalkit lock recover
+goalcli lock recover
 ```
 
 ---
@@ -961,7 +961,7 @@ goalkit lock recover
 
 ### **[P1]** `RULE-COMPAT-MATRIX-001`：规则版本必须有兼容矩阵
 
-<sub>level: P1 · status: indexed · enforced_by: `（待机器化）` · source: §188 L7656</sub>
+<sub>level: P1 · status: active · enforced_by: `goalcli policy-schema` · exit: 6 · source: §188 L7656</sub>
 
 示例：
 
@@ -970,7 +970,7 @@ rules-v1.6
 compatible:
   harness-v0.1.x
   templates-v0.2.x
-  goalkit-v0.1.x
+  goalcli-v0.1.x
 requires:
   schema-v0.1
 breaking:
@@ -979,7 +979,7 @@ breaking:
 
 ### **[P1]** `RULE-COMPAT-MATRIX-002`：不兼容必须阻断 adoption
 
-<sub>level: P1 · status: indexed · enforced_by: `（待机器化）` · source: §188 L7674</sub>
+<sub>level: P1 · status: active · enforced_by: `goalcli policy-schema` · exit: 6 · source: §188 L7674</sub>
 
 如果下游：
 
@@ -999,7 +999,7 @@ adoption-check failed
 
 ### **[P1]** `RULE-ORPHAN-001`：禁止孤儿对象
 
-<sub>level: P1 · status: indexed · enforced_by: `（待机器化）` · source: §197 L7919</sub>
+<sub>level: P1 · status: active · enforced_by: `goalcli goal-runtime` · exit: 1 · source: §197 L7919</sub>
 
 以下对象不得孤立存在：
 
@@ -1015,7 +1015,7 @@ adoption-check failed
 
 ### **[P1]** `RULE-ORPHAN-002`：orphan-check 必须进入 CI
 
-<sub>level: P1 · status: indexed · enforced_by: `（待机器化）` · source: §197 L7935</sub>
+<sub>level: P1 · status: active · enforced_by: `goalcli goal-runtime` · exit: 1 · source: §197 L7935</sub>
 
 ```bash
 make orphan-check
@@ -1027,7 +1027,7 @@ make orphan-check
 
 ### **[P1]** `RULE-COVERAGE-001`：P0/P1 规则必须有覆盖率
 
-<sub>level: P1 · status: indexed · enforced_by: `（待机器化）` · source: §210 L8325</sub>
+<sub>level: P1 · status: active · enforced_by: `goalcli traceability-check` · exit: 9 · source: §210 L8325</sub>
 
 计算：
 
@@ -1044,7 +1044,7 @@ P1 Rule Coverage >= 90%
 
 ### **[P1]** `RULE-COVERAGE-002`：无覆盖规则必须降级
 
-<sub>level: P1 · status: indexed · enforced_by: `（待机器化）` · source: §210 L8342</sub>
+<sub>level: P1 · status: active · enforced_by: `goalcli traceability-check` · exit: 9 · source: §210 L8342</sub>
 
 如果规则无法机器化：
 
@@ -1060,7 +1060,7 @@ P1 Rule Coverage >= 90%
 
 ### **[P1]** `RULE-SUNSET-001`：规则必须允许退役
 
-<sub>level: P1 · status: indexed · enforced_by: `（待机器化）` · source: §227 L8845</sub>
+<sub>level: P1 · status: active · enforced_by: `goalcli policy-schema` · exit: 6 · source: §227 L8845</sub>
 
 退役流程：
 
@@ -1075,7 +1075,7 @@ archive rule
 
 ### **[P1]** `RULE-SUNSET-002`：无执行价值规则必须退役
 
-<sub>level: P1 · status: indexed · enforced_by: `（待机器化）` · source: §227 L8860</sub>
+<sub>level: P1 · status: active · enforced_by: `goalcli policy-schema` · exit: 6 · source: §227 L8860</sub>
 
 满足任一条件：
 
@@ -1095,7 +1095,7 @@ archive rule
 
 ### **[P1]** `RULE-COMPAT-GUARD-001`：下游兼容性失败不得阻断 xlib-standard 内部发布
 
-<sub>level: P1 · status: indexed · enforced_by: `（待机器化）` · source: §231 L8961</sub>
+<sub>level: P1 · status: active · enforced_by: `goalcli downstream-adoption` · exit: 1 · source: §231 L8961</sub>
 
 但必须限制发布通道：
 
@@ -1106,7 +1106,7 @@ downstream promotion blocked
 
 ### **[P1]** `RULE-COMPAT-GUARD-002`：Breaking Rule 必须分阶段推进
 
-<sub>level: P1 · status: indexed · enforced_by: `（待机器化）` · source: §231 L8972</sub>
+<sub>level: P1 · status: active · enforced_by: `goalcli downstream-adoption` · exit: 1 · source: §231 L8972</sub>
 
 ```text
 warn-only

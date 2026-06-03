@@ -101,7 +101,7 @@ func TestMetricsContractDocumentsPublicConstants(t *testing.T) {
 
 func TestGoalRuntimeSchemasAreValidJSON(t *testing.T) {
 	for _, path := range []string{
-		"xlibgate-report.schema.json",
+		"goalcli-report.schema.json",
 		"issue-registry.schema.json",
 		"command-registry.schema.json",
 		"execution-context.schema.json",

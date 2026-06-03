@@ -5,7 +5,7 @@ scope:
   source: /home/xlib-standard/.worktree/patch.md
   acceptance_command: "GOWORK=off XLIB_CONTEXT=ci_pull_request make governance-check"
   optional_commands:
-    - "GOWORK=off go test ./cmd/xlibgate ./contracts"
+    - "GOWORK=off go test ./cmd/goalcli ./contracts"
   summary: "first-PR/MVA 只建立治理事实分层，不实现 release runtime 或 downstream migration-wave。"
   excludes:
     - release_manifest_cutover

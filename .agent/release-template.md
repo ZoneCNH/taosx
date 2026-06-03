@@ -12,7 +12,7 @@
 ## 必需 Evidence
 
 - [ ] `GOWORK=off make release-check`
-- [ ] `go run ./cmd/xlibgate score --min 9.8`
+- [ ] `go run ./cmd/goalcli score --min 9.8`
 - [ ] `GOWORK=off make release-final-check`
 - [ ] `GOWORK=off make release-preflight VERSION=<version>`
 - [ ] `release/manifest/latest.json` 已生成并完成校验

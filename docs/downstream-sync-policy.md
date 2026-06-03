@@ -10,7 +10,7 @@
 | --- | --- | --- |
 | Standard Source | `xlib-standard` | 定义标准、边界、gate、Evidence 和下游同步规则 |
 | Go Reference Template | `xlib-standard` | 提供可渲染模板和参考实现 |
-| Generator | `scripts/render_template.sh` / `cmd/xlibgate integration` | 把模板渲染为具体基础库 |
+| Generator | `scripts/render_template.sh` / `cmd/goalcli integration` | 把模板渲染为具体基础库 |
 | L0 代表下游 | `kernel` | 第一优先级同步目标，验证最小基础库形态 |
 | L1 基础库 | `configx`、`observex`、`testkitx` | 继承 L0 标准并提供基础能力 |
 | L2 基础库 | `postgresx`、`redisx`、`kafkax`、`taosx`、`ossx`、`clickhousex` | 在 L1 能力上提供具体基础设施适配 |

@@ -19,12 +19,12 @@
 XLIB_CONTEXT=release_verify GOWORK=off make release-check
 ```
 
-`GOWORK=off` 用于证明模板不依赖父级 workspace。Makefile 的 gate 入口统一通过 `cmd/xlibgate` 调度；shell 脚本仍保留为兼容实现层，供本地排障和旧自动化复用。
+`GOWORK=off` 用于证明模板不依赖父级 workspace。Makefile 的 gate 入口统一通过 `cmd/goalcli` 调度；shell 脚本仍保留为兼容实现层，供本地排障和旧自动化复用。
 
 Full Goal Runtime v3.1 的评分入口是：
 
 ```bash
-GOWORK=off go run ./cmd/xlibgate score --min 9.8
+GOWORK=off go run ./cmd/goalcli score --min 9.8
 ```
 
 CI 和 release workflow 必须在 release gate 后执行该评分，防止 Makefile、CI、文档和下游 integration 的契约漂移。
@@ -40,7 +40,7 @@ XLIB_CONTEXT=release_verify GOWORK=off make release-final-check
 打 tag 前推荐使用 release preflight：
 
 ```bash
-XLIB_CONTEXT=release_verify GOWORK=off make release-preflight VERSION=v0.4.5
+XLIB_CONTEXT=release_verify GOWORK=off make release-preflight VERSION=v0.4.6
 ```
 
 `release-preflight` 会先检查版本号、当前分支、工作区洁净状态、`main` 与 `origin/main` 是否一致、目标 tag 是否已存在、`CHANGELOG.md` 是否包含目标版本，以及 `golangci-lint` / `govulncheck` 是否已安装；随后以 `GOWORK=off` 和 `XLIB_CONTEXT=release_verify` 运行 `release-final-check`。tag 应在该入口通过后再创建和推送。
@@ -130,7 +130,7 @@ Extended Evidence 推荐额外记录：
 
 `source_digest` 基于 `git ls-files` 中的受跟踪文件内容计算；`contracts` 固定记录核心 contract 文件的 SHA256；`dependencies` 来自 `go list -m -json all`；`tools` 记录 Go、`golangci-lint` 和 `govulncheck` 的版本或可用状态。这些字段由 `internal/tools/releasemanifest` 生成并校验，不再由 shell 拼接 JSON。
 
-`make integration` 会通过 `cmd/xlibgate integration` 调用 `scripts/render_template.sh`，生成临时 `kernel` 和 `corekit` 两个下游库，并对每个生成目录执行：
+`make integration` 会通过 `cmd/goalcli integration` 调用 `scripts/render_template.sh`，生成临时 `kernel` 和 `corekit` 两个下游库，并对每个生成目录执行：
 
 - 模块路径、包目录和旧模板标识扫描。
 - `GOWORK=off go test ./...`
@@ -154,11 +154,11 @@ Extended Evidence 推荐额外记录：
 发布分数是 release gate 的显式合同：
 
 ```bash
-go run ./cmd/xlibgate score --min 9.8
+go run ./cmd/goalcli score --min 9.8
 ```
 
 `release/manifest/latest.json` 必须记录 `score` 与 `workflow` 字段。`workflow_run_id`、`artifact_name`、`artifact_url` 用来把本地 manifest 与 GitHub Actions 上传的 `release-manifest-<workflow-run-id>` artifact 对齐；本地运行时允许使用 `local:*` artifact URL。`release-final-check` 会在 clean tree 要求之外校验 manifest 内的 score threshold。
 
 ## Debt evidence
 
-Release checks generate debt evidence with `make debt-evidence` before manifest generation. `release-final-check` enforces `xlibgate debt --mode enforce --min-score 9.8` and release evidence verification validates the manifest `debt` block. Generated `release/debt/*` artifacts are not committed.
+Release checks generate debt evidence with `make debt-evidence` before manifest generation. `release-final-check` enforces `goalcli debt --mode enforce --min-score 9.8` and release evidence verification validates the manifest `debt` block. Generated `release/debt/*` artifacts are not committed.

@@ -56,13 +56,13 @@ required_gates:
     purpose: "validates DONE-with-evidence and artifact policy"
   - id: cli_contract
     command: "GOWORK=off make cli-contract"
-    purpose: "validates xlibgate CLI contract and report schema"
+    purpose: "validates goalcli CLI contract and report schema"
   - id: issue_registry
     command: "GOWORK=off make issue-registry"
     purpose: "validates issue registry for P0/P1/P2 traceability"
   - id: command_registry
     command: "GOWORK=off make command-registry"
-    purpose: "validates command registry for xlibgate gates"
+    purpose: "validates command registry for goalcli gates"
   - id: makefile_baseline
     command: "GOWORK=off make makefile-baseline"
     purpose: "validates required Makefile target matrix"
@@ -79,14 +79,14 @@ required_gates:
     command: "make integration"
     purpose: "generator 和 downstream smoke"
   - id: score_check
-    command: "go run ./cmd/xlibgate score --min 9.8"
+    command: "go run ./cmd/goalcli score --min 9.8"
     purpose: "Release Score 达到 9.8 基准"
   - id: evidence
     command: "CHECK_STATUS=passed GOWORK=off make evidence"
     purpose: "generate release manifest"
   - id: version
     command: "GOWORK=off make version"
-    purpose: "xlibgate version contract"
+    purpose: "goalcli version contract"
   - id: doctor
     command: "GOWORK=off make doctor"
     purpose: "runtime preflight checks"
@@ -113,37 +113,37 @@ extended_gates:
     command: "GOWORK=off make ci-extended"
   - id: release_check_extended
     command: "GOWORK=off make release-check-extended"
-  - id: goalkit_g12_acceptance
-    command: "GOAL_ID=GOAL-20260603-XLIB-GOALKIT-001 GOWORK=off make goal-acceptance"
-  - id: goalkit_g13_delivery
-    command: "GOAL_ID=GOAL-20260603-XLIB-GOALKIT-001 GOWORK=off make goal-delivery"
-  - id: goalkit_g14_handover
-    command: "GOAL_ID=GOAL-20260603-XLIB-GOALKIT-001 GOWORK=off make goal-handover"
-  - id: goalkit_g15a_downstream_adoption
-    command: "GOAL_ID=GOAL-20260603-XLIB-GOALKIT-001 GOWORK=off make goal-downstream-adoption"
-  - id: goalkit_g15b_certify
-    command: "GOAL_ID=GOAL-20260603-XLIB-GOALKIT-001 GOWORK=off make goal-certify"
+  - id: goalcli_g12_acceptance
+    command: "GOAL_ID=GOAL-20260603-XLIB-GOALCLI-001 GOWORK=off make goal-acceptance"
+  - id: goalcli_g13_delivery
+    command: "GOAL_ID=GOAL-20260603-XLIB-GOALCLI-001 GOWORK=off make goal-delivery"
+  - id: goalcli_g14_handover
+    command: "GOAL_ID=GOAL-20260603-XLIB-GOALCLI-001 GOWORK=off make goal-handover"
+  - id: goalcli_g15a_downstream_adoption
+    command: "GOAL_ID=GOAL-20260603-XLIB-GOALCLI-001 GOWORK=off make goal-downstream-adoption"
+  - id: goalcli_g15b_certify
+    command: "GOAL_ID=GOAL-20260603-XLIB-GOALCLI-001 GOWORK=off make goal-certify"
 final_gates:
   - id: release_score_final
-    command: "go run ./cmd/xlibgate score --min 9.8"
+    command: "go run ./cmd/goalcli score --min 9.8"
   - id: release_final_check
     command: "XLIB_CONTEXT=release_verify GOWORK=off make release-final-check"
   - id: release_preflight
-    command: "XLIB_CONTEXT=release_verify GOWORK=off make release-preflight VERSION=v0.4.5"
+    command: "XLIB_CONTEXT=release_verify GOWORK=off make release-preflight VERSION=v0.4.6"
   - id: score
-    command: "xlibgate score --min 9.8"
+    command: "goalcli score --min 9.8"
   - id: kernel_downstream
     command: "GOWORK=off make integration DOWNSTREAM=kernel"
-  - id: goalkit_g16_runtime_final
-    command: "GOAL_ID=GOAL-20260603-XLIB-GOALKIT-001 GOWORK=off make goal-runtime-final"
+  - id: goalcli_g16_runtime_final
+    command: "GOAL_ID=GOAL-20260603-XLIB-GOALCLI-001 GOWORK=off make goal-runtime-final"
 evidence:
   manifest: "release/manifest/latest.json"
   checksum: "release/manifest/latest.json.sha256"
   debt_manifest: "release/debt/latest.json"
   debt_markdown: "release/debt/latest.md"
   debt_checksum: "release/debt/latest.json.sha256"
-  goalkit_ledger: ".agent/evidence/ledger.jsonl"
-  goalkit_generated_pack: "release/evidence/goalkit/"
+  goalcli_ledger: ".agent/evidence/ledger.jsonl"
+  goalcli_generated_pack: "release/evidence/goalcli/"
   done_format: "DONE with evidence:"
   required_fields:
     - commit
@@ -160,19 +160,19 @@ forbidden:
   - "business-domain models in xlib-standard, kernel, or generated base libraries"
   - "legacy baselib-template/foundationx as primary identity outside migration context"
 
-goalkit_v0_1_0:
+goalcli_v0_1_0:
   mva_status: complete
   control_plane: Harness Runtime
-  executor: xlibgate
+  executor: goalcli
   source_evidence_ledger: .agent/evidence/ledger.jsonl
-  generated_evidence_pack: release/evidence/goalkit/
+  generated_evidence_pack: release/evidence/goalcli/
   blocking_activation: PR-6/PR-8 evidence reconciled
   notes:
-    - "goalkit v0.1.0 不是 standalone external CLI。"
-    - "G12-G16 是 command-backed 的 goalkit MVA-blocking checks，source evidence 位于 .agent/evidence/ledger.jsonl。"
-    - "release/evidence/goalkit/ 是 generated evidence output，不是 source ledger。"
-  gates_ref: goalkit_mva_gates
-goalkit_mva_gates:
+    - "goalcli v0.1.0 不引入第二套并列执行面。"
+    - "G12-G16 是 command-backed 的 goalcli MVA-blocking checks，source evidence 位于 .agent/evidence/ledger.jsonl。"
+    - "release/evidence/goalcli/ 是 generated evidence output，不是 source ledger。"
+  gates_ref: goalcli_mva_gates
+goalcli_mva_gates:
   - id: G12_ACCEPTANCE
     command: "GOWORK=off make goal-acceptance"
     blocking: true

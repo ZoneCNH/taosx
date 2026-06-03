@@ -62,7 +62,7 @@
         "contracts/**",
         "docs/standard/**",
         "scripts/**",
-        "cmd/xlibgate/**",
+        "cmd/goalcli/**",
         "internal/tools/**",
         "release/manifest/template.json"
       ],

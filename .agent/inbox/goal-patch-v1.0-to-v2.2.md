@@ -221,7 +221,7 @@ Retrospective
 跨仓库改造
 运行时控制平面
 自动化系统
-goalkit / harness / xlib-standard / kernel / x.go
+goalcli / harness / xlib-standard / kernel / x.go
 ```
 
 最低要求：
@@ -1227,7 +1227,7 @@ authorization header
 ```text
 xlib-standard = 基础库标准源
 .agent = 运行时控制平面
-xlibgate / goalkit = 机器裁判与执行器
+goalcli = 机器裁判与执行器
 Evidence = 完成证明
 downstream adoption = 扩张方式
 self-improving = 复利机制
@@ -1295,37 +1295,37 @@ make ci
 
 ---
 
-# 24. 必须提供的 goalkit 命令
+# 24. 必须提供的 goalcli 命令
 
-从 `goalkit v0.1.0` 开始，建议最小命令集：
+从 `goalcli v0.1.0` 开始，建议最小命令集：
 
 ```bash
-goalkit goal init
-goalkit context scan
-goalkit spec check
-goalkit design check
-goalkit tasks check
+goalcli goal init
+goalcli context scan
+goalcli spec check
+goalcli design check
+goalcli tasks check
 
-goalkit worktree create
-goalkit worktree check
-goalkit worktree clean
+goalcli worktree create
+goalcli worktree check
+goalcli worktree clean
 
-goalkit issues create
-goalkit issues sync
-goalkit issues status
+goalcli issues create
+goalcli issues sync
+goalcli issues status
 
-goalkit pr create
-goalkit pr update
-goalkit pr ready
+goalcli pr create
+goalcli pr update
+goalcli pr ready
 
-goalkit evidence collect
-goalkit evidence check
+goalcli evidence collect
+goalcli evidence check
 
-goalkit release prepare
-goalkit release publish
+goalcli release prepare
+goalcli release publish
 
-goalkit retro generate
-goalkit patch propose
+goalcli retro generate
+goalcli patch propose
 ```
 
 ---
@@ -1452,7 +1452,7 @@ scripts/harness/no-main-dev.sh
 .github/workflows/goal-gates.yml
 
 Makefile
-goalkit CLI
+goalcli CLI
 reports/
 release/
 ```
@@ -1491,7 +1491,7 @@ release/
 
 ```text
 这些规则如何落到文件？
-如何被 goalkit / Harness / CI 执行？
+如何被 goalcli / Harness / CI 执行？
 如何阻断违规？
 如何形成长期复利？
 如何判断一个 Goal 是否合格？
@@ -1861,7 +1861,7 @@ Status
 推荐命令：
 
 ```bash
-goalkit issues create --goal GOAL-20260603-001
+goalcli issues create --goal GOAL-20260603-001
 ```
 
 生成逻辑：
@@ -1906,7 +1906,7 @@ goals.yaml
 必须通过：
 
 ```bash
-goalkit worktree create \
+goalcli worktree create \
   --goal GOAL-20260603-001 \
   --task TASK-GOAL-20260603-001-001 \
   --repo xlib-standard
@@ -1943,12 +1943,12 @@ make context-check
 
 # 39. Commit 自动化规则
 
-## RULE-COMMIT-AUTO-001：commit 必须由 goalkit 包装
+## RULE-COMMIT-AUTO-001：commit 必须由 goalcli 包装
 
 推荐命令：
 
 ```bash
-goalkit commit create \
+goalcli commit create \
   --task TASK-GOAL-20260603-001-001 \
   --evidence EVID-TASK-GOAL-20260603-001-001-20260603-001 \
   --type feat \
@@ -1996,12 +1996,12 @@ make traceability-check
 
 # 40. PR 自动化规则
 
-## RULE-PR-AUTO-001：PR 必须由 goalkit 生成或校验
+## RULE-PR-AUTO-001：PR 必须由 goalcli 生成或校验
 
 推荐命令：
 
 ```bash
-goalkit pr create --task TASK-GOAL-20260603-001-001
+goalcli pr create --task TASK-GOAL-20260603-001-001
 ```
 
 PR 必须自动填充：
@@ -2033,7 +2033,7 @@ Evidence Registry
 推荐命令：
 
 ```bash
-goalkit pr update --pr 130
+goalcli pr update --pr 130
 ```
 
 ---
@@ -2081,7 +2081,7 @@ Squash merge + PR body 保留完整 Evidence Summary
 推荐命令：
 
 ```bash
-goalkit release prepare --goal GOAL-20260603-001
+goalcli release prepare --goal GOAL-20260603-001
 ```
 
 生成：
@@ -2098,7 +2098,7 @@ release/REL-20260603-goal-runtime/rollback.md
 ## RULE-RELEASE-AUTO-002：发布命令必须二次确认 Gate
 
 ```bash
-goalkit release publish --release REL-20260603-goal-runtime
+goalcli release publish --release REL-20260603-goal-runtime
 ```
 
 内部必须执行：
@@ -2485,13 +2485,13 @@ GitHub Actions
 ## 第 3 层：自动化
 
 ```text
-goalkit goal
-goalkit worktree
-goalkit issues
-goalkit pr
-goalkit evidence
-goalkit release
-goalkit retro
+goalcli goal
+goalcli worktree
+goalcli issues
+goalcli pr
+goalcli evidence
+goalcli release
+goalcli retro
 ```
 
 ---
@@ -2545,7 +2545,7 @@ YAML Policy
 Harness Gate
 Makefile Target
 GitHub Action
-goalkit Command
+goalcli Command
 Shell Script
 JSON Schema
 CI Check
@@ -2632,7 +2632,7 @@ Patch
 例如：
 
 ```bash
-goalkit schema validate .agent/goals/GOAL-20260603-001/tasks.yaml
+goalcli schema validate .agent/goals/GOAL-20260603-001/tasks.yaml
 ```
 
 失败则：
@@ -2787,7 +2787,7 @@ forbidden_paths:
 allowed_commands:
   - make ci
   - make evidence-check
-  - goalkit evidence collect
+  - goalcli evidence collect
 forbidden_commands:
   - rm -rf /
   - git push origin main
@@ -3116,7 +3116,7 @@ CI evidence-check 失败
 
 ## RULE-GATE-CONSISTENCY-002：Makefile 是统一入口
 
-Agent、开发者、CI 都必须使用 Makefile / goalkit 入口，不允许各跑各的命令。
+Agent、开发者、CI 都必须使用 Makefile / goalcli 入口，不允许各跑各的命令。
 
 ---
 
@@ -3289,7 +3289,7 @@ template version: templates-v0.2
 git revert <commit>
 git tag -d <tag>
 git push origin :refs/tags/<tag>
-goalkit release rollback --release REL-xxx
+goalcli release rollback --release REL-xxx
 ```
 
 ---
@@ -3484,7 +3484,7 @@ Gate false positive > 10% → 需要调参
 推荐命令：
 
 ```bash
-goalkit audit goal --goal GOAL-20260603-001
+goalcli audit goal --goal GOAL-20260603-001
 ```
 
 生成：
@@ -3633,20 +3633,20 @@ release-check:
 
 > **把 Goal 从“写计划”升级为一个可机器裁判、可证据证明、可并发执行、可审计发布、可持续自我增强的工程操作系统。**
 
-继续补齐 **Goal 完整规则 v1.3：goalkit 命令契约、自动化执行协议、异常豁免、Agent Team、审计交付与 MVA Issue 拆解**。
+继续补齐 **Goal 完整规则 v1.3：goalcli 命令契约、自动化执行协议、异常豁免、Agent Team、审计交付与 MVA Issue 拆解**。
 
 这一版重点把规则进一步压成 **可实现的工程接口**。
 
 ---
 
-# 83. goalkit 命令契约规则
+# 83. goalcli 命令契约规则
 
-## RULE-GOALKIT-001：goalkit 必须是 Goal Runtime 的唯一执行入口之一
+## RULE-GOALCLI-001：goalcli 必须是 Goal Runtime 的唯一执行入口之一
 
 所有自动化动作必须优先通过：
 
 ```bash
-goalkit <domain> <action>
+goalcli <domain> <action>
 ```
 
 而不是每个 Agent 自己拼命令。
@@ -3664,14 +3664,14 @@ goalkit <domain> <action>
 
 ---
 
-## RULE-GOALKIT-002：goalkit 命令必须幂等
+## RULE-GOALCLI-002：goalcli 命令必须幂等
 
 重复执行不应破坏状态。
 
 例如：
 
 ```bash
-goalkit issues create --goal GOAL-20260603-001
+goalcli issues create --goal GOAL-20260603-001
 ```
 
 第二次执行时必须：
@@ -3692,13 +3692,13 @@ goalkit issues create --goal GOAL-20260603-001
 
 ---
 
-## RULE-GOALKIT-003：goalkit 命令必须统一输出机器结果
+## RULE-GOALCLI-003：goalcli 命令必须统一输出机器结果
 
 所有命令输出至少包含：
 
 ```json
 {
-  "command": "goalkit evidence check",
+  "command": "goalcli evidence check",
   "status": "passed",
   "goal_id": "GOAL-20260603-001",
   "reports": ["reports/evidence-check.json"],
@@ -3716,9 +3716,9 @@ reports/<command>.json
 
 ---
 
-# 84. goalkit Exit Code 规则
+# 84. goalcli Exit Code 规则
 
-## RULE-GOALKIT-EXIT-001：退出码必须标准化
+## RULE-GOALCLI-EXIT-001：退出码必须标准化
 
 ```text
 0  = PASS
@@ -3965,15 +3965,15 @@ debug
 
 # 90. PR 同步协议
 
-## RULE-PR-SYNC-001：PR Body 必须由 goalkit 可重复生成
+## RULE-PR-SYNC-001：PR Body 必须由 goalcli 可重复生成
 
 PR Body 不应完全手写。
 
 推荐命令：
 
 ```bash
-goalkit pr render --task TASK-GOAL-20260603-001-003
-goalkit pr update --pr 123
+goalcli pr render --task TASK-GOAL-20260603-001-003
+goalcli pr update --pr 123
 ```
 
 ---
@@ -4068,7 +4068,7 @@ Release impact
 清理命令：
 
 ```bash
-goalkit worktree clean --task TASK-GOAL-20260603-001-003
+goalcli worktree clean --task TASK-GOAL-20260603-001-003
 ```
 
 内部执行：
@@ -4105,7 +4105,7 @@ git fetch origin
 git pull --ff-only
 git tag
 git status
-goalkit release prepare
+goalcli release prepare
 ```
 
 禁止：
@@ -4582,12 +4582,12 @@ breaking_changes:
 例如：
 
 ```bash
-goalkit migrate rules --from rules-v1.2 --to rules-v1.3
+goalcli migrate rules --from rules-v1.2 --to rules-v1.3
 ```
 
 ---
 
-# 109. goalkit v0.1.0 最小功能边界
+# 109. goalcli v0.1.0 最小功能边界
 
 ## 必须实现
 
@@ -4624,7 +4624,7 @@ v0.1.0 先做裁判系统，不先做全自动执行器。
 
 ---
 
-# 110. goalkit v0.1.0 推荐 Issue 拆解
+# 110. goalcli v0.1.0 推荐 Issue 拆解
 
 ## ISSUE-001：建立 Schema 基础
 
@@ -4726,7 +4726,7 @@ v0.1.0 先做裁判系统，不先做全自动执行器。
 压缩成 10 条：
 
 ```text
-1. goalkit 是执行入口，Harness 是裁判入口。
+1. goalcli 是执行入口，Harness 是裁判入口。
 2. 所有 P0/P1 规则必须机器化。
 3. 所有命令必须幂等、可审计、可产出报告。
 4. Issue 从 Task 生成，PR 从 Issue/Task 生成，Release 从 Manifest 生成。
@@ -4740,8 +4740,8 @@ v0.1.0 先做裁判系统，不先做全自动执行器。
 
 最终结论：
 
-> **Goal Runtime 的第一阶段不是追求“全自动写代码”，而是建立一个不会污染 main、不会无证据 DONE、不会断链发布、不会规则漂移的机器裁判系统。goalkit v0.1.0 应先成为 Harness + Evidence + Traceability + Worktree 的执行入口。**
-继续补齐 **Goal 完整规则 v1.4：工程落地目录、检查器契约、goalkit 内核设计、CI 工作流、迁移与防过度工程化规则**。
+> **Goal Runtime 的第一阶段不是追求“全自动写代码”，而是建立一个不会污染 main、不会无证据 DONE、不会断链发布、不会规则漂移的机器裁判系统。goalcli v0.1.0 应先成为 Harness + Evidence + Traceability + Worktree 的执行入口。**
+继续补齐 **Goal 完整规则 v1.4：工程落地目录、检查器契约、goalcli 内核设计、CI 工作流、迁移与防过度工程化规则**。
 
 这一版解决的问题是：
 
@@ -4750,7 +4750,7 @@ v0.1.0 先做裁判系统，不先做全自动执行器。
 哪些文件先建？
 哪些命令先做？
 哪些 Gate 先接入？
-goalkit 内部怎么设计？
+goalcli 内部怎么设计？
 如何防止 Goal Runtime 本身变成新的复杂度债？
 ```
 
@@ -4844,7 +4844,7 @@ goalkit 内部怎么设计？
 
 ```text
 Makefile
-goalkit.yaml
+goalcli.yaml
 .github/workflows/
 scripts/harness/
 scripts/git/
@@ -4872,12 +4872,12 @@ scripts/
 
 ---
 
-# 115. `goalkit.yaml` 配置规则
+# 115. `goalcli.yaml` 配置规则
 
-## RULE-GOALKIT-CONFIG-001：goalkit 必须有统一配置文件
+## RULE-GOALCLI-CONFIG-001：goalcli 必须有统一配置文件
 
 ```yaml
-version: goalkit-v0.1.0
+version: goalcli-v0.1.0
 
 runtime:
   timezone: Asia/Tokyo
@@ -4940,39 +4940,39 @@ security:
 ```makefile
 .PHONY: schema-check
 schema-check:
-	goalkit schema validate --all
+	goalcli schema validate --all
 
 .PHONY: worktree-check
 worktree-check:
-	goalkit worktree check
+	goalcli worktree check
 
 .PHONY: traceability-check
 traceability-check:
-	goalkit traceability check
+	goalcli traceability check
 
 .PHONY: evidence-check
 evidence-check:
-	goalkit evidence check
+	goalcli evidence check
 
 .PHONY: secret-check
 secret-check:
-	goalkit secret check
+	goalcli secret check
 
 .PHONY: pr-check
 pr-check:
-	goalkit pr check
+	goalcli pr check
 
 .PHONY: release-check
 release-check:
-	goalkit release check
+	goalcli release check
 
 .PHONY: retro-check
 retro-check:
-	goalkit retro check
+	goalcli retro check
 
 .PHONY: goal-check
 goal-check:
-	goalkit goal check
+	goalcli goal check
 
 .PHONY: ci
 ci: schema-check worktree-check traceability-check evidence-check secret-check
@@ -5068,9 +5068,9 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Install goalkit
+      - name: Install goalcli
         run: |
-          echo "install goalkit here"
+          echo "install goalcli here"
 
       - name: Run CI gates
         run: |
@@ -5144,14 +5144,14 @@ Release Gate
 
 ---
 
-# 120. goalkit 内核架构规则
+# 120. goalcli 内核架构规则
 
-## RULE-GOALKIT-ARCH-001：goalkit v0.1.0 先做裁判，不做复杂 Agent
+## RULE-GOALCLI-ARCH-001：goalcli v0.1.0 先做裁判，不做复杂 Agent
 
 内核模块建议：
 
 ```text
-cmd/goalkit/
+cmd/goalcli/
 internal/
 ├── config/
 ├── schema/
@@ -5169,7 +5169,7 @@ internal/
 
 ---
 
-## RULE-GOALKIT-ARCH-002：每个 Checker 必须实现统一接口
+## RULE-GOALCLI-ARCH-002：每个 Checker 必须实现统一接口
 
 伪接口：
 
@@ -5489,7 +5489,7 @@ New Issue Candidates
 
 ## RULE-AUDIT-CHECK-001：Audit 必须能从 Goal Pack 重建事实链
 
-`goalkit audit goal` 必须输出：
+`goalcli audit goal` 必须输出：
 
 ```text
 Goal summary
@@ -5522,7 +5522,7 @@ Final score
 
 ## RULE-SIMPLICITY-001：v0.1.0 不实现全自动写代码
 
-`goalkit v0.1.0` 的边界：
+`goalcli v0.1.0` 的边界：
 
 ```text
 做检查
@@ -5619,7 +5619,7 @@ Retro 无 Patch: -5
 ## 第一批必须交付
 
 ```text
-[ ] goalkit.yaml
+[ ] goalcli.yaml
 [ ] Makefile gate targets
 [ ] scripts/harness/no-main-dev.sh
 [ ] .githooks/pre-commit
@@ -5641,14 +5641,14 @@ Retro 无 Patch: -5
 # 134. v0.1.0 最小命令清单
 
 ```bash
-goalkit schema validate --all
-goalkit worktree check
-goalkit evidence check
-goalkit traceability check
-goalkit pr check
-goalkit release check
-goalkit retro check
-goalkit audit goal --goal <GOAL-ID>
+goalcli schema validate --all
+goalcli worktree check
+goalcli evidence check
+goalcli traceability check
+goalcli pr check
+goalcli release check
+goalcli retro check
+goalcli audit goal --goal <GOAL-ID>
 ```
 
 ---
@@ -5672,7 +5672,7 @@ goalkit audit goal --goal <GOAL-ID>
 
 ```text
 ISSUE-001: 初始化 .agent 目录与规则索引
-ISSUE-002: 增加 goalkit.yaml 与 Makefile gates
+ISSUE-002: 增加 goalcli.yaml 与 Makefile gates
 ISSUE-003: 实现 worktree-only Gate
 ISSUE-004: 实现 schema-check
 ISSUE-005: 实现 evidence-check
@@ -5769,7 +5769,7 @@ P3：Downstream adoption automation
 4. 先 worktree-only，再并发 Agent。
 5. 先 Evidence + Traceability，再 PR / Release。
 6. 先 Golden / Violation fixtures，再扩展规则。
-7. 先 goalkit v0.1.0 最小命令，再做复杂 Agent Team。
+7. 先 goalcli v0.1.0 最小命令，再做复杂 Agent Team。
 8. 规则增长必须被机器化，否则就是新文档债。
 ```
 
@@ -5952,8 +5952,8 @@ git status
 git branch --show-current
 make worktree-check
 make schema-check
-goalkit goal status --goal <GOAL-ID>
-goalkit task status --task <TASK-ID>
+goalcli goal status --goal <GOAL-ID>
+goalcli task status --task <TASK-ID>
 ```
 
 禁止直接开始改文件。
@@ -6105,7 +6105,7 @@ owners:
     owner: "harness"
     review_required: true
 
-  - path: "goalkit.yaml"
+  - path: "goalcli.yaml"
     owner: "runtime"
     review_required: true
 ```
@@ -6122,7 +6122,7 @@ owners:
 .agent/harness/
 .github/workflows/
 Makefile
-goalkit.yaml
+goalcli.yaml
 scripts/harness/
 CONSTITUTION.md
 ```
@@ -6170,7 +6170,7 @@ security
 | harness     | harness-test / violation-fixture-test |
 | ci          | ci-dry-run / workflow-check           |
 | template    | template-check                        |
-| automation  | goalkit-test                          |
+| automation  | goalcli-test                          |
 | code        | lint / test                           |
 | release     | release-check                         |
 | security    | secret-check / security-review        |
@@ -6220,7 +6220,7 @@ PR 中必须有：
 
 ## RULE-COMPAT-001：规则升级必须兼容旧 Goal Pack
 
-除非明确标记 breaking，否则新版本 goalkit 必须能读取旧版本 Goal Pack。
+除非明确标记 breaking，否则新版本 goalcli 必须能读取旧版本 Goal Pack。
 
 ---
 
@@ -6265,8 +6265,8 @@ affected repos
 ## RULE-MIGRATION-002：迁移必须可 dry-run
 
 ```bash
-goalkit migrate --from rules-v1.4 --to rules-v1.5 --dry-run
-goalkit migrate --from rules-v1.4 --to rules-v1.5 --apply
+goalcli migrate --from rules-v1.4 --to rules-v1.5 --dry-run
+goalcli migrate --from rules-v1.4 --to rules-v1.5 --apply
 ```
 
 ---
@@ -6416,7 +6416,7 @@ retrospective.md
 CI 必须跑：
 
 ```bash
-goalkit audit goal --fixture .agent/harness/fixtures/golden/minimal-goal-pack
+goalcli audit goal --fixture .agent/harness/fixtures/golden/minimal-goal-pack
 ```
 
 ---
@@ -7086,7 +7086,7 @@ audit 能重建事实链
 
 ```text
 Goal Runtime 如何长期运行？
-goalkit / .agent / Harness 谁是事实源？
+goalcli / .agent / Harness 谁是事实源？
 自动化命令失败如何恢复？
 权限如何最小化？
 Evidence 如何长期保存？
@@ -7171,7 +7171,7 @@ README 可以写：
 
 # 175. 命令事务规则
 
-## RULE-CMD-TXN-001：goalkit 命令必须事务化
+## RULE-CMD-TXN-001：goalcli 命令必须事务化
 
 任何会修改状态的命令必须遵循：
 
@@ -7187,7 +7187,7 @@ precheck
 例如：
 
 ```bash
-goalkit worktree create --task TASK-001
+goalcli worktree create --task TASK-001
 ```
 
 内部必须执行：
@@ -7233,10 +7233,10 @@ Issue 创建了但 tasks.yaml 没回写
 必须支持：
 
 ```bash
-goalkit release publish --dry-run
-goalkit migrate --dry-run
-goalkit worktree clean --dry-run
-goalkit issues sync --dry-run
+goalcli release publish --dry-run
+goalcli migrate --dry-run
+goalcli worktree clean --dry-run
+goalcli issues sync --dry-run
 ```
 
 ---
@@ -7260,7 +7260,7 @@ goalkit issues sync --dry-run
 
 ## RULE-PERMISSION-001：GitHub 权限必须最小化
 
-goalkit / Agent 不应默认拥有全部权限。
+goalcli / Agent 不应默认拥有全部权限。
 
 权限分级：
 
@@ -7338,8 +7338,8 @@ Human / trusted release token：可 publish stable
 必须先执行：
 
 ```bash
-goalkit simulate adoption --target kernel
-goalkit simulate migrate --from rules-v1.5 --to rules-v1.6
+goalcli simulate adoption --target kernel
+goalcli simulate migrate --from rules-v1.5 --to rules-v1.6
 ```
 
 ---
@@ -7403,7 +7403,7 @@ sha256  audit-report.md
 ## RULE-EVIDENCE-HASH-002：审计时必须校验 hash
 
 ```bash
-goalkit audit release --release REL-20260603-goal-runtime
+goalcli audit release --release REL-20260603-goal-runtime
 ```
 
 必须验证：
@@ -7575,7 +7575,7 @@ pid:
 超时后：
 
 ```bash
-goalkit lock recover
+goalcli lock recover
 ```
 
 ---
@@ -7662,7 +7662,7 @@ rules-v1.6
 compatible:
   harness-v0.1.x
   templates-v0.2.x
-  goalkit-v0.1.x
+  goalcli-v0.1.x
 requires:
   schema-v0.1
 breaking:
@@ -7694,7 +7694,7 @@ adoption-check failed
 不需要第一阶段做 Web 服务，先生成静态报告：
 
 ```bash
-goalkit dashboard generate
+goalcli dashboard generate
 ```
 
 输出：
@@ -7775,7 +7775,7 @@ alpha → beta → rc → stable
 ```bash
 make ci
 make release-check
-goalkit audit release --release <REL-ID>
+goalcli audit release --release <REL-ID>
 ```
 
 ---
@@ -8066,27 +8066,27 @@ audit goal 生效
 ```makefile
 .PHONY: registry-check
 registry-check:
-	goalkit registry check
+	goalcli registry check
 
 .PHONY: orphan-check
 orphan-check:
-	goalkit orphan check
+	goalcli orphan check
 
 .PHONY: drift-check
 drift-check:
-	goalkit drift check
+	goalcli drift check
 
 .PHONY: audit-check
 audit-check:
-	goalkit audit goal --all
+	goalcli audit goal --all
 
 .PHONY: dashboard
 dashboard:
-	goalkit dashboard generate
+	goalcli dashboard generate
 
 .PHONY: adoption-check
 adoption-check:
-	goalkit adoption check
+	goalcli adoption check
 ```
 
 ---
@@ -8096,7 +8096,7 @@ adoption-check:
 ```text
 1. .agent 是控制平面，不是文档垃圾桶。
 2. 每类事实必须只有一个 SSOT。
-3. goalkit 命令必须事务化、幂等、可 dry-run、可恢复。
+3. goalcli 命令必须事务化、幂等、可 dry-run、可恢复。
 4. 权限必须最小化，发布权限必须隔离。
 5. Evidence 必须长期保存，Release Evidence 永久保存。
 6. Release Artifact 必须 hash 化、不可变、可审计。
@@ -8173,14 +8173,14 @@ Downstream Adoption
 接入命令：
 
 ```bash
-goalkit bootstrap repo --profile xlib-standard
+goalcli bootstrap repo --profile xlib-standard
 ```
 
 必须生成或检查：
 
 ```text
 .agent/
-goalkit.yaml
+goalcli.yaml
 Makefile gates
 scripts/harness/
 .githooks/
@@ -8198,7 +8198,7 @@ scripts/harness/
 重复执行：
 
 ```bash
-goalkit bootstrap repo
+goalcli bootstrap repo
 ```
 
 不得重复覆盖用户修改。必须输出：
@@ -8224,7 +8224,7 @@ NEEDS_DECISION
 ## RULE-DOCTOR-001：必须提供一键诊断
 
 ```bash
-goalkit doctor
+goalcli doctor
 ```
 
 检查：
@@ -8251,7 +8251,7 @@ Registry 是否一致
 修复必须走：
 
 ```bash
-goalkit repair
+goalcli repair
 ```
 
 ---
@@ -8263,9 +8263,9 @@ goalkit repair
 禁止盲修。
 
 ```bash
-goalkit doctor --output reports/doctor.json
-goalkit repair --from reports/doctor.json --dry-run
-goalkit repair --from reports/doctor.json --apply
+goalcli doctor --output reports/doctor.json
+goalcli repair --from reports/doctor.json --dry-run
+goalcli repair --from reports/doctor.json --apply
 ```
 
 ---
@@ -8389,7 +8389,7 @@ release-check 又依赖 evidence-check
 命令：
 
 ```bash
-goalkit reconcile --goal GOAL-20260603-001
+goalcli reconcile --goal GOAL-20260603-001
 ```
 
 检查并修复：
@@ -8526,7 +8526,7 @@ branch protection API
 执行 Task 前：
 
 ```bash
-goalkit lease acquire --task TASK-001 --agent agent-01
+goalcli lease acquire --task TASK-001 --agent agent-01
 ```
 
 Lease 包含：
@@ -8545,7 +8545,7 @@ heartbeat_at:
 ## RULE-LEASE-002：Lease 超时必须释放或接管
 
 ```bash
-goalkit lease recover
+goalcli lease recover
 ```
 
 防止僵尸 Agent 占用任务。
@@ -8557,7 +8557,7 @@ goalkit lease recover
 ## RULE-HEARTBEAT-001：长任务必须写心跳
 
 ```bash
-goalkit heartbeat --task TASK-001
+goalcli heartbeat --task TASK-001
 ```
 
 心跳记录：
@@ -8589,8 +8589,8 @@ Task state = STALE
 ## RULE-WT-GC-001：必须定期清理 worktree
 
 ```bash
-goalkit worktree gc --dry-run
-goalkit worktree gc --apply
+goalcli worktree gc --dry-run
+goalcli worktree gc --apply
 ```
 
 可清理：
@@ -9020,17 +9020,17 @@ P1 → P0 candidate
 Goal Runtime 长期运行至少需要：
 
 ```bash
-goalkit doctor
-goalkit repair --dry-run
-goalkit reconcile --goal <GOAL-ID>
-goalkit rule compile
-goalkit rule coverage
-goalkit drift check
-goalkit registry check
-goalkit orphan check
-goalkit audit goal --all
-goalkit dashboard generate
-goalkit worktree gc --dry-run
+goalcli doctor
+goalcli repair --dry-run
+goalcli reconcile --goal <GOAL-ID>
+goalcli rule compile
+goalcli rule coverage
+goalcli drift check
+goalcli registry check
+goalcli orphan check
+goalcli audit goal --all
+goalcli dashboard generate
+goalcli worktree gc --dry-run
 ```
 
 对应 Makefile：
@@ -9038,19 +9038,19 @@ goalkit worktree gc --dry-run
 ```makefile
 .PHONY: doctor
 doctor:
-	goalkit doctor
+	goalcli doctor
 
 .PHONY: rule-compile
 rule-compile:
-	goalkit rule compile
+	goalcli rule compile
 
 .PHONY: rule-coverage
 rule-coverage:
-	goalkit rule coverage
+	goalcli rule coverage
 
 .PHONY: reconcile
 reconcile:
-	goalkit reconcile --all
+	goalcli reconcile --all
 
 .PHONY: maintenance
 maintenance:
@@ -9068,14 +9068,14 @@ maintenance:
 # 234. v1.7 新增交付清单
 
 ```text
-[ ] goalkit doctor
-[ ] goalkit repair
-[ ] goalkit reconcile
-[ ] goalkit rule compile
-[ ] goalkit rule coverage
-[ ] goalkit lease acquire/release/recover
-[ ] goalkit heartbeat
-[ ] goalkit worktree gc
+[ ] goalcli doctor
+[ ] goalcli repair
+[ ] goalcli reconcile
+[ ] goalcli rule compile
+[ ] goalcli rule coverage
+[ ] goalcli lease acquire/release/recover
+[ ] goalcli heartbeat
+[ ] goalcli worktree gc
 [ ] .agent/compiled/
 [ ] .agent/leases/
 [ ] .agent/incidents/
@@ -9136,12 +9136,12 @@ Sunset
 
 ```text
 从“继续扩规则”
-→ 收敛为“可执行落地文档 + goalkit v0.1.0 Issue 拆解 + 文件清单 + 下载版”
+→ 收敛为“可执行落地文档 + goalcli v0.1.0 Issue 拆解 + 文件清单 + 下载版”
 ```
 
 最终判断：
 
-> **Goal Runtime v1.7 的核心已经足够完整。下一步不应继续堆规则，而应把 v1.0-v1.7 合并成一个可执行规范，并拆成 goalkit v0.1.0、xlib-standard `.agent`、Harness Gates、CI Workflows、下游 adoption 五条落地线。**
+> **Goal Runtime v1.7 的核心已经足够完整。下一步不应继续堆规则，而应把 v1.0-v1.7 合并成一个可执行规范，并拆成 goalcli v0.1.0、xlib-standard `.agent`、Harness Gates、CI Workflows、下游 adoption 五条落地线。**
 继续，但从 **v1.8** 开始不再继续无限扩规则，而是进入 **Rule Freeze + Build Mode**：把 v1.0-v1.7 收敛成可执行规范、文件树、Issue、Gate、CI、Release 与 Adoption。
 
 ---
@@ -9224,7 +9224,7 @@ L3 Schemas             # 对象结构定义
 L4 Harness Gates       # 机器裁判
 L5 Runtime Registries  # 状态事实源
 L6 Goal Packs          # 每个 Goal 的事实包
-L7 Automation          # goalkit / GitHub / CI
+L7 Automation          # goalcli / GitHub / CI
 L8 Evidence & Audit    # 证据与审计
 L9 Self-improving      # 复盘补丁与下游采用
 ```
@@ -9322,7 +9322,7 @@ L9 Self-improving      # 复盘补丁与下游采用
 
 ```text
 Makefile
-goalkit.yaml
+goalcli.yaml
 scripts/harness/
 scripts/git/
 .github/workflows/
@@ -9333,7 +9333,7 @@ reports/
 
 ---
 
-## 240. goalkit v0.1.0 最终定位
+## 240. goalcli v0.1.0 最终定位
 
 ### 不是：
 
@@ -9364,35 +9364,35 @@ Goal Runtime 的最小机器裁判内核
 
 ---
 
-## 241. goalkit v0.1.0 命令边界
+## 241. goalcli v0.1.0 命令边界
 
 第一版只做这些：
 
 ```bash
-goalkit bootstrap repo
-goalkit doctor
-goalkit schema validate --all
-goalkit worktree check
-goalkit evidence check
-goalkit traceability check
-goalkit secret check
-goalkit pr check
-goalkit release check
-goalkit retro check
-goalkit registry check
-goalkit orphan check
-goalkit audit goal --goal <GOAL-ID>
-goalkit dashboard generate
+goalcli bootstrap repo
+goalcli doctor
+goalcli schema validate --all
+goalcli worktree check
+goalcli evidence check
+goalcli traceability check
+goalcli secret check
+goalcli pr check
+goalcli release check
+goalcli retro check
+goalcli registry check
+goalcli orphan check
+goalcli audit goal --goal <GOAL-ID>
+goalcli dashboard generate
 ```
 
 暂缓：
 
 ```bash
-goalkit code generate
-goalkit pr merge
-goalkit release publish stable
-goalkit multi-repo rewrite
-goalkit auto-fix-all
+goalcli code generate
+goalcli pr merge
+goalcli release publish stable
+goalcli multi-repo rewrite
+goalcli auto-fix-all
 ```
 
 原则：
@@ -9465,7 +9465,7 @@ release-check-all:
 
 ---
 
-#### ISSUE-002：建立 `goalkit.yaml`
+#### ISSUE-002：建立 `goalcli.yaml`
 
 ```text
 交付：
@@ -9477,7 +9477,7 @@ release-check-all:
 - security 配置
 
 验收：
-- goalkit doctor 可读取配置
+- goalcli doctor 可读取配置
 - 配置缺字段会失败
 ```
 
@@ -9674,7 +9674,7 @@ release-check-all:
 
 ```text
 交付：
-- release/REL-<date>-goalkit-v0.1.0/manifest.md
+- release/REL-<date>-goalcli-v0.1.0/manifest.md
 - changelog.md
 - evidence-summary.md
 - rollback.md
@@ -9697,7 +9697,7 @@ release-check-all:
 [ ] 创建 .agent 基础目录
 [ ] 写 CONSTITUTION.md
 [ ] 写 worktree-rules / evidence-rules / security-rules
-[ ] 增加 goalkit.yaml
+[ ] 增加 goalcli.yaml
 [ ] 增加 Makefile gate 空壳
 [ ] 实现 no-main-dev.sh
 [ ] 增加 pre-commit / pre-push
@@ -9746,7 +9746,7 @@ Violation Fixtures 可失败
 [ ] 实现 audit goal
 [ ] 生成 dashboard
 [ ] 生成 release artifact
-[ ] 发布 goalkit v0.1.0
+[ ] 发布 goalcli v0.1.0
 [ ] 选择 kernel 作为第一个 downstream adoption pilot
 ```
 
@@ -9815,7 +9815,7 @@ Phase 1：冻结规则
 Phase 2：整理 SSOT 文档
 Phase 3：实现 P0 Gates
 Phase 4：建立 Golden / Violation fixtures
-Phase 5：发布 goalkit v0.1.0
+Phase 5：发布 goalcli v0.1.0
 Phase 6：kernel downstream adoption pilot
 Phase 7：Retro 后再决定 v0.2.0 自动化范围
 ```
@@ -9827,7 +9827,7 @@ Phase 7：Retro 后再决定 v0.2.0 自动化范围
 ```text
 1. 规则到 v1.8 必须冻结，不能继续无边界膨胀。
 2. 下一步必须从规则写作转为 Gate 实现。
-3. goalkit v0.1.0 只做裁判内核，不做全自动平台。
+3. goalcli v0.1.0 只做裁判内核，不做全自动平台。
 4. P0 Gate 必须先于 Issue/PR/Release 自动化。
 5. Golden/Violation fixtures 是系统可信度的根。
 6. xlib-standard 先自证，再推广 kernel。
@@ -9863,7 +9863,7 @@ Rule Freeze
 
 ```text
 .agent 控制平面
-+ goalkit 裁判内核
++ goalcli 裁判内核
 + Harness Gates
 + Evidence Protocol
 + Traceability Matrix
@@ -9893,7 +9893,7 @@ Rule Freeze
 7. Golden Goal Pack 必须通过
 8. Violation Fixtures 必须失败
 9. 所有 Gate 必须输出 reports
-10. goalkit v0.1.0 必须能执行最小裁判闭环
+10. goalcli v0.1.0 必须能执行最小裁判闭环
 ```
 
 ---
@@ -10076,7 +10076,7 @@ dashboard 能显示 Evidence / Traceability / Gate 状态
 
 ```text
 01. CONSTITUTION.md
-02. goalkit.yaml
+02. goalcli.yaml
 03. Makefile
 04. scripts/harness/no-main-dev.sh
 05. .githooks/pre-commit
@@ -10160,10 +10160,10 @@ dashboard 能显示 Evidence / Traceability / Gate 状态
 31. .github/workflows/goal-gates.yml
 32. .github/workflows/secret-scan.yml
 33. .github/workflows/release-gate.yml
-34. release/REL-YYYYMMDD-goalkit-v0.1.0/manifest.md
-35. release/REL-YYYYMMDD-goalkit-v0.1.0/evidence-summary.md
-36. release/REL-YYYYMMDD-goalkit-v0.1.0/rollback.md
-37. release/REL-YYYYMMDD-goalkit-v0.1.0/checksums.txt
+34. release/REL-YYYYMMDD-goalcli-v0.1.0/manifest.md
+35. release/REL-YYYYMMDD-goalcli-v0.1.0/evidence-summary.md
+36. release/REL-YYYYMMDD-goalcli-v0.1.0/rollback.md
+37. release/REL-YYYYMMDD-goalcli-v0.1.0/checksums.txt
 ```
 
 目标：
@@ -10181,51 +10181,51 @@ dashboard 能显示 Evidence / Traceability / Gate 状态
 ```makefile
 .PHONY: worktree-check
 worktree-check:
-	goalkit worktree check
+	goalcli worktree check
 
 .PHONY: secret-check
 secret-check:
-	goalkit secret check
+	goalcli secret check
 
 .PHONY: schema-check
 schema-check:
-	goalkit schema validate --all
+	goalcli schema validate --all
 
 .PHONY: evidence-check
 evidence-check:
-	goalkit evidence check
+	goalcli evidence check
 
 .PHONY: traceability-check
 traceability-check:
-	goalkit traceability check
+	goalcli traceability check
 
 .PHONY: pr-check
 pr-check:
-	goalkit pr check
+	goalcli pr check
 
 .PHONY: release-check
 release-check:
-	goalkit release check
+	goalcli release check
 
 .PHONY: retro-check
 retro-check:
-	goalkit retro check
+	goalcli retro check
 
 .PHONY: registry-check
 registry-check:
-	goalkit registry check
+	goalcli registry check
 
 .PHONY: orphan-check
 orphan-check:
-	goalkit orphan check
+	goalcli orphan check
 
 .PHONY: audit-check
 audit-check:
-	goalkit audit goal --all
+	goalcli audit goal --all
 
 .PHONY: dashboard
 dashboard:
-	goalkit dashboard generate
+	goalcli dashboard generate
 
 .PHONY: ci
 ci:
@@ -10246,12 +10246,12 @@ release-check-all:
 
 ---
 
-# 253. goalkit v0.1.0 内核模块
+# 253. goalcli v0.1.0 内核模块
 
 建议 Go 实现结构：
 
 ```text
-cmd/goalkit/
+cmd/goalcli/
 └── main.go
 
 internal/
@@ -10370,7 +10370,7 @@ reports/release-check.json
 当前 git repo
 当前分支
 当前 repo root
-goalkit.yaml worktree_root
+goalcli.yaml worktree_root
 ```
 
 ## 检查
@@ -10690,9 +10690,9 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Install goalkit
+      - name: Install goalcli
         run: |
-          echo "Install goalkit v0.1.0"
+          echo "Install goalcli v0.1.0"
 
       - name: Run CI Gates
         run: |
@@ -10722,9 +10722,9 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Install goalkit
+      - name: Install goalcli
         run: |
-          echo "Install goalkit v0.1.0"
+          echo "Install goalcli v0.1.0"
 
       - name: Run Release Gates
         run: |
@@ -10939,7 +10939,7 @@ make pr-check
 
 ```text
 [ ] `.agent` 控制平面存在
-[ ] `goalkit.yaml` 存在
+[ ] `goalcli.yaml` 存在
 [ ] `Makefile` 有所有 Gate target
 [ ] `worktree-check` 可阻断 main
 [ ] `secret-check` 可阻断 secret
@@ -11025,7 +11025,7 @@ reports/adoption-check.json
 ```text
 1. Freeze rules
 2. Create .agent control plane
-3. Add goalkit.yaml
+3. Add goalcli.yaml
 4. Add Makefile gates
 5. Implement worktree-check
 6. Implement secret-check
@@ -11051,7 +11051,7 @@ reports/adoption-check.json
 ```text
 1. 建 .agent 最小目录
 2. 写 CONSTITUTION.md
-3. 写 goalkit.yaml
+3. 写 goalcli.yaml
 4. 写 Makefile gate target
 5. 写 no-main-dev.sh
 6. 写 pre-commit / pre-push
@@ -11069,7 +11069,7 @@ reports/adoption-check.json
 1. 不再扩规则，开始实现 Gate。
 2. 不先做自动化 Issue / PR / Release，先做裁判。
 3. 不先推广下游，先让 xlib-standard 自证。
-4. 不把 goalkit v0.1.0 做成大平台，只做最小裁判内核。
+4. 不把 goalcli v0.1.0 做成大平台，只做最小裁判内核。
 5. 不允许 main 开发，这是所有 Agent 自动化的地基。
 6. 不允许无 Evidence DONE，这是所有交付可信度的地基。
 7. 不允许 Traceability 断链，这是所有 Goal 可审计性的地基。
@@ -11091,7 +11091,7 @@ reports/adoption-check.json
 
 v2.0 的目标：
 
-> **把 Goal Runtime 从规则体系推进到可运行的 goalkit v0.1.0 裁判内核。**
+> **把 Goal Runtime 从规则体系推进到可运行的 goalcli v0.1.0 裁判内核。**
 
 v2.0 不追求全自动 Agent，不追求复杂平台，不追求一次覆盖所有下游库。
 
@@ -11115,12 +11115,12 @@ Retro 无 Patch → 警告或阻断
 
 ---
 
-# 275. goalkit v0.1.0 最小产品定义
+# 275. goalcli v0.1.0 最小产品定义
 
 ## 不是平台
 
 ```text
-goalkit v0.1.0 不做：
+goalcli v0.1.0 不做：
 - 自动写代码
 - 自动修复所有问题
 - 自动合并 PR
@@ -11132,8 +11132,8 @@ goalkit v0.1.0 不做：
 ## 是裁判内核
 
 ```text
-goalkit v0.1.0 必须做：
-- 读取 goalkit.yaml
+goalcli v0.1.0 必须做：
+- 读取 goalcli.yaml
 - 执行 Gate
 - 输出标准 reports
 - 识别违规
@@ -11143,14 +11143,14 @@ goalkit v0.1.0 必须做：
 
 一句话：
 
-> **goalkit v0.1.0 = Goal Runtime 的 `make test` + `make audit` + `policy gate`。**
+> **goalcli v0.1.0 = Goal Runtime 的 `make test` + `make audit` + `policy gate`。**
 
 ---
 
-# 276. goalkit CLI 最小命令树
+# 276. goalcli CLI 最小命令树
 
 ```text
-goalkit
+goalcli
 ├── bootstrap
 │   └── repo
 ├── doctor
@@ -11184,15 +11184,15 @@ goalkit
 
 ---
 
-# 277. goalkit 项目结构
+# 277. goalcli 项目结构
 
 建议在 `xlib-standard` 内先作为本地工具实现：
 
 ```text
-tools/goalkit/
+tools/goalcli/
 ├── go.mod
 ├── cmd/
-│   └── goalkit/
+│   └── goalcli/
 │       └── main.go
 ├── internal/
 │   ├── app/
@@ -11229,7 +11229,7 @@ tools/goalkit/
 职责：
 
 ```text
-读取 goalkit.yaml
+读取 goalcli.yaml
 解析 worktree_root
 解析 reports_dir
 解析 severity_policy
@@ -11375,7 +11375,7 @@ CI、Agent、Makefile 都按退出码处理。
 1. git rev-parse --show-toplevel
 2. git symbolic-ref --short HEAD
 3. git rev-parse --git-common-dir
-4. 读取 goalkit.yaml worktree_root
+4. 读取 goalcli.yaml worktree_root
 5. 判断 branch 是否 main/master
 6. 判断 repo root 是否在 worktree_root 下
 7. 输出 reports/worktree-check.json
@@ -11835,12 +11835,12 @@ Decision
 Golden 必须能通过：
 
 ```bash
-goalkit schema validate --fixture .agent/harness/fixtures/golden/minimal-goal-pack
-goalkit evidence check --fixture .agent/harness/fixtures/golden/minimal-goal-pack
-goalkit traceability check --fixture .agent/harness/fixtures/golden/minimal-goal-pack
-goalkit release check --fixture .agent/harness/fixtures/golden/minimal-goal-pack
-goalkit retro check --fixture .agent/harness/fixtures/golden/minimal-goal-pack
-goalkit audit goal --fixture .agent/harness/fixtures/golden/minimal-goal-pack
+goalcli schema validate --fixture .agent/harness/fixtures/golden/minimal-goal-pack
+goalcli evidence check --fixture .agent/harness/fixtures/golden/minimal-goal-pack
+goalcli traceability check --fixture .agent/harness/fixtures/golden/minimal-goal-pack
+goalcli release check --fixture .agent/harness/fixtures/golden/minimal-goal-pack
+goalcli retro check --fixture .agent/harness/fixtures/golden/minimal-goal-pack
+goalcli audit goal --fixture .agent/harness/fixtures/golden/minimal-goal-pack
 ```
 
 ---
@@ -11877,18 +11877,18 @@ expected:
 
 # 292. 第一阶段 Issue 拆解
 
-## ISSUE-001：goalkit 项目初始化
+## ISSUE-001：goalcli 项目初始化
 
 ```text
 交付：
-- tools/goalkit/go.mod
-- cmd/goalkit/main.go
+- tools/goalcli/go.mod
+- cmd/goalcli/main.go
 - internal/report
 - internal/config
 
 验收：
-- goalkit --version 可运行
-- goalkit doctor 可运行
+- goalcli --version 可运行
+- goalcli doctor 可运行
 ```
 
 ## ISSUE-002：实现 report 标准输出
@@ -12015,8 +12015,8 @@ make release-check-all
 # 294. v2.0 最终验收标准
 
 ```text
-[ ] goalkit --version 可运行
-[ ] goalkit doctor 可运行
+[ ] goalcli --version 可运行
+[ ] goalcli doctor 可运行
 [ ] worktree-check 可阻断 main
 [ ] secret-check 可阻断 secret
 [ ] schema-check 可识别 invalid schema
@@ -12040,7 +12040,7 @@ make release-check-all
 现在真正应该执行的是：
 
 ```text
-1. 在 xlib-standard 新建 tools/goalkit/
+1. 在 xlib-standard 新建 tools/goalcli/
 2. 实现 CheckResult 与 report writer
 3. 实现 worktree-check
 4. 接入 Makefile
@@ -12066,29 +12066,29 @@ make release-check-all
 
 最终结论：
 
-> **Goal Runtime v2.0 的核心不是再写规则，而是把 `worktree-check`、`secret-check`、`schema-check`、`evidence-check`、`traceability-check` 做成真正可运行的 goalkit v0.1.0。只要这五个 Gate 生效，整个 Goal 系统的可信度会发生质变。**
+> **Goal Runtime v2.0 的核心不是再写规则，而是把 `worktree-check`、`secret-check`、`schema-check`、`evidence-check`、`traceability-check` 做成真正可运行的 goalcli v0.1.0。只要这五个 Gate 生效，整个 Goal 系统的可信度会发生质变。**
 继续进入 **Goal Runtime v2.1：第一批代码级落地骨架**。
 
-这一版不再增加抽象规则，而是把 `goalkit v0.1.0` 的第一批可提交文件、最小 Go 代码结构、Makefile、worktree-check、report writer、fixture 测试方式整理出来。
+这一版不再增加抽象规则，而是把 `goalcli v0.1.0` 的第一批可提交文件、最小 Go 代码结构、Makefile、worktree-check、report writer、fixture 测试方式整理出来。
 
 ---
 
-# Goal Runtime v2.1：goalkit v0.1.0 第一批可执行骨架
+# Goal Runtime v2.1：goalcli v0.1.0 第一批可执行骨架
 
 ## 297. v2.1 的目标
 
 v2.1 只完成一个目标：
 
-> **让 `goalkit worktree check` 成为第一个真实可运行的 P0 Gate。**
+> **让 `goalcli worktree check` 成为第一个真实可运行的 P0 Gate。**
 
 这一步完成后，Goal Runtime 从“规则文档”进入“机器裁判”。
 
 第一批必须做到：
 
 ```text
-goalkit --version 可运行
-goalkit doctor 可运行
-goalkit worktree check 可运行
+goalcli --version 可运行
+goalcli doctor 可运行
+goalcli worktree check 可运行
 make worktree-check 可运行
 main 分支执行失败
 合法 worktree 执行通过
@@ -12102,28 +12102,28 @@ reports/worktree-check.txt 生成
 
 不要一个 PR 做完所有 Gate。第一批按 5 个 Commit / Task 落地。
 
-## Commit 1：初始化 goalkit 工具目录
+## Commit 1：初始化 goalcli 工具目录
 
 ```text
-feat(goalkit): initialize goalkit cli skeleton
+feat(goalcli): initialize goalcli cli skeleton
 ```
 
 交付：
 
 ```text
-tools/goalkit/go.mod
-tools/goalkit/cmd/goalkit/main.go
-tools/goalkit/internal/report/result.go
-tools/goalkit/internal/report/writer.go
-tools/goalkit/internal/config/config.go
+tools/goalcli/go.mod
+tools/goalcli/cmd/goalcli/main.go
+tools/goalcli/internal/report/result.go
+tools/goalcli/internal/report/writer.go
+tools/goalcli/internal/config/config.go
 ```
 
 验收：
 
 ```bash
-cd tools/goalkit
-go run ./cmd/goalkit --version
-go run ./cmd/goalkit doctor
+cd tools/goalcli
+go run ./cmd/goalcli --version
+go run ./cmd/goalcli doctor
 ```
 
 ---
@@ -12131,7 +12131,7 @@ go run ./cmd/goalkit doctor
 ## Commit 2：实现 report 输出协议
 
 ```text
-feat(goalkit): add standard check result reports
+feat(goalcli): add standard check result reports
 ```
 
 交付：
@@ -12145,7 +12145,7 @@ reports/.gitkeep
 验收：
 
 ```bash
-go run ./cmd/goalkit doctor
+go run ./cmd/goalcli doctor
 ls reports/
 ```
 
@@ -12154,7 +12154,7 @@ ls reports/
 ## Commit 3：实现 gitutil
 
 ```text
-feat(goalkit): add git repository inspection helpers
+feat(goalcli): add git repository inspection helpers
 ```
 
 交付：
@@ -12166,7 +12166,7 @@ internal/gitutil/git.go
 验收：
 
 ```bash
-go run ./cmd/goalkit doctor
+go run ./cmd/goalcli doctor
 ```
 
 doctor 输出：
@@ -12198,7 +12198,7 @@ reports/worktree-check.txt
 验收：
 
 ```bash
-go run ./cmd/goalkit worktree check
+go run ./cmd/goalcli worktree check
 ```
 
 ---
@@ -12228,15 +12228,15 @@ scripts/git/install-hooks.sh
 
 ---
 
-# 299. `tools/goalkit` 初始目录
+# 299. `tools/goalcli` 初始目录
 
 推荐第一版结构：
 
 ```text
-tools/goalkit/
+tools/goalcli/
 ├── go.mod
 ├── cmd/
-│   └── goalkit/
+│   └── goalcli/
 │       └── main.go
 └── internal/
     ├── config/
@@ -12254,7 +12254,7 @@ tools/goalkit/
 
 ```text
 Makefile
-goalkit.yaml
+goalcli.yaml
 reports/.gitkeep
 .githooks/pre-commit
 .githooks/pre-push
@@ -12263,12 +12263,12 @@ scripts/git/install-hooks.sh
 
 ---
 
-# 300. `goalkit.yaml` 最小版本
+# 300. `goalcli.yaml` 最小版本
 
 先不要复杂化。
 
 ```yaml
-version: goalkit-v0.1.0
+version: goalcli-v0.1.0
 
 runtime:
   timezone: Asia/Tokyo
@@ -12298,7 +12298,7 @@ rules:
 
 # 301. `CheckResult` 标准结构
 
-`tools/goalkit/internal/report/result.go`
+`tools/goalcli/internal/report/result.go`
 
 ```go
 package report
@@ -12343,7 +12343,7 @@ type CheckResult struct {
 
 # 302. Report Writer
 
-`tools/goalkit/internal/report/writer.go`
+`tools/goalcli/internal/report/writer.go`
 
 ```go
 package report
@@ -12426,7 +12426,7 @@ func ExitCode(result CheckResult, fallback int) int {
 
 # 303. Git 工具函数
 
-`tools/goalkit/internal/gitutil/git.go`
+`tools/goalcli/internal/gitutil/git.go`
 
 ```go
 package gitutil
@@ -12489,14 +12489,14 @@ func IsDetachedHead() bool {
 优先级：
 
 ```text
-GOALKIT_WORKTREE_ROOT
-→ goalkit.yaml
+GOALCLI_WORKTREE_ROOT
+→ goalcli.yaml
 → 默认 ~/code/.worktrees
 ```
 
 v0.1.0 可以先实现环境变量 + 默认值；v0.1.1 再完善 YAML。
 
-`tools/goalkit/internal/config/config.go`
+`tools/goalcli/internal/config/config.go`
 
 ```go
 package config
@@ -12514,7 +12514,7 @@ type Config struct {
 }
 
 func Load() Config {
-	worktreeRoot := os.Getenv("GOALKIT_WORKTREE_ROOT")
+	worktreeRoot := os.Getenv("GOALCLI_WORKTREE_ROOT")
 	if worktreeRoot == "" {
 		home, err := os.UserHomeDir()
 		if err == nil {
@@ -12559,7 +12559,7 @@ func expandHome(path string) string {
 
 # 305. worktree-check 实现骨架
 
-`tools/goalkit/internal/worktree/checker.go`
+`tools/goalcli/internal/worktree/checker.go`
 
 ```go
 package worktree
@@ -12569,9 +12569,9 @@ import (
 	"strings"
 	"time"
 
-	"github.com/ZoneCNH/xlib-standard/tools/goalkit/internal/config"
-	"github.com/ZoneCNH/xlib-standard/tools/goalkit/internal/gitutil"
-	"github.com/ZoneCNH/xlib-standard/tools/goalkit/internal/report"
+	"github.com/ZoneCNH/xlib-standard/tools/goalcli/internal/config"
+	"github.com/ZoneCNH/xlib-standard/tools/goalcli/internal/gitutil"
+	"github.com/ZoneCNH/xlib-standard/tools/goalcli/internal/report"
 )
 
 func Check(cfg config.Config) report.CheckResult {
@@ -12635,7 +12635,7 @@ func isWithin(path string, root string) bool {
 
 # 306. CLI `main.go`
 
-`tools/goalkit/cmd/goalkit/main.go`
+`tools/goalcli/cmd/goalcli/main.go`
 
 ```go
 package main
@@ -12645,10 +12645,10 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/ZoneCNH/xlib-standard/tools/goalkit/internal/config"
-	"github.com/ZoneCNH/xlib-standard/tools/goalkit/internal/gitutil"
-	"github.com/ZoneCNH/xlib-standard/tools/goalkit/internal/report"
-	"github.com/ZoneCNH/xlib-standard/tools/goalkit/internal/worktree"
+	"github.com/ZoneCNH/xlib-standard/tools/goalcli/internal/config"
+	"github.com/ZoneCNH/xlib-standard/tools/goalcli/internal/gitutil"
+	"github.com/ZoneCNH/xlib-standard/tools/goalcli/internal/report"
+	"github.com/ZoneCNH/xlib-standard/tools/goalcli/internal/worktree"
 )
 
 const version = "v0.1.0"
@@ -12663,7 +12663,7 @@ func main() {
 
 	switch {
 	case args[0] == "--version" || args[0] == "version":
-		fmt.Println("goalkit", version)
+		fmt.Println("goalcli", version)
 
 	case args[0] == "doctor":
 		runDoctor()
@@ -12678,12 +12678,12 @@ func main() {
 }
 
 func printUsage() {
-	fmt.Println(`goalkit v0.1.0
+	fmt.Println(`goalcli v0.1.0
 
 Usage:
-  goalkit --version
-  goalkit doctor
-  goalkit worktree check`)
+  goalcli --version
+  goalcli doctor
+  goalcli worktree check`)
 }
 
 func runDoctor() {
@@ -12692,7 +12692,7 @@ func runDoctor() {
 	commit, _ := gitutil.Commit()
 	commonDir, _ := gitutil.GitCommonDir()
 
-	fmt.Println("goalkit doctor")
+	fmt.Println("goalcli doctor")
 	fmt.Println("repo_root:", root)
 	fmt.Println("branch:", branch)
 	fmt.Println("commit:", commit)
@@ -12726,10 +12726,10 @@ func runWorktreeCheck() {
 
 # 307. `go.mod`
 
-`tools/goalkit/go.mod`
+`tools/goalcli/go.mod`
 
 ```go
-module github.com/ZoneCNH/xlib-standard/tools/goalkit
+module github.com/ZoneCNH/xlib-standard/tools/goalcli
 
 go 1.22
 ```
@@ -12743,19 +12743,19 @@ go 1.22
 根目录 `Makefile`：
 
 ```makefile
-GOALKIT := go run ./tools/goalkit/cmd/goalkit
+GOALCLI := go run ./tools/goalcli/cmd/goalcli
 
-.PHONY: goalkit-version
-goalkit-version:
-	$(GOALKIT) --version
+.PHONY: goalcli-version
+goalcli-version:
+	$(GOALCLI) --version
 
 .PHONY: doctor
 doctor:
-	$(GOALKIT) doctor
+	$(GOALCLI) doctor
 
 .PHONY: worktree-check
 worktree-check:
-	$(GOALKIT) worktree check
+	$(GOALCLI) worktree check
 
 .PHONY: ci
 ci: worktree-check
@@ -12908,8 +12908,8 @@ cat reports/worktree-check.txt
 只有全部满足，才能进入 `secret-check`。
 
 ```text
-[ ] goalkit --version 可运行
-[ ] goalkit doctor 可运行
+[ ] goalcli --version 可运行
+[ ] goalcli doctor 可运行
 [ ] make worktree-check 可运行
 [ ] main 分支执行 worktree-check 失败
 [ ] 合法 worktree 执行 worktree-check 通过
@@ -12947,18 +12947,18 @@ Git hooks installed
 # 314. v2.1 最终执行命令
 
 ```bash
-# 1. 初始化 goalkit
-mkdir -p tools/goalkit/cmd/goalkit
-mkdir -p tools/goalkit/internal/{config,gitutil,report,worktree}
+# 1. 初始化 goalcli
+mkdir -p tools/goalcli/cmd/goalcli
+mkdir -p tools/goalcli/internal/{config,gitutil,report,worktree}
 mkdir -p reports
 touch reports/.gitkeep
 
 # 2. 写入 go.mod / main.go / internal packages
 
 # 3. 验证
-cd tools/goalkit
-go run ./cmd/goalkit --version
-go run ./cmd/goalkit doctor
+cd tools/goalcli
+go run ./cmd/goalcli --version
+go run ./cmd/goalcli doctor
 
 # 4. 回到根目录
 cd ../..
@@ -12979,13 +12979,13 @@ make worktree-check
 
 最终结论：
 
-> **v2.1 的唯一目标是让 `goalkit worktree check` 成为第一个真正可运行的 Harness Gate。完成它以后，Goal Runtime 才拥有第一条不可绕过的机器铁律：禁止 main 开发。**
+> **v2.1 的唯一目标是让 `goalcli worktree check` 成为第一个真正可运行的 Harness Gate。完成它以后，Goal Runtime 才拥有第一条不可绕过的机器铁律：禁止 main 开发。**
 继续进入 **Goal Runtime v2.2：实现第二个 P0 Gate —— `secret-check`**。
 
 上一阶段 v2.1 只做一件事：让 `worktree-check` 真正跑起来，防止 main 开发。
 v2.2 只做第二件事：
 
-> **让 `goalkit secret check` 成为第二个真实可运行的 P0 Gate，防止密钥进入代码、文档、Evidence、Release。**
+> **让 `goalcli secret check` 成为第二个真实可运行的 P0 Gate，防止密钥进入代码、文档、Evidence、Release。**
 
 ---
 
@@ -12998,7 +12998,7 @@ v2.2 只做第二件事：
 v2.2 必须做到：
 
 ```text
-goalkit secret check 可运行
+goalcli secret check 可运行
 make secret-check 可运行
 含 secret 的 fixture 必须失败
 masked example / allowlist 示例必须通过
@@ -13041,21 +13041,21 @@ v2.2 只做：
 ## Commit 1：扩展 CLI 命令
 
 ```text
-feat(goalkit): add secret check command skeleton
+feat(goalcli): add secret check command skeleton
 ```
 
 交付：
 
 ```text
-tools/goalkit/internal/secret/checker.go
-tools/goalkit/internal/gitutil/git.go 更新 TrackedFiles
-tools/goalkit/cmd/goalkit/main.go 增加 secret check
+tools/goalcli/internal/secret/checker.go
+tools/goalcli/internal/gitutil/git.go 更新 TrackedFiles
+tools/goalcli/cmd/goalcli/main.go 增加 secret check
 ```
 
 验收：
 
 ```bash
-go run ./tools/goalkit/cmd/goalkit secret check
+go run ./tools/goalcli/cmd/goalcli secret check
 ```
 
 ---
@@ -13116,7 +13116,7 @@ test(secret): add secret leak violation fixture
 验收：
 
 ```bash
-goalkit secret check --fixture .agent/harness/fixtures/violations/secret-leak
+goalcli secret check --fixture .agent/harness/fixtures/violations/secret-leak
 ```
 
 ---
@@ -13142,7 +13142,7 @@ Makefile 增加 secret-check
 新增：
 
 ```text
-tools/goalkit/internal/secret/
+tools/goalcli/internal/secret/
 └── checker.go
 
 .agent/security/
@@ -13164,7 +13164,7 @@ tools/goalkit/internal/secret/
 更新：
 
 ```text
-tools/goalkit/internal/gitutil/git.go
+tools/goalcli/internal/gitutil/git.go
 ```
 
 新增函数：
@@ -13288,9 +13288,9 @@ import (
 	"strings"
 	"time"
 
-	"github.com/ZoneCNH/xlib-standard/tools/goalkit/internal/config"
-	"github.com/ZoneCNH/xlib-standard/tools/goalkit/internal/gitutil"
-	"github.com/ZoneCNH/xlib-standard/tools/goalkit/internal/report"
+	"github.com/ZoneCNH/xlib-standard/tools/goalcli/internal/config"
+	"github.com/ZoneCNH/xlib-standard/tools/goalcli/internal/gitutil"
+	"github.com/ZoneCNH/xlib-standard/tools/goalcli/internal/report"
 )
 
 var secretAssignmentPattern = regexp.MustCompile(
@@ -13511,19 +13511,19 @@ func fail(result report.CheckResult, ruleID string, message string, file string,
 更新：
 
 ```text
-tools/goalkit/cmd/goalkit/main.go
+tools/goalcli/cmd/goalcli/main.go
 ```
 
 新增 import：
 
 ```go
-"github.com/ZoneCNH/xlib-standard/tools/goalkit/internal/secret"
+"github.com/ZoneCNH/xlib-standard/tools/goalcli/internal/secret"
 ```
 
 新增 usage：
 
 ```text
-goalkit secret check
+goalcli secret check
 ```
 
 新增 case：
@@ -13587,23 +13587,23 @@ exit code = 7
 更新根目录 `Makefile`：
 
 ```makefile
-GOALKIT := go run ./tools/goalkit/cmd/goalkit
+GOALCLI := go run ./tools/goalcli/cmd/goalcli
 
-.PHONY: goalkit-version
-goalkit-version:
-	$(GOALKIT) --version
+.PHONY: goalcli-version
+goalcli-version:
+	$(GOALCLI) --version
 
 .PHONY: doctor
 doctor:
-	$(GOALKIT) doctor
+	$(GOALCLI) doctor
 
 .PHONY: worktree-check
 worktree-check:
-	$(GOALKIT) worktree check
+	$(GOALCLI) worktree check
 
 .PHONY: secret-check
 secret-check:
-	$(GOALKIT) secret check
+	$(GOALCLI) secret check
 
 .PHONY: ci
 ci:
@@ -13716,7 +13716,7 @@ v2.2 可以先不用 `--fixture` 参数，先用手工复制方式验证。
 后续 v2.3 再实现：
 
 ```bash
-goalkit secret check --fixture <path>
+goalcli secret check --fixture <path>
 ```
 
 当前可先执行：
@@ -13769,7 +13769,7 @@ rm example.env
 只有全部满足，才进入 `schema-check`。
 
 ```text
-[ ] goalkit secret check 可运行
+[ ] goalcli secret check 可运行
 [ ] make secret-check 可运行
 [ ] secret-check 失败时 exit code = 7
 [ ] secret-check 成功时 exit code = 0
@@ -13830,7 +13830,7 @@ schema-check 才能让 Goal Pack / Evidence / Release 机器可读
 v2.3 的目标：
 
 ```text
-goalkit schema validate --all
+goalcli schema validate --all
 Goal / Task / Evidence / Release schema
 Golden Goal Pack
 invalid-schema violation fixture
@@ -13853,4 +13853,4 @@ reports/schema-check.json
 
 最终结论：
 
-> **v2.2 完成后，Goal Runtime 拥有第二条机器铁律：不允许 secret 进入代码、文档、Evidence、Release。worktree-check 保护主线，secret-check 保护安全边界。两者一起构成 goalkit v0.1.0 的第一层 P0 防护。**
+> **v2.2 完成后，Goal Runtime 拥有第二条机器铁律：不允许 secret 进入代码、文档、Evidence、Release。worktree-check 保护主线，secret-check 保护安全边界。两者一起构成 goalcli v0.1.0 的第一层 P0 防护。**

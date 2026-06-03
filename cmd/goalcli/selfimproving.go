@@ -24,7 +24,7 @@ import (
 // --strict 追加：3 个 patches.yaml 合计至少 1 个 `- patch_id:` entry
 // （RULE-SI-001 / RULE-RETRO-CHECK-002，对 Lite Mode 无失败可豁免，故默认非 strict）。
 func runSelfImprovingCheck(cmdName string, args []string, stdout io.Writer, stderr io.Writer) int {
-	flags := flag.NewFlagSet("xlibgate "+cmdName, flag.ContinueOnError)
+	flags := flag.NewFlagSet("goalcli "+cmdName, flag.ContinueOnError)
 	flags.SetOutput(stderr)
 	root := flags.String("root", ".", "repository root to inspect")
 	strict := flags.Bool("strict", false, "require at least one patch entry across the three registries")

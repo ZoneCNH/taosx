@@ -101,7 +101,7 @@ gates:
     current_mva_state: not_run
     release_usable: false
   - id: score_check
-    command: "go run ./cmd/xlibgate score --min 9.8"
+    command: "go run ./cmd/goalcli score --min 9.8"
     required_for_release: true
     current_mva_state: not_run
     release_usable: false

@@ -19,13 +19,13 @@
 ## 当前 v3.1 补充入口
 
 - [Goal Runtime Canonical 标准](../../.agent/standard/goal-runtime-canonical.md)：Goal Runtime 唯一权威规格（8 条铁律 + 9 层架构 + v0.1.0 五主线），原始演进合集见 `.agent/inbox/`。
-- [goalkit ↔ xlibgate 命名合约](../../.agent/standard/goalkit-xlibgate-mapping.md)：合约-实现分离声明，`goalkit` 是标准合约名，`xlibgate` 是本仓库实现。
+- [goalcli 命名合约](../../.agent/standard/goalcli-mapping.md)：单一命名合约，`goalcli` 是标准合约、机器执行面和本仓库实现入口。
 - [下游矩阵](../downstream-matrix.md)：`kernel` 与目标基础库的 module/package/layer/dependency 矩阵。
 - [下游同步策略](../downstream-sync-policy.md)：标准变更到 `kernel`、L1/L2 基础库和 `x.go` 的同步规则。
 - [x.go 集成边界](../xgo-integration-boundary.md)：调用方密钥路径和组合边界。
 - [测试策略](../testing.md)：单元、示例 smoke、release quality 和 release manifest fixture 隔离要求。
 - [供应链与 Evidence](../supply-chain.md)：workflow Action SHA pinning、固定 `govulncheck` 版本、manifest 校验和 CI artifact 对齐。
-- [Release Scorecard](../scorecard.md)：`xlibgate score --min 9.8` 的评分维度、阈值和语义边界。
+- [Release Scorecard](../scorecard.md)：`goalcli score --min 9.8` 的评分维度、阈值和语义边界。
 - [独立审计 2026-06-02](../independent-audit-20260602.md)：审计发现、修复状态和剩余远端验证缺口。
 - [迁移指南](../migration/baselib-template-to-xlib-standard.md)：旧名迁移规则。
 - [目标 ADR-001](../adr/ADR-20260602-001-xlib-standard-role.md)：合并五类职责的身份决策。
@@ -39,7 +39,7 @@
 GOWORK=off make dependency-check
 GOWORK=off make standard-impact-check
 GOWORK=off make docs-check
-GOWORK=off go run ./cmd/xlibgate score --min 9.8
+GOWORK=off go run ./cmd/goalcli score --min 9.8
 GOWORK=off make release-check
 ```
 

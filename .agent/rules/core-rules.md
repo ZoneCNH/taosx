@@ -14,7 +14,7 @@
 
 ### **[P0]** `RULE-CORE-001`：没有证据，不允许 DONE
 
-<sub>level: P0 · status: active · enforced_by: `xlibgate evidence-check` · exit: 8 · source: §1 L56</sub>
+<sub>level: P0 · status: active · enforced_by: `goalcli evidence-check` · exit: 8 · source: §1 L56</sub>
 
 任何 Task、Issue、Goal、Release 都不能只靠描述完成。
 
@@ -31,7 +31,7 @@ DONE with evidence:
 
 ### **[P0]** `RULE-CORE-002`：Goal 必须从真实上下文开始
 
-<sub>level: P0 · status: active · enforced_by: `xlibgate context-fast-check` · exit: 1 · source: §1 L73</sub>
+<sub>level: P0 · status: active · enforced_by: `goalcli context-fast-check` · exit: 1 · source: §1 L73</sub>
 
 禁止在没有恢复上下文的情况下直接设计方案。
 
@@ -52,7 +52,7 @@ DONE with evidence:
 
 ### **[P0]** `RULE-CORE-003`：需求必须可验证
 
-<sub>level: P0 · status: active · enforced_by: `xlibgate acceptance-matrix` · exit: 1 · source: §1 L94</sub>
+<sub>level: P0 · status: active · enforced_by: `goalcli acceptance-matrix` · exit: 1 · source: §1 L94</sub>
 
 所有 Requirement 必须绑定 Acceptance Criteria。
 
@@ -64,7 +64,7 @@ Requirement → Acceptance Criteria → Test → Evidence
 
 ### **[P0]** `RULE-CORE-004`：所有变更必须可追踪
 
-<sub>level: P0 · status: active · enforced_by: `xlibgate traceability-check` · exit: 9 · source: §1 L106</sub>
+<sub>level: P0 · status: active · enforced_by: `goalcli traceability-check` · exit: 9 · source: §1 L106</sub>
 
 每个变更必须能追踪到：
 
@@ -90,7 +90,7 @@ Harness 负责判断是否允许进入下一阶段。
 
 ### **[P0]** `RULE-CORE-006`：Self-improving 是强制环节
 
-<sub>level: P0 · status: indexed · enforced_by: `（待机器化）` · source: §1 L132</sub>
+<sub>level: P0 · status: active · enforced_by: `goalcli self-improving-check` · exit: 1 · source: §1 L132</sub>
 
 每次 Goal 完成后必须输出：
 
@@ -111,7 +111,7 @@ New Issue Candidates
 
 ### **[P1]** `RULE-MODE-001`：必须声明执行模式
 
-<sub>level: P1 · status: indexed · enforced_by: `（待机器化）` · source: §2 L151</sub>
+<sub>level: P1 · status: active · enforced_by: `goalcli goal-runtime` · exit: 1 · source: §2 L151</sub>
 
 每个 Goal 必须声明模式：
 
@@ -127,7 +127,7 @@ Full
 
 ### **[P1]** `RULE-OBJECT-001`：Goal 必须包含完整字段
 
-<sub>level: P1 · status: indexed · enforced_by: `（待机器化）` · source: §3 L252</sub>
+<sub>level: P1 · status: active · enforced_by: `goalcli goal-runtime` · exit: 1 · source: §3 L252</sub>
 
 ```text
 goal_id
@@ -150,7 +150,7 @@ state
 
 ### **[P1]** `RULE-OBJECT-002`：统一对象关系
 
-<sub>level: P1 · status: indexed · enforced_by: `（待机器化）` · source: §3 L275</sub>
+<sub>level: P1 · status: active · enforced_by: `goalcli goal-runtime` · exit: 1 · source: §3 L275</sub>
 
 必须遵循：
 
@@ -175,7 +175,7 @@ Retrospective patches Prompt / Harness / Rules
 
 ### **[P1]** `RULE-ID-001`：所有核心对象必须有稳定 ID
 
-<sub>level: P1 · status: indexed · enforced_by: `（待机器化）` · source: §4 L298</sub>
+<sub>level: P1 · status: active · enforced_by: `goalcli goal-runtime` · exit: 1 · source: §4 L298</sub>
 
 ```text
 GOAL-YYYYMMDD-NNN
@@ -200,7 +200,7 @@ PATCH-RULE-YYYYMMDD-NNN
 
 ### **[P1]** `RULE-ID-002`：禁止无 ID 的需求、任务、证据
 
-<sub>level: P1 · status: indexed · enforced_by: `（待机器化）` · source: §4 L323</sub>
+<sub>level: P1 · status: active · enforced_by: `goalcli goal-runtime` · exit: 1 · source: §4 L323</sub>
 
 以下对象没有 ID 不允许进入执行：
 
@@ -223,7 +223,7 @@ Patch
 
 ### **[P0]** `RULE-STATE-001`：Goal 必须经过状态机
 
-<sub>level: P0 · status: active · enforced_by: `xlibgate goal-runtime` · exit: 1 · source: §5 L344</sub>
+<sub>level: P0 · status: active · enforced_by: `goalcli goal-runtime` · exit: 1 · source: §5 L344</sub>
 
 标准状态机：
 
@@ -245,7 +245,7 @@ INIT
 
 ### **[P0]** `RULE-STATE-002`：异常状态必须显式记录
 
-<sub>level: P0 · status: active · enforced_by: `xlibgate goal-runtime` · exit: 1 · source: §5 L366</sub>
+<sub>level: P0 · status: active · enforced_by: `goalcli goal-runtime` · exit: 1 · source: §5 L366</sub>
 
 ```text
 BLOCKED
@@ -260,7 +260,7 @@ INCONSISTENT_STATE
 
 ### **[P0]** `RULE-STATE-003`：禁止跳状态
 
-<sub>level: P0 · status: active · enforced_by: `xlibgate goal-runtime` · exit: 1 · source: §5 L381</sub>
+<sub>level: P0 · status: active · enforced_by: `goalcli goal-runtime` · exit: 1 · source: §5 L381</sub>
 
 例如：
 
@@ -277,7 +277,7 @@ INCONSISTENT_STATE
 
 ### **[P1]** `RULE-CONTEXT-001`：必须恢复真实项目状态
 
-<sub>level: P1 · status: active · enforced_by: `xlibgate context-fast-check` · exit: 1 · source: §6 L396</sub>
+<sub>level: P1 · status: active · enforced_by: `goalcli context-fast-check` · exit: 1 · source: §6 L396</sub>
 
 必须检查：
 
@@ -302,7 +302,7 @@ release tags
 
 ### **[P1]** `RULE-CONTEXT-002`：禁止引用不存在的能力
 
-<sub>level: P1 · status: active · enforced_by: `xlibgate context-fast-check` · exit: 1 · source: §6 L421</sub>
+<sub>level: P1 · status: active · enforced_by: `goalcli context-fast-check` · exit: 1 · source: §6 L421</sub>
 
 禁止出现：
 
@@ -315,7 +315,7 @@ release tags
 
 ### **[P1]** `RULE-CONTEXT-003`：上下文冲突必须进入 Decision Log
 
-<sub>level: P1 · status: active · enforced_by: `xlibgate context-fast-check` · exit: 1 · source: §6 L434</sub>
+<sub>level: P1 · status: active · enforced_by: `goalcli context-fast-check` · exit: 1 · source: §6 L434</sub>
 
 例如：
 
@@ -338,7 +338,7 @@ DEC-YYYYMMDD-NNN
 
 ### **[P1]** `RULE-CLASS-001`：所有规则必须分级
 
-<sub>level: P1 · status: indexed · enforced_by: `（待机器化）` · source: §28 L1504</sub>
+<sub>level: P1 · status: active · enforced_by: `goalcli goal-runtime` · exit: 1 · source: §28 L1504</sub>
 
 规则必须分为：
 
@@ -355,7 +355,7 @@ P3: 建议规则，用于优化和评分
 
 ### **[P1]** `RULE-PRIORITY-001`：规则冲突时按优先级裁决
 
-<sub>level: P1 · status: indexed · enforced_by: `（待机器化）` · source: §29 L1581</sub>
+<sub>level: P1 · status: active · enforced_by: `goalcli goal-runtime` · exit: 1 · source: §29 L1581</sub>
 
 优先级：
 
@@ -380,7 +380,7 @@ Worktree Rule 优先，必须阻断。
 
 ### **[P1]** `RULE-PRIORITY-002`：本地规则不得覆盖 P0 全局规则
 
-<sub>level: P1 · status: indexed · enforced_by: `（待机器化）` · source: §29 L1606</sub>
+<sub>level: P1 · status: active · enforced_by: `goalcli goal-runtime` · exit: 1 · source: §29 L1606</sub>
 
 仓库局部规则可以增强，但不能削弱：
 
@@ -434,7 +434,7 @@ decision log
 
 ### **[P1]** `RULE-SCORE-001`：每个 Goal 必须评分
 
-<sub>level: P1 · status: active · enforced_by: `xlibgate score` · exit: 1 · source: §50 L2392</sub>
+<sub>level: P1 · status: active · enforced_by: `goalcli score` · exit: 1 · source: §50 L2392</sub>
 
 满分 100：
 
@@ -457,7 +457,7 @@ Self-improving: 5
 
 ### **[P1]** `RULE-RUNTIME-COMPAT-001`：Goal Runtime 升级必须声明兼容范围
 
-<sub>level: P1 · status: indexed · enforced_by: `（待机器化）` · source: §108 L4566</sub>
+<sub>level: P1 · status: active · enforced_by: `goalcli upgrade-runtime` · exit: 1 · source: §108 L4566</sub>
 
 ```yaml
 runtime_version: goal-runtime-v1.3
@@ -471,12 +471,12 @@ breaking_changes:
 
 ### **[P1]** `RULE-RUNTIME-COMPAT-002`：不兼容升级必须提供迁移脚本
 
-<sub>level: P1 · status: indexed · enforced_by: `（待机器化）` · source: §108 L4580</sub>
+<sub>level: P1 · status: active · enforced_by: `goalcli upgrade-runtime` · exit: 1 · source: §108 L4580</sub>
 
 例如：
 
 ```bash
-goalkit migrate rules --from rules-v1.2 --to rules-v1.3
+goalcli migrate rules --from rules-v1.2 --to rules-v1.3
 ```
 
 ---
@@ -485,13 +485,13 @@ goalkit migrate rules --from rules-v1.2 --to rules-v1.3
 
 ### **[P1]** `RULE-ROOT-001`：根目录必须提供统一入口
 
-<sub>level: P1 · status: indexed · enforced_by: `（待机器化）` · source: §114 L4841</sub>
+<sub>level: P1 · status: active · enforced_by: `goalcli boundary` · exit: 1 · source: §114 L4841</sub>
 
 根目录至少需要：
 
 ```text
 Makefile
-goalkit.yaml
+goalcli.yaml
 .github/workflows/
 scripts/harness/
 scripts/git/
@@ -523,9 +523,9 @@ scripts/
 
 ### **[P1]** `RULE-SIMPLICITY-001`：v0.1.0 不实现全自动写代码
 
-<sub>level: P1 · status: indexed · enforced_by: `（待机器化）` · source: §130 L5523</sub>
+<sub>level: P1 · status: active · enforced_by: `goalcli minimal-kernel` · exit: 1 · source: §130 L5523</sub>
 
-`goalkit v0.1.0` 的边界：
+`goalcli v0.1.0` 的边界：
 
 ```text
 做检查
@@ -549,7 +549,7 @@ scripts/
 
 ### **[P1]** `RULE-SIMPLICITY-002`：规则不能无限增长而无机器约束
 
-<sub>level: P1 · status: indexed · enforced_by: `（待机器化）` · source: §130 L5549</sub>
+<sub>level: P1 · status: active · enforced_by: `goalcli minimal-kernel` · exit: 1 · source: §130 L5549</sub>
 
 新增规则必须满足至少一个条件：
 
@@ -569,7 +569,7 @@ scripts/
 
 ### **[P1]** `RULE-MODE-GATE-001`：不同模式 Gate 不同
 
-<sub>level: P1 · status: indexed · enforced_by: `（待机器化）` · source: §131 L5567</sub>
+<sub>level: P1 · status: active · enforced_by: `goalcli goal-runtime` · exit: 1 · source: §131 L5567</sub>
 
 | Gate               | Lite | Standard | Full |
 | ------------------ | ---: | -------: | ---: |
@@ -590,7 +590,7 @@ scripts/
 
 ### **[P1]** `RULE-ORDER-001`：先做 Gate，再做自动化
 
-<sub>level: P1 · status: indexed · enforced_by: `（待机器化）` · source: §137 L5695</sub>
+<sub>level: P1 · status: active · enforced_by: `goalcli goal-runtime` · exit: 1 · source: §137 L5695</sub>
 
 正确顺序：
 
@@ -622,7 +622,7 @@ scripts/
 
 ### **[P0]** `RULE-STATE-GATE-001`：每个状态迁移必须有 Gate
 
-<sub>level: P0 · status: active · enforced_by: `xlibgate goal-runtime` · exit: 1 · source: §143 L5901</sub>
+<sub>level: P0 · status: active · enforced_by: `goalcli goal-runtime` · exit: 1 · source: §143 L5901</sub>
 
 ```text
 INIT → CONTEXT_READY              需要 Context Gate
@@ -641,7 +641,7 @@ RETROSPECTING → DONE              需要 Retro + Audit Gate
 
 ### **[P0]** `RULE-STATE-GATE-002`：状态迁移必须写入 Registry
 
-<sub>level: P0 · status: active · enforced_by: `xlibgate goal-runtime` · exit: 1 · source: §143 L5920</sub>
+<sub>level: P0 · status: active · enforced_by: `goalcli goal-runtime` · exit: 1 · source: §143 L5920</sub>
 
 每次迁移必须更新：
 
@@ -669,7 +669,7 @@ state_transitions:
 
 ### **[P1]** `RULE-GOAL-FREEZE-001`：进入 Release 前必须冻结 Goal Scope
 
-<sub>level: P1 · status: indexed · enforced_by: `（待机器化）` · source: §160 L6548</sub>
+<sub>level: P1 · status: active · enforced_by: `goalcli scope-lock` · exit: 1 · source: §160 L6548</sub>
 
 状态：
 
@@ -694,7 +694,7 @@ NEEDS_REPLAN
 
 ### **[P1]** `RULE-GOAL-FREEZE-002`：冻结后只允许修复 release blocker
 
-<sub>level: P1 · status: indexed · enforced_by: `（待机器化）` · source: §160 L6573</sub>
+<sub>level: P1 · status: active · enforced_by: `goalcli scope-lock` · exit: 1 · source: §160 L6573</sub>
 
 允许：
 
@@ -713,7 +713,7 @@ NEEDS_REPLAN
 
 ### **[P1]** `RULE-SSOT-001`：每类事实必须只有一个主源
 
-<sub>level: P1 · status: indexed · enforced_by: `（待机器化）` · source: §174 L7143</sub>
+<sub>level: P1 · status: active · enforced_by: `goalcli goal-runtime` · exit: 1 · source: §174 L7143</sub>
 
 | 事实类型        | SSOT                              |
 | ----------- | --------------------------------- |
@@ -729,7 +729,7 @@ NEEDS_REPLAN
 
 ### **[P1]** `RULE-SSOT-002`：非 SSOT 文档只能引用，不得复制事实
 
-<sub>level: P1 · status: indexed · enforced_by: `（待机器化）` · source: §174 L7159</sub>
+<sub>level: P1 · status: active · enforced_by: `goalcli goal-runtime` · exit: 1 · source: §174 L7159</sub>
 
 例如：
 
@@ -746,7 +746,7 @@ README 可以写：
 
 ### **[P1]** `RULE-NAMING-001`：命名必须统一
 
-<sub>level: P1 · status: indexed · enforced_by: `（待机器化）` · source: §198 L7945</sub>
+<sub>level: P1 · status: active · enforced_by: `goalcli naming` · exit: 1 · source: §198 L7945</sub>
 
 禁止同一概念多名称：
 
@@ -768,7 +768,7 @@ Harness / Gate / Checker 混用
 
 ### **[P1]** `RULE-GLOSSARY-001`：核心术语必须进入 Glossary
 
-<sub>level: P1 · status: indexed · enforced_by: `（待机器化）` · source: §199 L7965</sub>
+<sub>level: P1 · status: active · enforced_by: `make governance-check` · exit: 1 · source: §199 L7965</sub>
 
 至少包括：
 
@@ -791,7 +791,7 @@ Waiver
 
 ### **[P1]** `RULE-GLOSSARY-002`：文档新增术语必须同步 Glossary
 
-<sub>level: P1 · status: indexed · enforced_by: `（待机器化）` · source: §199 L7988</sub>
+<sub>level: P1 · status: active · enforced_by: `make governance-check` · exit: 1 · source: §199 L7988</sub>
 
 否则 docs-check 警告。
 
@@ -801,7 +801,7 @@ Waiver
 
 ### **[P1]** `RULE-MATURITY-001`：Goal Runtime 成熟度分五级
 
-<sub>level: P1 · status: indexed · enforced_by: `（待机器化）` · source: §200 L7996</sub>
+<sub>level: P1 · status: active · enforced_by: `goalcli conformance-profile` · exit: 1 · source: §200 L7996</sub>
 
 ```text
 L0 文档型：
@@ -825,7 +825,7 @@ Retro Patch 能稳定反哺规则、Harness、模板和 CI
 
 ### **[P1]** `RULE-MATURITY-002`：当前目标应先达到 L2
 
-<sub>level: P1 · status: indexed · enforced_by: `（待机器化）` · source: §200 L8020</sub>
+<sub>level: P1 · status: active · enforced_by: `goalcli conformance-profile` · exit: 1 · source: §200 L8020</sub>
 
 当前阶段不要直接追求 L5。
 
@@ -852,7 +852,7 @@ audit goal 生效
 
 ### **[P1]** `RULE-CONFLICT-001`：SSOT 冲突必须自动检测
 
-<sub>level: P1 · status: indexed · enforced_by: `（待机器化）` · source: §213 L8431</sub>
+<sub>level: P1 · status: active · enforced_by: `goalcli goal-runtime` · exit: 1 · source: §213 L8431</sub>
 
 典型冲突：
 
@@ -866,7 +866,7 @@ README 复制了过期规则
 
 ### **[P1]** `RULE-CONFLICT-002`：冲突必须有裁决顺序
 
-<sub>level: P1 · status: indexed · enforced_by: `（待机器化）` · source: §213 L8445</sub>
+<sub>level: P1 · status: active · enforced_by: `goalcli goal-runtime` · exit: 1 · source: §213 L8445</sub>
 
 裁决顺序：
 
@@ -887,7 +887,7 @@ README / docs
 
 ### **[P1]** `RULE-PROFILE-001`：必须区分安装 Profile
 
-<sub>level: P1 · status: indexed · enforced_by: `（待机器化）` · source: §214 L8464</sub>
+<sub>level: P1 · status: active · enforced_by: `goalcli conformance-profile` · exit: 1 · source: §214 L8464</sub>
 
 ```text
 minimal
@@ -899,7 +899,7 @@ xgo
 
 ### **[P1]** `RULE-PROFILE-002`：不同 Profile 安装不同能力
 
-<sub>level: P1 · status: indexed · enforced_by: `（待机器化）` · source: §214 L8476</sub>
+<sub>level: P1 · status: active · enforced_by: `goalcli conformance-profile` · exit: 1 · source: §214 L8476</sub>
 
 | Profile    | 适用            | 必装                                        |
 | ---------- | ------------- | ----------------------------------------- |
@@ -915,7 +915,7 @@ xgo
 
 ### **[P1]** `RULE-FREEZE-003`：Freeze 后禁止新增非 blocker 变更
 
-<sub>level: P1 · status: indexed · enforced_by: `（待机器化）` · source: §221 L8665</sub>
+<sub>level: P1 · status: active · enforced_by: `goalcli scope-lock` · exit: 1 · source: §221 L8665</sub>
 
 进入 `RELEASE_FREEZE` 后只允许：
 
@@ -931,7 +931,7 @@ xgo
 
 ### **[P1]** `RULE-FREEZE-004`：Freeze 解除必须有 Decision
 
-<sub>level: P1 · status: indexed · enforced_by: `（待机器化）` · source: §221 L8681</sub>
+<sub>level: P1 · status: active · enforced_by: `goalcli scope-lock` · exit: 1 · source: §221 L8681</sub>
 
 如果要扩大 Scope：
 

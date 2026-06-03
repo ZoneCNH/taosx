@@ -6,7 +6,7 @@
 
 1. `docs/goal/` 与 `docs/standard/` 描述目标、边界和标准条款。
 2. `.agent/rules/` 描述 Goal Runtime 全链路规则（goal、worktree、evidence、harness、self-improving、issue、commit、pr、release、risk-decision、security）。
-3. `.agent/*.yaml` 与 `cmd/xlibgate` 描述机器可执行的门禁契约。
+3. `.agent/*.yaml` 与 `cmd/goalcli` 描述机器可执行的门禁契约。
 4. `release/manifest/` 与 `release/evidence/` 保存发布证据模板或占位；`latest.json` 等运行时产物按 `.gitignore` 重新生成，不直接提交。
 
 ## 修改原则

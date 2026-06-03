@@ -31,6 +31,18 @@ func run(args []string, stdin io.Reader, stdout io.Writer, stderr io.Writer) int
 		return runMainGuard(args[1:], stdout, stderr)
 	case "worktree-guard":
 		return runWorktreeGuard(args[1:], stdout, stderr)
+	case "worktree-check":
+		return runWorktreeCheck(args[1:], stdout, stderr)
+	case "context-check":
+		return runContextCheck(args[1:], stdout, stderr)
+	case "spec-check":
+		return runSpecCheck(args[1:], stdout, stderr)
+	case "design-check":
+		return runDesignCheck(args[1:], stdout, stderr)
+	case "task-check":
+		return runTaskCheck(args[1:], stdout, stderr)
+	case "pr-check":
+		return runPRCheck(args[1:], stdin, stdout, stderr)
 	case "evidence-check":
 		return runEvidenceCheck(args[1:], stdout, stderr)
 	case "cli-contract":
@@ -101,10 +113,17 @@ func run(args []string, stdin io.Reader, stdout io.Writer, stderr io.Writer) int
 		return runExternal(stdin, stdout, stderr, "./scripts/check_rendered_template.sh", args[1:]...)
 	case "rules-consistency-check":
 		return runRulesConsistencyCheck(args[1:], stdout, stderr)
+	case "rules-verify":
+		return runExternal(stdin, stdout, stderr, "python3", "scripts/verify_rules.py")
 	case "score":
 		return runScore(args[1:], stdout, stderr)
-	case "secrets", "security":
+	case "secrets":
 		return runExternal(stdin, stdout, stderr, "./scripts/check_secrets.sh")
+	case "security":
+		return runExternalSequence(stdin, stdout, stderr,
+			externalCommand{name: "govulncheck", args: []string{"./..."}},
+			externalCommand{name: "./scripts/check_secrets.sh"},
+		)
 	case "standard-impact-check":
 		return runExternal(stdin, stdout, stderr, "./scripts/check_standard_impact.sh")
 	case "self-improving-check", "retro-check":
@@ -121,7 +140,7 @@ func run(args []string, stdin io.Reader, stdout io.Writer, stderr io.Writer) int
 }
 
 func runScore(args []string, stdout io.Writer, stderr io.Writer) int {
-	flags := flag.NewFlagSet("xlibgate score", flag.ContinueOnError)
+	flags := flag.NewFlagSet("goalcli score", flag.ContinueOnError)
 	flags.SetOutput(stderr)
 	minimum := flags.Float64("min", releasequality.DefaultMinimum, "minimum acceptable release score")
 	if err := flags.Parse(args); err != nil {
@@ -166,11 +185,25 @@ func runExternal(stdin io.Reader, stdout io.Writer, stderr io.Writer, name strin
 	return 0
 }
 
+type externalCommand struct {
+	name string
+	args []string
+}
+
+func runExternalSequence(stdin io.Reader, stdout io.Writer, stderr io.Writer, commands ...externalCommand) int {
+	for _, command := range commands {
+		if code := runExternal(stdin, stdout, stderr, command.name, command.args...); code != 0 {
+			return code
+		}
+	}
+	return 0
+}
+
 func write(writer io.Writer, format string, args ...any) {
 	_, _ = fmt.Fprintf(writer, format, args...)
 }
 
-const usage = `usage: xlibgate <command> [args]
+const usage = `usage: goalcli <command> [args]
 
 commands:
   agent-team-contract [--dry-run]
@@ -183,6 +216,7 @@ commands:
   cli-contract [--json|--output <path>|--explain]
   command-registry
   conformance-profile [--profile <name>]
+  context-check [--json]
   context-fast-check
   context-full
   context-full-check
@@ -208,6 +242,7 @@ commands:
   domain [debt args]
   doctor [--json]
   docs-check
+  design-check [--json]
   downstream-adoption
   downstream-baseline
   downstream-registry
@@ -241,6 +276,7 @@ commands:
   pack-gate
   pack-standard
   policy-schema
+  pr-check [--context local_write|local_readonly|ci_pull_request|ci_main_verify|release_verify] [--dry-run] [--json]
   pr-template
   release-evidence-check
   release-evidence-checksum-check
@@ -250,6 +286,7 @@ commands:
   render-check <rendered-dir>
   retro-check [--root <path>] [--strict]
   rules-consistency-check
+  rules-verify
   runtime-file-ownership
   runtime-health
   scope-lock
@@ -259,13 +296,16 @@ commands:
   security-debt [debt args]
   self-improving-check [--root <path>] [--strict]
   self-healing-skeleton
+  spec-check [--json]
   standard-impact-check
   supply-chain
+  task-check [--json]
   toolchain
   testing-debt [debt args]
   traceability-check [--matrix .agent/traceability-matrix.md] [--json]
   upgrade-runtime [--dry-run]
   upgrade-standard [--dry-run]
   version [--json]
+  worktree-check [--context local_write|local_readonly|ci_pull_request|ci_main_verify|release_verify]
   worktree-guard [--context local_write|local_readonly|ci_pull_request|ci_main_verify|release_verify]
 `

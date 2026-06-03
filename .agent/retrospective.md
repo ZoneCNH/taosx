@@ -9,7 +9,7 @@
 ## 失败项记录规则
 
 - 任一 required/final gate 失败不得声明完成。
-- 缺少 `golangci-lint`、`govulncheck` 或 `xlibgate` 必须作为 blocker 记录。
+- 缺少 `golangci-lint`、`govulncheck` 或 `goalcli` 必须作为 blocker 记录。
 - `/home/k8s/secrets/env/*` 内容进入源码、日志、manifest、PR 或 Evidence 时必须回滚并补充规则补丁。
 
 ## 提示补丁
@@ -19,7 +19,7 @@
 
 ## Harness 补丁
 
-- 保持 `xlibgate score --min 9.8` 为最终门禁。
+- 保持 `goalcli score --min 9.8` 为最终门禁。
 - 保持 kernel downstream smoke 为默认下游集成门禁。
 
 ## 规则补丁

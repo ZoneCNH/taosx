@@ -1,7 +1,7 @@
 schema_version: "0.1.0"
-runtime: goalkit
+runtime: goalcli
 control_plane: Harness Runtime
-executor: xlibgate
+executor: goalcli
 mva_status: complete
 commands:
   - gate: G12_ACCEPTANCE

@@ -16,7 +16,7 @@ import (
 )
 
 const (
-	projectReleaseVersion    = "v0.4.5"
+	projectReleaseVersion    = "v0.4.6"
 	governanceRuntimeVersion = "v2.9.3"
 )
 
@@ -45,7 +45,7 @@ func runVersion(args []string, stdout io.Writer, stderr io.Writer) int {
 	if err := validateInternalCommandArgs("version", args, internalCommandFlagSpec{boolFlags: []string{"json"}}); err != nil {
 		return invalidInternalArgsExit("version", err, stderr)
 	}
-	return emitReport(stdout, "version", "passed", []string{"xlib-standard release " + projectReleaseVersion, "xlibgate governance runtime " + governanceRuntimeVersion, "xlibgate governance CLI available"}, nil)
+	return emitReport(stdout, "version", "passed", []string{"xlib-standard release " + projectReleaseVersion, "goalcli governance runtime " + governanceRuntimeVersion, "goalcli governance CLI available"}, nil)
 }
 
 func runDoctor(args []string, stdout io.Writer, stderr io.Writer) int {
@@ -58,8 +58,8 @@ func runDoctor(args []string, stdout io.Writer, stderr io.Writer) int {
 		".agent/command-registry.yaml",
 		".agent/makefile-target-registry.yaml",
 		".agent/makefile-baseline.yaml",
-		"docs/standard/xlibgate-cli-contract.md",
-		"contracts/xlibgate-report.schema.json",
+		"docs/standard/goalcli-cli-contract.md",
+		"contracts/goalcli-report.schema.json",
 		"Makefile",
 	}
 	if isXlibStandardSourceModule() {
@@ -99,7 +99,7 @@ func hooksStatusDetail() string {
 }
 
 func runMainGuard(args []string, stdout io.Writer, stderr io.Writer) int {
-	flags := flag.NewFlagSet("xlibgate main-guard", flag.ContinueOnError)
+	flags := flag.NewFlagSet("goalcli main-guard", flag.ContinueOnError)
 	flags.SetOutput(stderr)
 	context := flags.String("context", envDefault("XLIB_CONTEXT", "local_write"), "execution context")
 	if err := flags.Parse(args); err != nil {
@@ -120,26 +120,176 @@ func runMainGuard(args []string, stdout io.Writer, stderr io.Writer) int {
 }
 
 func runWorktreeGuard(args []string, stdout io.Writer, stderr io.Writer) int {
-	flags := flag.NewFlagSet("xlibgate worktree-guard", flag.ContinueOnError)
+	return runWorktreeGate("worktree-guard", args, stdout, stderr)
+}
+
+func runWorktreeCheck(args []string, stdout io.Writer, stderr io.Writer) int {
+	return runWorktreeGate("worktree-check", args, stdout, stderr)
+}
+
+func runWorktreeGate(command string, args []string, stdout io.Writer, stderr io.Writer) int {
+	flags := flag.NewFlagSet("goalcli "+command, flag.ContinueOnError)
 	flags.SetOutput(stderr)
 	context := flags.String("context", envDefault("XLIB_CONTEXT", "local_write"), "execution context")
+	flags.Bool("json", false, "")
 	if err := flags.Parse(args); err != nil {
 		if errors.Is(err, flag.ErrHelp) {
 			return 0
 		}
 		return 2
 	}
+	if flags.NArg() > 0 {
+		write(stderr, "ERROR: %s invalid arguments: unexpected positional argument %q\n", command, flags.Arg(0))
+		return 2
+	}
 	if !validContext(*context) {
 		write(stderr, "ERROR: invalid context %q\n", *context)
 		return 2
 	}
+	details, gaps := evaluateWorktreeGate(*context)
+	if len(gaps) > 0 {
+		return emitReport(stdout, command, "failed", details, gaps)
+	}
+	return emitReport(stdout, command, "passed", details, nil)
+}
+
+func evaluateWorktreeGate(context string) ([]string, []string) {
 	top := gitOutput("rev-parse", "--show-toplevel")
 	common := gitOutput("rev-parse", "--path-format=absolute", "--git-common-dir")
 	isWorkerTree := strings.Contains(top, string(filepath.Separator)+".worktree"+string(filepath.Separator)) || strings.Contains(top, string(filepath.Separator)+".worktrees"+string(filepath.Separator)) || strings.Contains(common, string(filepath.Separator)+"worktrees"+string(filepath.Separator))
-	if *context == "local_write" && !isWorkerTree {
-		return emitReport(stdout, "worktree-guard", "failed", []string{"top=" + fallback(top, "unknown")}, []string{"local_write requires a worker worktree"})
+	details := []string{"context=" + context, "top=" + fallback(top, "unknown")}
+	if context == "local_write" && !isWorkerTree {
+		return details, []string{"local_write requires a worker worktree"}
 	}
-	return emitReport(stdout, "worktree-guard", "passed", []string{"context=" + *context, "top=" + fallback(top, "unknown")}, nil)
+	return details, nil
+}
+
+func runContextCheck(args []string, stdout io.Writer, stderr io.Writer) int {
+	if err := validateInternalCommandArgs("context-check", args, internalCommandFlagSpec{boolFlags: []string{"json"}}); err != nil {
+		return invalidInternalArgsExit("context-check", err, stderr)
+	}
+	required := []string{"docs/goal", "docs/goal/goal.md"}
+	var gaps []string
+	for _, path := range required {
+		if !fileExists(path) {
+			gaps = append(gaps, "missing "+path)
+		}
+	}
+	if len(gaps) > 0 {
+		write(stderr, "ERROR: context-check found %d gap(s)\n", len(gaps))
+		return emitReport(stdout, "context-check", "failed", nil, gaps)
+	}
+	return emitReport(stdout, "context-check", "passed", []string{"docs/goal context is present"}, nil)
+}
+
+func runSpecCheck(args []string, stdout io.Writer, stderr io.Writer) int {
+	if err := validateInternalCommandArgs("spec-check", args, internalCommandFlagSpec{boolFlags: []string{"json"}}); err != nil {
+		return invalidInternalArgsExit("spec-check", err, stderr)
+	}
+	if !fileExists("docs") {
+		write(stderr, "ERROR: spec-check found 1 gap(s)\n")
+		return emitReport(stdout, "spec-check", "failed", nil, []string{"missing docs"})
+	}
+	found := false
+	var gaps []string
+	paths, err := trackedDocsMarkdownFiles()
+	if err != nil {
+		gaps = append(gaps, "scan docs: "+err.Error())
+	}
+	for _, path := range paths {
+		data, readErr := os.ReadFile(path)
+		if readErr != nil {
+			gaps = append(gaps, "read "+path+": "+readErr.Error())
+			continue
+		}
+		if strings.Contains(string(data), "REQ-") {
+			found = true
+		}
+	}
+	if len(gaps) > 0 {
+		write(stderr, "ERROR: spec-check found %d gap(s)\n", len(gaps))
+		return emitReport(stdout, "spec-check", "failed", nil, gaps)
+	}
+	details := []string{fmt.Sprintf("scanned_markdown=%d", len(paths))}
+	if !found {
+		details = append(details, "warning: no docs markdown file contains REQ-")
+	}
+	return emitReport(stdout, "spec-check", "passed", details, nil)
+}
+
+func trackedDocsMarkdownFiles() ([]string, error) {
+	out, err := exec.Command("git", "ls-files", "-z", "--", "docs").Output()
+	if err != nil {
+		return nil, err
+	}
+	var paths []string
+	for _, path := range strings.Split(string(out), "\x00") {
+		if path == "" || filepath.Ext(path) != ".md" {
+			continue
+		}
+		paths = append(paths, path)
+	}
+	sort.Strings(paths)
+	return paths, nil
+}
+
+func runDesignCheck(args []string, stdout io.Writer, stderr io.Writer) int {
+	if err := validateInternalCommandArgs("design-check", args, internalCommandFlagSpec{boolFlags: []string{"json"}}); err != nil {
+		return invalidInternalArgsExit("design-check", err, stderr)
+	}
+	if !fileExists("docs/adr") {
+		return emitReport(stdout, "design-check", "passed", []string{"warning: optional docs/adr not present"}, nil)
+	}
+	return emitReport(stdout, "design-check", "passed", []string{"docs/adr is present"}, nil)
+}
+
+func runTaskCheck(args []string, stdout io.Writer, stderr io.Writer) int {
+	if err := validateInternalCommandArgs("task-check", args, internalCommandFlagSpec{boolFlags: []string{"json"}}); err != nil {
+		return invalidInternalArgsExit("task-check", err, stderr)
+	}
+	switch {
+	case fileExists(".agent/command-registry.yaml"):
+		return emitReport(stdout, "task-check", "passed", []string{".agent/command-registry.yaml is present"}, nil)
+	case fileExists(".agent/registry/commands.yaml"):
+		return emitReport(stdout, "task-check", "passed", []string{"legacy .agent/registry/commands.yaml is present"}, nil)
+	default:
+		return emitReport(stdout, "task-check", "passed", []string{"warning: command registry not present"}, nil)
+	}
+}
+
+func runPRCheck(args []string, stdin io.Reader, stdout io.Writer, stderr io.Writer) int {
+	flags := flag.NewFlagSet("goalcli pr-check", flag.ContinueOnError)
+	flags.SetOutput(stderr)
+	context := flags.String("context", envDefault("XLIB_CONTEXT", "local_write"), "execution context")
+	dryRun := flags.Bool("dry-run", false, "")
+	flags.Bool("json", false, "")
+	if err := flags.Parse(args); err != nil {
+		if errors.Is(err, flag.ErrHelp) {
+			return 0
+		}
+		return 2
+	}
+	if flags.NArg() > 0 {
+		write(stderr, "ERROR: pr-check invalid arguments: unexpected positional argument %q\n", flags.Arg(0))
+		return 2
+	}
+	if !validContext(*context) {
+		write(stderr, "ERROR: invalid context %q\n", *context)
+		return 2
+	}
+	if *dryRun {
+		return emitReport(stdout, "pr-check", "passed", []string{"mode=dry-run", "context=" + *context, "delegates=worktree-check,lint,test"}, nil)
+	}
+	if details, gaps := evaluateWorktreeGate(*context); len(gaps) > 0 {
+		return emitReport(stdout, "pr-check", "failed", details, gaps)
+	}
+	if code := runExternal(stdin, stderr, stderr, "make", "lint"); code != 0 {
+		return emitReport(stdout, "pr-check", "failed", nil, []string{fmt.Sprintf("make lint exited %d", code)})
+	}
+	if code := runExternal(stdin, stderr, stderr, "make", "test"); code != 0 {
+		return emitReport(stdout, "pr-check", "failed", nil, []string{fmt.Sprintf("make test exited %d", code)})
+	}
+	return emitReport(stdout, "pr-check", "passed", []string{"context=" + *context, "make lint passed", "make test passed"}, nil)
 }
 
 func runRegistryCheck(command string, required map[string][]string, stdout io.Writer, stderr io.Writer) int {
@@ -182,9 +332,9 @@ func runCLIContract(args []string, stdout io.Writer, stderr io.Writer) int {
 		return invalidInternalArgsExit("cli-contract", err, stderr)
 	}
 	return runRegistryCheck("cli-contract", map[string][]string{
-		"docs/standard/xlibgate-cli-contract.md": commandRegistryRequiredCommands(),
-		"contracts/xlibgate-report.schema.json":  {"command", "status", "details", "gaps"},
-		".agent/command-registry.yaml":           requiredCommandRegistryNeedles(),
+		"docs/standard/goalcli-cli-contract.md": commandRegistryRequiredCommands(),
+		"contracts/goalcli-report.schema.json":  {"command", "status", "details", "gaps"},
+		".agent/command-registry.yaml":          requiredCommandRegistryNeedles(),
 	}, stdout, stderr)
 }
 
@@ -214,8 +364,8 @@ func runMakefileBaseline(args []string, stdout io.Writer, stderr io.Writer) int 
 	if err := validateInternalCommandArgs("makefile-baseline", args, internalCommandFlagSpec{boolFlags: []string{"json"}}); err != nil {
 		return invalidInternalArgsExit("makefile-baseline", err, stderr)
 	}
-	requiredTargets := append([]string{"fmt", "vet", "lint", "test", "race", "boundary", "security", "contracts", "docs-check", "evidence", "score-check", "main-guard", "worktree-guard", "evidence-check", "cli-contract", "issue-registry", "command-registry", "makefile-baseline", "governance-check", "p1-governance-check", "execution-context", "p2-runtime-check", "release-check", "release-final-check"}, contextRuntimeTargets()...)
-	requiredTargets = append(requiredTargets, goalkitMakefileTargets()...)
+	requiredTargets := append([]string{"fmt", "vet", "lint", "test", "race", "boundary", "security", "contracts", "docs-check", "rules-verify", "evidence", "score-check", "main-guard", "worktree-guard", "worktree-check", "context-check", "spec-check", "design-check", "task-check", "pr-check", "evidence-check", "cli-contract", "issue-registry", "command-registry", "makefile-baseline", "governance-check", "p1-governance-check", "execution-context", "p2-runtime-check", "release-check", "release-final-check"}, contextRuntimeTargets()...)
+	requiredTargets = append(requiredTargets, goalcliMakefileTargets()...)
 	required := map[string][]string{"Makefile": {}, ".agent/makefile-target-registry.yaml": requiredTargets, ".agent/makefile-baseline.yaml": requiredTargets}
 	for _, target := range requiredTargets {
 		required["Makefile"] = append(required["Makefile"], ".PHONY: "+target, target+":")
@@ -223,7 +373,7 @@ func runMakefileBaseline(args []string, stdout io.Writer, stderr io.Writer) int 
 	return runRegistryCheck("makefile-baseline", required, stdout, stderr)
 }
 
-func goalkitMakefileTargets() []string {
+func goalcliMakefileTargets() []string {
 	return []string{
 		"goal-acceptance",
 		"goal-delivery",
@@ -242,7 +392,7 @@ var contextProfileGates = map[string][]string{
 }
 
 func runContextProfile(args []string, stdout io.Writer, stderr io.Writer) int {
-	flags := flag.NewFlagSet("xlibgate context-profile", flag.ContinueOnError)
+	flags := flag.NewFlagSet("goalcli context-profile", flag.ContinueOnError)
 	flags.SetOutput(stderr)
 	profile := flags.String("profile", "standard", "context runtime profile")
 	flags.Bool("json", false, "")
@@ -288,11 +438,11 @@ func runContextProfileCheck(command string, args []string, stdout io.Writer, std
 	}
 	contextTargets := contextRuntimeTargets()
 	required := map[string][]string{
-		".agent/command-registry.yaml":           requiredCommandRegistryNeedles(),
-		".agent/makefile-target-registry.yaml":   contextTargets,
-		".agent/makefile-baseline.yaml":          contextTargets,
-		"docs/standard/xlibgate-cli-contract.md": commandRegistryRequiredCommands(),
-		"Makefile":                               {"release-final-check:", "$(MAKE) context-release"},
+		".agent/command-registry.yaml":          requiredCommandRegistryNeedles(),
+		".agent/makefile-target-registry.yaml":  contextTargets,
+		".agent/makefile-baseline.yaml":         contextTargets,
+		"docs/standard/goalcli-cli-contract.md": commandRegistryRequiredCommands(),
+		"Makefile":                              {"release-final-check:", "$(MAKE) context-release"},
 	}
 	for _, target := range contextTargets {
 		required["Makefile"] = append(required["Makefile"], ".PHONY: "+target, target+":")
@@ -332,7 +482,7 @@ func runContextProfileCheck(command string, args []string, stdout io.Writer, std
 }
 
 func parseContextProfileCheckProfile(command string, args []string) (string, error) {
-	flags := flag.NewFlagSet("xlibgate "+command, flag.ContinueOnError)
+	flags := flag.NewFlagSet("goalcli "+command, flag.ContinueOnError)
 	flags.SetOutput(io.Discard)
 	flags.Bool("json", false, "")
 	flags.Bool("strict", false, "")
@@ -690,7 +840,7 @@ func appendReleaseFinalDelegationGaps(content string, gaps *[]string) {
 		*gaps = append(*gaps, "Makefile missing target block release-final-check")
 		return
 	}
-	if makefileDependencyHasToken(makefileTargetDependencies(content, "release-final-check"), "release-final-check") || strings.Contains(block, "$(MAKE) release-final-check") || strings.Contains(block, "make release-final-check") || strings.Contains(block, "$(XLIBGATE) release-final-check") {
+	if makefileDependencyHasToken(makefileTargetDependencies(content, "release-final-check"), "release-final-check") || strings.Contains(block, "$(MAKE) release-final-check") || strings.Contains(block, "make release-final-check") || strings.Contains(block, "$(GOALCLI) release-final-check") {
 		*gaps = append(*gaps, "release-final-check must not call itself")
 	}
 	if !strings.Contains(block, "$(MAKE) context-release") {
@@ -761,22 +911,22 @@ var plannedCommandSemanticMarkers = map[string]map[string][]string{
 		".agent/runtime-health.yaml": {"schema_version:", "checks:", "toolchain"},
 	},
 	"goal-acceptance": {
-		".agent/harness.yaml": {"goalkit_mva_gates:", "G12_ACCEPTANCE", "goal-acceptance"},
+		".agent/harness.yaml": {"goalcli_mva_gates:", "G12_ACCEPTANCE", "goal-acceptance"},
 	},
 	"goal-delivery": {
-		".agent/harness.yaml": {"goalkit_mva_gates:", "G13_DELIVERY", "goal-delivery"},
+		".agent/harness.yaml": {"goalcli_mva_gates:", "G13_DELIVERY", "goal-delivery"},
 	},
 	"goal-handover": {
-		".agent/harness.yaml": {"goalkit_mva_gates:", "G14_HANDOVER", "goal-handover"},
+		".agent/harness.yaml": {"goalcli_mva_gates:", "G14_HANDOVER", "goal-handover"},
 	},
 	"goal-downstream-adoption": {
-		".agent/harness.yaml": {"goalkit_mva_gates:", "G15_DOWNSTREAM_ADOPTION", "goal-downstream-adoption"},
+		".agent/harness.yaml": {"goalcli_mva_gates:", "G15_DOWNSTREAM_ADOPTION", "goal-downstream-adoption"},
 	},
 	"goal-certify": {
-		".agent/harness.yaml": {"goalkit_mva_gates:", "G16_CERTIFY", "goal-certify"},
+		".agent/harness.yaml": {"goalcli_mva_gates:", "G16_CERTIFY", "goal-certify"},
 	},
 	"goal-runtime-final": {
-		".agent/harness.yaml": {"goalkit_mva_gates:", "G12_G16_FINAL", "goal-runtime-final"},
+		".agent/harness.yaml": {"goalcli_mva_gates:", "G12_G16_FINAL", "goal-runtime-final"},
 	},
 	"execution-context": {
 		".agent/execution-context.yaml": {"schema_version:", "contexts:", "local_write", "ci_pull_request", "release_verify"},
@@ -885,7 +1035,7 @@ func flagProvided(args []string, name string) bool {
 }
 
 func validatePlannedCommandArgs(command string, args []string) error {
-	flags := flag.NewFlagSet("xlibgate "+command, flag.ContinueOnError)
+	flags := flag.NewFlagSet("goalcli "+command, flag.ContinueOnError)
 	flags.SetOutput(io.Discard)
 	flags.Bool("dry-run", false, "")
 	flags.Bool("verify", false, "")
@@ -914,7 +1064,7 @@ type internalCommandFlagSpec struct {
 }
 
 func validateInternalCommandArgs(command string, args []string, spec internalCommandFlagSpec) error {
-	flags := flag.NewFlagSet("xlibgate "+command, flag.ContinueOnError)
+	flags := flag.NewFlagSet("goalcli "+command, flag.ContinueOnError)
 	flags.SetOutput(io.Discard)
 	for _, name := range spec.boolFlags {
 		flags.Bool(name, false, "")
@@ -990,6 +1140,12 @@ var commandRegistryCommands = []string{
 	"minimal-kernel",
 	"main-guard",
 	"worktree-guard",
+	"worktree-check",
+	"context-check",
+	"spec-check",
+	"design-check",
+	"task-check",
+	"pr-check",
 	"evidence-check",
 	"done-assertion",
 	"cli-contract",
@@ -1056,6 +1212,7 @@ var commandRegistryCommands = []string{
 	"release-evidence-hash",
 	"release-final-check",
 	"render-check",
+	"rules-verify",
 	"score",
 	"secrets",
 	"security",

@@ -17,7 +17,7 @@
 
 ```bash
 GOWORK=off make release-check
-GOWORK=off go run ./cmd/xlibgate score --min 9.8
+GOWORK=off go run ./cmd/goalcli score --min 9.8
 GOWORK=off make release-check-extended
 GOWORK=off make release-final-check
 GOWORK=off make release-preflight VERSION=v1.0.0

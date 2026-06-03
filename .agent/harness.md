@@ -12,5 +12,5 @@
 - Test Gate：docs、中文文档规则、Go、boundary、contract、release 和 downstream gate 有新鲜证据。
 - Evidence Gate：manifest/checksum/score/日志满足 Evidence Protocol。
 - Review Gate：review template 覆盖边界、旧名、secret、score、kernel downstream。
-- Release Gate：`release-final-check`、`release-preflight` 和 `xlibgate score --min 9.8`。
+- Release Gate：`release-final-check`、`release-preflight` 和 `goalcli score --min 9.8`。
 - Retrospective Gate：失败或风险必须写入 retrospective、prompt/harness/rule patch。

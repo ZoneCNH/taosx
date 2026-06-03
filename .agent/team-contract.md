@@ -1,6 +1,6 @@
 # Agent Team Contract（xlib-standard v2.9.3）
 
-本文件记录 P1-001 Agent Team Contract 的本地可验证契约，用于 `xlibgate agent-team-contract` 与 team worker 验收。
+本文件记录 P1-001 Agent Team Contract 的本地可验证契约，用于 `goalcli agent-team-contract` 与 team worker 验收。
 
 ## 角色与职责
 
@@ -16,6 +16,6 @@
 
 ## Gate 与证据
 
-- 必须在 `GOWORK=off` 下执行相关 xlibgate、Makefile、测试与治理命令。
+- 必须在 `GOWORK=off` 下执行相关 goalcli、Makefile、测试与治理命令。
 - 完成报告必须包含 changed files、验证命令、PASS/FAIL 结果、剩余风险。
 - Team lifecycle 以 OMX task claim/status 为准，完成前必须提交 worker worktree 变更。

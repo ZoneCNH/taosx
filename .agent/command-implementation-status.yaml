@@ -16,7 +16,7 @@ groups:
     phase: P0
     implementation_status: implemented
     evidence_state: requires_current_command_output
-    note: "P0 命令已有 Makefile 或 xlibgate 入口；是否 passed 必须以本次命令输出为准。"
+    note: "P0 命令已有 Makefile 或 goalcli 入口；是否 passed 必须以本次命令输出为准。"
     commands:
       - version
       - doctor
@@ -112,12 +112,12 @@ groups:
       - downstream-baseline
       - downstream-adoption
 
-  - id: goalkit_v0_1_0_mva_blocking
+  - id: goalcli_v0_1_0_mva_blocking
     phase: P2
     implementation_status: implemented
     mva_status: complete
     evidence_strength: full_mva_evidence
-    note: "goalkit v0.1.0 MVA commands 通过 xlibgate 和 source ledger 证明 blocking G12-G16 evidence contracts。"
+    note: "goalcli v0.1.0 MVA commands 通过 goalcli 和 source ledger 证明 blocking G12-G16 evidence contracts。"
     commands:
       - goal-acceptance
       - goal-delivery

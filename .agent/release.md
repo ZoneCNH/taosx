@@ -14,7 +14,7 @@ Full Goal Runtime v3.1 release candidate。
 - `GOWORK=off make release-check`
 - `GOWORK=off make release-final-check`
 - `GOWORK=off make release-preflight VERSION=<version>`
-- `xlibgate score --min 9.8`
+- `goalcli score --min 9.8`
 - `release/manifest/latest.json`
 - `release/manifest/latest.json.sha256`
 
@@ -22,7 +22,7 @@ Full Goal Runtime v3.1 release candidate。
 
 - `golangci-lint`
 - `govulncheck`
-- `xlibgate`
+- `goalcli`
 
 缺少任一工具时，相关 gate 必须失败并记录为 blocker，不能降级为通过。
 

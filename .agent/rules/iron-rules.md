@@ -19,26 +19,26 @@
 
 ## 标准退出码
 
-`xlibgate` 与所有 Gate 命令统一遵守，便于 Makefile / Hooks / CI / Agent 串接：
+`goalcli` 与所有 Gate 命令统一遵守，便于 Makefile / Hooks / CI / Agent 串接：
 
 | 退出码 | 含义 | 触发规则 |
 |---|---|---|
 | 0 | OK | — |
 | 1 | 通用失败 | — |
 | 2 | 参数错误 | — |
-| 5 | worktree / main 违规 | RULE-WORKTREE-* / RULE-MAIN-SYNC-* / RULE-BRANCH-* | ✅ `xlibgate worktree-guard` / `main-guard` |
-| 6 | schema 校验失败 | RULE-SCHEMA-* | ✅ `xlibgate policy-schema` |
-| 7 | secret / 凭据泄漏 | RULE-SECURITY-* / RULE-SECRET-* | ✅ `xlibgate secrets` |
-| 8 | Evidence 缺失或伪造 | RULE-EVIDENCE-* / RULE-CORE-001 | ✅ `xlibgate evidence-check` |
+| 5 | worktree / main 违规 | RULE-WORKTREE-* / RULE-MAIN-SYNC-* / RULE-BRANCH-* | ✅ `goalcli worktree-guard` / `main-guard` |
+| 6 | schema 校验失败 | RULE-SCHEMA-* | ✅ `goalcli policy-schema` |
+| 7 | secret / 凭据泄漏 | RULE-SECURITY-* / RULE-SECRET-* | ✅ `goalcli secrets` |
+| 8 | Evidence 缺失或伪造 | RULE-EVIDENCE-* / RULE-CORE-001 | ✅ `goalcli evidence-check` |
 | 9 | Traceability 断链 | RULE-TRACE-* / RULE-CORE-004 | ⚠️ **GAP**：`traceability-check` 尚未实现 |
-| 10 | Release 不完整 | RULE-RELEASE-* / RULE-REL-ARTIFACT-* | ✅ `xlibgate release-evidence-check` / `release-final-check` |
+| 10 | Release 不完整 | RULE-RELEASE-* / RULE-REL-ARTIFACT-* | ✅ `goalcli release-evidence-check` / `release-final-check` |
 
 ## 已知 P0 Gap
 
 > 本节是诚实性披露：以下规则虽属 P0，但 `enforced_by` 尚未对应任何已实现的命令；
 > 在 [`registry.yaml`](./registry.yaml) 中标记为 `status: indexed`，等待落地。
 
-- **Traceability Gate**：RULE-CORE-004, RULE-TRACE-001, RULE-TRACE-002, RULE-TRACE-ALG-001, RULE-TRACE-ALG-002（共 5 条）。需要 `xlibgate traceability-check` 子命令，按 `.agent/traceability-matrix.yaml` 校验 Goal → Req → AC → Task → Issue → Commit → PR → Evidence → Release 链路完整性，断链返回退出码 9。
+- **Traceability Gate**：RULE-CORE-004, RULE-TRACE-001, RULE-TRACE-002, RULE-TRACE-ALG-001, RULE-TRACE-ALG-002（共 5 条）。需要 `goalcli traceability-check` 子命令，按 `.agent/traceability-matrix.yaml` 校验 Goal → Req → AC → Task → Issue → Commit → PR → Evidence → Release 链路完整性，断链返回退出码 9。
 - **Self-improving Gate**：RULE-CORE-006, RULE-RETRO-*, RULE-SI-* 等。需要 Retrospective/Patch 校验命令。
 
 P0 gap 的状态可通过 `make rules-verify` 持续检测（任何 active 规则若引用不存在的命令将阻断 CI）。

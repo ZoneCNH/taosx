@@ -9,9 +9,9 @@
 
 本文保留 2026-06-02 审计时的结构性问题快照。部分条目已经在后续治理中修复；阅读时以文末“当前修复状态”表为准。特别是版本号体系已在 v0.4.3 口径下统一，本文正文中的 `v0.3.7` / `v0.1.0` 描述仅代表历史问题状态。
 
-## 问题 1：`cmd/xlibgate` 超级文件与上帝 switch
+## 问题 1：`cmd/goalcli` 超级文件与上帝 switch
 
-**位置**：`cmd/xlibgate/governance.go`（743 行、40 个函数）、`cmd/xlibgate/main.go`（213 行、29 个 case 的 switch）
+**位置**：`cmd/goalcli/governance.go`（743 行、40 个函数）、`cmd/goalcli/main.go`（213 行、29 个 case 的 switch）
 
 **描述**：所有门禁逻辑集中在一个文件中。`main.go` 的 `run()` 函数将命令分为三类：Go 原生实现（score、version、doctor）、委托 shell 脚本（boundary、contracts、docs-check）、planned command（仅检查文件是否存在）。
 
@@ -28,7 +28,7 @@
 
 ## 问题 2：Planned Command 的空壳验证
 
-**位置**：`cmd/xlibgate/governance.go:398-434`（`plannedCommandFiles` map）、`runPlannedCommand` 函数
+**位置**：`cmd/goalcli/governance.go:398-434`（`plannedCommandFiles` map）、`runPlannedCommand` 函数
 
 **描述**：`plannedCommandFiles` map 中约 30 个命令（占总命令一半）只检查声明的 YAML 文件是否存在，不执行任何实质性验证。例如 `agent-team-contract` 只检查 `.agent/team-contract.yaml` 是否存在。
 
@@ -52,7 +52,7 @@
 | -------- | -------------------------------------------- | ------------------------ |
 | `v0.3.7` | CHANGELOG.md                                 | 项目发布版本             |
 | `v0.1.0` | `pkg/templatex/version.go`                   | 包版本（**未同步**）     |
-| `v2.9.3` | `cmd/xlibgate/governance.go` xlibgateVersion | Goal Runtime 版本        |
+| `v2.9.3` | `cmd/goalcli/governance.go` goalcliVersion | Goal Runtime 版本        |
 | `v3.1`   | `.agent/goal-runtime.md`                     | Goal Runtime schema 版本 |
 
 **影响**：
@@ -67,7 +67,7 @@
 
 ## 问题 4：Issue Registry 硬编码计数
 
-**位置**：`cmd/xlibgate/governance.go:675-688`
+**位置**：`cmd/goalcli/governance.go:675-688`
 
 ```go
 func requiredIssueRegistryNeedles() []string {
@@ -93,7 +93,7 @@ func requiredIssueRegistryNeedles() []string {
 
 ## 问题 5：Shell 脚本与 Go 代码的职责分裂
 
-**位置**：`scripts/` 目录（14 个脚本）、`cmd/xlibgate/main.go`（`runExternal` 函数）
+**位置**：`scripts/` 目录（14 个脚本）、`cmd/goalcli/main.go`（`runExternal` 函数）
 
 **描述**：14 个 shell 脚本和 Go 代码各自承担一部分 gate 逻辑，但边界不清：
 
@@ -101,12 +101,12 @@ func requiredIssueRegistryNeedles() []string {
 - `check_boundary.sh` 做 x.go 依赖检查和业务术语过滤
 - `check_secrets.sh` 做密钥扫描
 
-但 `xlibgate` CLI 通过 `runExternal` 只是委托执行，不做任何包装或结果解析。
+但 `goalcli` CLI 通过 `runExternal` 只是委托执行，不做任何包装或结果解析。
 
 **影响**：
 
 - Shell 脚本的输出格式（纯文本）与 Go gate 的输出格式（JSON `gateReport`）不统一
-- Shell 脚本的错误无法被 `xlibgate` 结构化捕获和聚合
+- Shell 脚本的错误无法被 `goalcli` 结构化捕获和聚合
 - `check_docs.sh` 混用 Python3 heredoc 和 Shell，调试困难
 - `check_docs.sh` 中的 70+ 条 `require_text` 断言是字符串包含检查，文档措辞变更即可触发 gate 失败
 
@@ -159,14 +159,14 @@ func requiredIssueRegistryNeedles() []string {
 
 ## 问题 8：测试代码量倒挂
 
-**位置**：`internal/tools/releasemanifest/main_test.go`（1375 行）、`cmd/xlibgate/main_test.go`（1090 行）
+**位置**：`internal/tools/releasemanifest/main_test.go`（1375 行）、`cmd/goalcli/main_test.go`（1090 行）
 
 **描述**：
 
 | 文件                           | 行数 | 被测文件行数 | 比值  |
 | ------------------------------ | ---- | ------------ | ----- |
 | `releasemanifest/main_test.go` | 1375 | 775          | 1.78x |
-| `cmd/xlibgate/main_test.go`    | 1090 | 956          | 1.14x |
+| `cmd/goalcli/main_test.go`    | 1090 | 956          | 1.14x |
 
 **影响**：
 
@@ -195,7 +195,7 @@ release-final-check → context-release → context-full → governance-check + 
 **影响**：
 
 - `release-final-check` 实际上会跑两遍部分 gate（一遍在 `context-release` 中，一遍在自身的 `RELEASE_EVIDENCE_REQUIRE_PASSED=1` 检查中）
-- `context-profile-check` 验证 Makefile 结构，但 Makefile 本身又通过 `$(XLIBGATE)` 调用 `context-profile-check` —— 形成间接自引用
+- `context-profile-check` 验证 Makefile 结构，但 Makefile 本身又通过 `$(GOALCLI)` 调用 `context-profile-check` —— 形成间接自引用
 
 **建议**：文档化完整依赖图，消除重复 gate 执行，或将 `context-release` 的 evidence 生成步骤提取为独立 target。
 
@@ -243,8 +243,8 @@ release-final-check → context-release → context-full → governance-check + 
 
 | 问题 | 状态 | 修复摘要 | 验证 |
 | ---- | ---- | -------- | ---- |
-| 问题 2：Planned Command 空壳验证 | 已修复最小语义层 | `runPlannedCommand` 不再只检查文件存在；会拒绝目录、空文件、非法 JSON，并对 `agent-team-contract`、`runtime-health`、`execution-context` 等核心 manifest 检查最小语义 marker。 | `GOWORK=off go run ./cmd/xlibgate agent-team-contract --dry-run --verify`、`runtime-health --dry-run --verify`、`execution-context --dry-run --verify` |
-| 问题 3：版本号体系混乱 | 已修复当前 release 口径 | 拆分项目发布版本 `projectReleaseVersion` 与治理运行时版本 `governanceRuntimeVersion`，并将 `templatex.Version`、release manifest template、release preflight 文档和 harness 版本同步到 `CHANGELOG.md` 最新版本 `v0.4.3`。 | `GOWORK=off go run ./cmd/xlibgate version --json`、`GOWORK=off go test ./cmd/xlibgate` |
-| 问题 4：Issue Registry 硬编码计数 | 已修复 | 移除 Go 代码中的固定 P0/P1/P2/CTX 数量 needle，改为从 `.agent/issue-registry.yaml` 动态解析 issue ID，校验 ID 格式、重复、连续性、`status: implemented`、`command` 和非空 `evidence`。 | `GOWORK=off go run ./cmd/xlibgate issue-registry`、`GOWORK=off go run ./cmd/xlibgate context-profile-check` |
+| 问题 2：Planned Command 空壳验证 | 已修复最小语义层 | `runPlannedCommand` 不再只检查文件存在；会拒绝目录、空文件、非法 JSON，并对 `agent-team-contract`、`runtime-health`、`execution-context` 等核心 manifest 检查最小语义 marker。 | `GOWORK=off go run ./cmd/goalcli agent-team-contract --dry-run --verify`、`runtime-health --dry-run --verify`、`execution-context --dry-run --verify` |
+| 问题 3：版本号体系混乱 | 已修复当前 release 口径 | 拆分项目发布版本 `projectReleaseVersion` 与治理运行时版本 `governanceRuntimeVersion`，并将 `templatex.Version`、release manifest template、release preflight 文档和 harness 版本同步到 `CHANGELOG.md` 最新版本 `v0.4.3`。 | `GOWORK=off go run ./cmd/goalcli version --json`、`GOWORK=off go test ./cmd/goalcli` |
+| 问题 4：Issue Registry 硬编码计数 | 已修复 | 移除 Go 代码中的固定 P0/P1/P2/CTX 数量 needle，改为从 `.agent/issue-registry.yaml` 动态解析 issue ID，校验 ID 格式、重复、连续性、`status: implemented`、`command` 和非空 `evidence`。 | `GOWORK=off go run ./cmd/goalcli issue-registry`、`GOWORK=off go run ./cmd/goalcli context-profile-check` |
 
 回归验证：`GOWORK=off go test ./...` 已通过。

@@ -33,7 +33,7 @@ func TestEvaluateGoalRuntimeFinalPassesWithAuthority(t *testing.T) {
 	}
 	for _, gate := range report.Gates {
 		if !gate.Blocking {
-			t.Fatalf("gate = %#v; want goalkit MVA gates to be blocking", gate)
+			t.Fatalf("gate = %#v; want goalcli MVA gates to be blocking", gate)
 		}
 	}
 	if !contains(report.Evidence, "source_evidence_ledger="+SourceLedgerPath) {
@@ -54,7 +54,7 @@ func TestEvaluateGoalRuntimeFinalPassesWithAuthority(t *testing.T) {
 }
 
 func TestEvaluateRejectsUnknownCommand(t *testing.T) {
-	if _, err := Evaluate("not-a-goalkit-command", Options{}); err == nil {
+	if _, err := Evaluate("not-a-goalcli-command", Options{}); err == nil {
 		t.Fatalf("Evaluate returned nil error for unknown command")
 	}
 }
@@ -71,7 +71,7 @@ func TestEvaluateReportsMissingAuthorityPaths(t *testing.T) {
 	if len(report.Gaps) == 0 {
 		t.Fatalf("gaps is empty; want missing authority paths")
 	}
-	if !containsSubstring(report.Gaps, ".worktree/goalkit-v0.1.0-plan.md") {
+	if !containsSubstring(report.Gaps, ".worktree/goalcli-v0.1.0-plan.md") {
 		t.Fatalf("gaps = %#v; want root plan gap", report.Gaps)
 	}
 	if report.MVAStatus != "not-complete" {
@@ -106,7 +106,7 @@ func TestEvaluateRenderedDownstreamSkipsSourceOnlyAuthorityPaths(t *testing.T) {
 	}
 }
 
-func TestEvaluateGoalkitGatePassesAsBlockingMVAContract(t *testing.T) {
+func TestEvaluateGoalcliGatePassesAsBlockingMVAContract(t *testing.T) {
 	root := t.TempDir()
 	writeAuthorityFixture(t, root)
 
@@ -115,7 +115,7 @@ func TestEvaluateGoalkitGatePassesAsBlockingMVAContract(t *testing.T) {
 		t.Fatalf("Evaluate returned error: %v", err)
 	}
 	if report.Status != "passed" || report.MVAStatus != "complete" || !report.Blocking {
-		t.Fatalf("report = %#v; want passed complete blocking goalkit gate", report)
+		t.Fatalf("report = %#v; want passed complete blocking goalcli gate", report)
 	}
 	if len(report.Gates) != 1 || !report.Gates[0].Blocking {
 		t.Fatalf("gates = %#v; want one blocking gate", report.Gates)
@@ -141,10 +141,10 @@ func TestEvaluateGoalRuntimeFinalRequiresPrerequisiteLedger(t *testing.T) {
 func TestWriteEvidenceWritesPackAndLedgerIdempotently(t *testing.T) {
 	root := t.TempDir()
 	writeAuthorityFixture(t, root)
-	writePrerequisiteLedgerFixture(t, root, "GOAL-20260603-XLIB-GOALKIT-001")
+	writePrerequisiteLedgerFixture(t, root, "GOAL-20260603-XLIB-GOALCLI-001")
 	report, err := Evaluate("goal-runtime-final", Options{
 		Root:   root,
-		GoalID: "GOAL-20260603-XLIB-GOALKIT-001",
+		GoalID: "GOAL-20260603-XLIB-GOALCLI-001",
 	})
 	if err != nil {
 		t.Fatalf("Evaluate returned error: %v", err)

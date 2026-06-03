@@ -18,15 +18,15 @@ required_files=(
   "docs/standard/acceptance-matrix.md"
   "docs/standard/goal-runtime.md"
   "docs/standard/agent-team-contract.md"
-  "docs/standard/xlibgate-cli-contract.md"
+  "docs/standard/goalcli-cli-contract.md"
   "docs/standard/template-generation-contract.md"
-  "docs/standard/xlibgate-cli-contract.md"
+  "docs/standard/goalcli-cli-contract.md"
   "docs/standard/dod.md"
   "docs/standard/downstream-compatibility.md"
   "docs/downstream-sync-policy.md"
   "docs/scorecard.md"
   ".agent/standard/goal-runtime-canonical.md"
-  ".agent/standard/goalkit-xlibgate-mapping.md"
+  ".agent/standard/goalcli-mapping.md"
   ".agent/standard/audit-2026-06-03.md"
   ".agent/rules/iron-rules.md"
   ".agent/rules/registry.yaml"
@@ -112,42 +112,42 @@ require_text "release/manifest/template.json" '"standard_impact"'
 require_text "release/manifest/template.json" '"downstream_sync_required"'
 require_text "release/manifest/template.json" '"generator_evidence"'
 require_text "release/manifest/template.json" '"dependency_check"'
-require_text "docs/scorecard.md" "go run ./cmd/xlibgate score --min 9.8"
+require_text "docs/scorecard.md" "go run ./cmd/goalcli score --min 9.8"
 require_text "docs/scorecard.md" "RELEASE_EVIDENCE_MIN_SCORE=9.8"
 require_text "release/manifest/template.json" '"score"'
 require_text "release/manifest/template.json" '"workflow_run_id"'
 require_text "internal/tools/releasemanifest/main.go" "min-score"
-require_text "Makefile" "go run ./cmd/xlibgate score --min 9.8"
+require_text "Makefile" "go run ./cmd/goalcli score --min 9.8"
 require_text "Makefile" "RELEASE_EVIDENCE_MIN_SCORE=9.8"
-require_text ".agent/release-template.md" "go run ./cmd/xlibgate score --min 9.8"
+require_text ".agent/release-template.md" "go run ./cmd/goalcli score --min 9.8"
 require_text ".agent/retrospective-template.md" "Score"
-require_text ".agent/harness.yaml" "go run ./cmd/xlibgate score --min 9.8"
+require_text ".agent/harness.yaml" "go run ./cmd/goalcli score --min 9.8"
 require_text "internal/tools/releasemanifest/main.go" "release/manifest/latest.json.sha256"
-require_text "cmd/xlibgate/main.go" "docs-check"
-require_text "cmd/xlibgate/main.go" "dependency-check"
-require_text "cmd/xlibgate/main.go" "standard-impact-check"
-require_text "cmd/xlibgate/main.go" "boundary"
-require_text "cmd/xlibgate/main.go" "contracts"
-require_text "cmd/xlibgate/main.go" "render-check"
-require_text "cmd/xlibgate/main.go" "release-final-check"
-require_text "cmd/xlibgate/main.go" "score"
-require_text "cmd/xlibgate/main.go" "main-guard"
-require_text "cmd/xlibgate/main.go" "worktree-guard"
-require_text "cmd/xlibgate/main.go" "issue-registry"
-require_text "cmd/xlibgate/main.go" "command-registry"
-require_text "docs/standard/xlibgate-cli-contract.md" "xlibgate"
-require_text "docs/standard/xlibgate-cli-contract.md" "contracts/xlibgate-report.schema.json"
-require_text "cmd/xlibgate/main.go" "--min"
+require_text "cmd/goalcli/main.go" "docs-check"
+require_text "cmd/goalcli/main.go" "dependency-check"
+require_text "cmd/goalcli/main.go" "standard-impact-check"
+require_text "cmd/goalcli/main.go" "boundary"
+require_text "cmd/goalcli/main.go" "contracts"
+require_text "cmd/goalcli/main.go" "render-check"
+require_text "cmd/goalcli/main.go" "release-final-check"
+require_text "cmd/goalcli/main.go" "score"
+require_text "cmd/goalcli/main.go" "main-guard"
+require_text "cmd/goalcli/main.go" "worktree-guard"
+require_text "cmd/goalcli/main.go" "issue-registry"
+require_text "cmd/goalcli/main.go" "command-registry"
+require_text "docs/standard/goalcli-cli-contract.md" "goalcli"
+require_text "docs/standard/goalcli-cli-contract.md" "contracts/goalcli-report.schema.json"
+require_text "cmd/goalcli/main.go" "--min"
 require_text "Makefile" "GOWORK=off is required for release targets"
-require_text "Makefile" "XLIBGATE ?= go run ./cmd/xlibgate"
-require_text "Makefile" '$(XLIBGATE) docs-check'
-require_text "Makefile" '$(XLIBGATE) dependency-check'
-require_text "Makefile" '$(XLIBGATE) standard-impact-check'
-require_text "Makefile" '$(XLIBGATE) boundary'
-require_text "Makefile" '$(XLIBGATE) contracts'
-require_text "Makefile" '$(XLIBGATE) integration'
-require_text "Makefile" '$(XLIBGATE) score --min 9.8'
-require_text "Makefile" '$(XLIBGATE) release-evidence-checksum-check'
+require_text "Makefile" "GOALCLI ?= go run ./cmd/goalcli"
+require_text "Makefile" '$(GOALCLI) docs-check'
+require_text "Makefile" '$(GOALCLI) dependency-check'
+require_text "Makefile" '$(GOALCLI) standard-impact-check'
+require_text "Makefile" '$(GOALCLI) boundary'
+require_text "Makefile" '$(GOALCLI) contracts'
+require_text "Makefile" '$(GOALCLI) integration'
+require_text "Makefile" '$(GOALCLI) score --min 9.8'
+require_text "Makefile" '$(GOALCLI) release-evidence-checksum-check'
 require_text "scripts/run_fuzz_smoke.sh" 'fuzz_time="${FUZZ_SMOKE_TIME:-10s}"'
 require_text ".github/workflows/ci.yml" "make release-check"
 require_text ".github/workflows/ci.yml" "release/manifest/latest.json.sha256"
@@ -158,10 +158,10 @@ require_text ".github/workflows/ci.yml" "ARTIFACT_URL"
 
 
 # Goal v2.9.3 executable governance contract checks.
-require_text "cmd/xlibgate/main.go" "main-guard"
-require_text "cmd/xlibgate/main.go" "policy-schema"
-require_text "cmd/xlibgate/main.go" "downstream-adoption"
-require_text "cmd/xlibgate/main.go" "runtime-file-ownership"
+require_text "cmd/goalcli/main.go" "main-guard"
+require_text "cmd/goalcli/main.go" "policy-schema"
+require_text "cmd/goalcli/main.go" "downstream-adoption"
+require_text "cmd/goalcli/main.go" "runtime-file-ownership"
 require_text "Makefile" "governance-check"
 require_text "Makefile" "p1-governance-check"
 require_text "Makefile" "p2-runtime-check"
@@ -176,9 +176,9 @@ require_text ".agent/makefile-baseline.yaml" "execution-context"
 require_text ".agent/makefile-target-registry.yaml" "execution-context"
 require_text ".agent/harness.yaml" "execution-context"
 require_text ".agent/gates.md" "execution-context"
-require_text "docs/standard/xlibgate-cli-contract.md" "不读取真实 secrets"
-require_text "docs/standard/xlibgate-cli-contract.md" "downstream-adoption"
-require_text "docs/standard/xlibgate-cli-contract.md" "execution-context"
+require_text "docs/standard/goalcli-cli-contract.md" "不读取真实 secrets"
+require_text "docs/standard/goalcli-cli-contract.md" "downstream-adoption"
+require_text "docs/standard/goalcli-cli-contract.md" "execution-context"
 require_text "docs/standard/harness-gates.md" "execution-context"
 require_text "docs/standard/agent-team-contract.md" "leader"
 require_text "docs/standard/goal-runtime.md" "runtime-health"

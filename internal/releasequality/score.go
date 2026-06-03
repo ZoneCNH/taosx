@@ -34,14 +34,14 @@ func Compute(threshold float64) Report {
 	dimensions := []Dimension{
 		fileDimension("scorecard_doc", 1, "docs/scorecard.md", "scorecard rubric is documented"),
 		textDimension("manifest_score_schema", 1, "release/manifest/template.json", []string{"\"score\"", "\"workflow_run_id\"", "\"artifact_url\""}, "manifest records score and workflow evidence"),
-		textDimension("score_cli", 1, "cmd/xlibgate/main.go", []string{"score", "--min"}, "xlibgate score command is runnable"),
+		textDimension("score_cli", 1, "cmd/goalcli/main.go", []string{"score", "--min"}, "goalcli score command is runnable"),
 		scoreGateDimension("Makefile"),
 		textDimension("manifest_min_score_verify", 1, "scripts/check_release_evidence.sh", []string{"RELEASE_EVIDENCE_MIN_SCORE", "--min-score"}, "release evidence verification passes score threshold"),
 		textDimension("security_gate", 1, "scripts/check_secrets.sh", []string{"github_pat_", "ghp_[A-Za-z0-9_]{36,}", "PRIVATE KEY-----"}, "secret scanner covers provider tokens and private keys"),
-		textDimension("release_docs", 1, "docs/release.md", []string{"go run ./cmd/xlibgate score --min 9.8", "workflow_run_id", "artifact_url"}, "release docs bind score and CI artifact evidence"),
+		textDimension("release_docs", 1, "docs/release.md", []string{"go run ./cmd/goalcli score --min 9.8", "workflow_run_id", "artifact_url"}, "release docs bind score and CI artifact evidence"),
 		textDimension("supply_chain_docs", 1, "docs/supply-chain.md", []string{"score", "workflow_run_id", "artifact_url"}, "supply-chain docs include score/workflow evidence"),
 		textDimension("retrospective_template", 1, ".agent/retrospective-template.md", []string{"Score", "Gate", "Patch"}, "retrospectives capture gate score and patch rationale"),
-		textDimension("release_template", 1, ".agent/release-template.md", []string{"go run ./cmd/xlibgate score --min 9.8", "CI artifact", "score"}, "release template requires score and artifact evidence"),
+		textDimension("release_template", 1, ".agent/release-template.md", []string{"go run ./cmd/goalcli score --min 9.8", "CI artifact", "score"}, "release template requires score and artifact evidence"),
 	}
 
 	var total, passed float64

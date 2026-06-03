@@ -4,7 +4,7 @@
 > 与 `.worktree/goal-patch.md` 渲染生成；冲突时以 `iron-rules.md` >
 > `registry.yaml` > 本文件 > `.worktree/goal-patch.md` 为序。
 
-本文件覆盖 Goal Runtime **执行平面层**规则：Agent 协议与边界、并发与租约、命令事务与 dry-run、Bootstrap/Doctor/Repair、Dashboard 与度量、`goalkit` / `xlibgate` 工具链架构、控制平面与报告规范。
+本文件覆盖 Goal Runtime **执行平面层**规则：Agent 协议与边界、并发与租约、命令事务与 dry-run、Bootstrap/Doctor/Repair、Dashboard 与度量、`goalcli` 工具链架构、控制平面与报告规范。
 
 对应 Gate：`runtime-doctor`、`runtime-repair`、`dashboard`、`cmd-txn-check`、`cli-contract`、`gate-dag-check`。
 
@@ -14,7 +14,7 @@
 
 ### **[P0]** `RULE-HUMAN-001`：高风险变更必须人工批准
 
-<sub>level: P0 · status: indexed · enforced_by: `（待机器化）` · source: §48 L2333</sub>
+<sub>level: P0 · status: active · enforced_by: `goalcli pr-template` · exit: 1 · source: §48 L2333</sub>
 
 以下必须进入：
 
@@ -40,7 +40,7 @@ NEEDS_HUMAN_APPROVAL
 
 ### **[P1]** `RULE-CODE-001`：所有 P0 / P1 规则必须机器化
 
-<sub>level: P1 · status: indexed · enforced_by: `（待机器化）` · source: §54 L2537</sub>
+<sub>level: P1 · status: active · enforced_by: `make governance-check` · exit: 1 · source: §54 L2537</sub>
 
 Markdown 规则只能解释，不能作为唯一裁判。
 
@@ -51,7 +51,7 @@ YAML Policy
 Harness Gate
 Makefile Target
 GitHub Action
-goalkit Command
+goalcli Command
 Shell Script
 JSON Schema
 CI Check
@@ -73,7 +73,7 @@ CI Check
 
 ### **[P1]** `RULE-CODE-002`：规则必须有机器 ID
 
-<sub>level: P1 · status: indexed · enforced_by: `（待机器化）` · source: §54 L2570</sub>
+<sub>level: P1 · status: active · enforced_by: `make governance-check` · exit: 1 · source: §54 L2570</sub>
 
 每条规则必须具备：
 
@@ -97,7 +97,7 @@ evidence:
 
 ### **[P1]** `RULE-AGENT-001`：Agent 不允许自由发挥执行
 
-<sub>level: P1 · status: indexed · enforced_by: `（待机器化）` · source: §57 L2699</sub>
+<sub>level: P1 · status: active · enforced_by: `goalcli agent-team-contract` · exit: 1 · source: §57 L2699</sub>
 
 Agent 必须遵循固定执行协议：
 
@@ -120,7 +120,7 @@ Read Goal
 
 ### **[P1]** `RULE-AGENT-002`：Agent 每一步必须写 Execution Log
 
-<sub>level: P1 · status: indexed · enforced_by: `（待机器化）` · source: §57 L2722</sub>
+<sub>level: P1 · status: active · enforced_by: `goalcli agent-team-contract` · exit: 1 · source: §57 L2722</sub>
 
 必须记录：
 
@@ -145,7 +145,7 @@ Evidence ID
 
 ### **[P1]** `RULE-AGENT-003`：Agent 不能跳过失败
 
-<sub>level: P1 · status: indexed · enforced_by: `（待机器化）` · source: §57 L2747</sub>
+<sub>level: P1 · status: active · enforced_by: `goalcli agent-team-contract` · exit: 1 · source: §57 L2747</sub>
 
 如果命令失败，Agent 必须：
 
@@ -172,7 +172,7 @@ Evidence ID
 
 ### **[P1]** `RULE-AGENT-AUTH-001`：Agent 只能操作当前 Goal 授权范围
 
-<sub>level: P1 · status: indexed · enforced_by: `（待机器化）` · source: §58 L2772</sub>
+<sub>level: P1 · status: active · enforced_by: `goalcli agent-team-contract` · exit: 1 · source: §58 L2772</sub>
 
 每个 Goal 必须定义：
 
@@ -190,7 +190,7 @@ forbidden_paths:
 allowed_commands:
   - make ci
   - make evidence-check
-  - goalkit evidence collect
+  - goalcli evidence collect
 forbidden_commands:
   - rm -rf /
   - git push origin main
@@ -199,7 +199,7 @@ forbidden_commands:
 
 ### **[P1]** `RULE-AGENT-AUTH-002`：越权必须阻断
 
-<sub>level: P1 · status: indexed · enforced_by: `（待机器化）` · source: §58 L2799</sub>
+<sub>level: P1 · status: active · enforced_by: `goalcli agent-team-contract` · exit: 1 · source: §58 L2799</sub>
 
 如果 Agent 修改非授权路径，必须：
 
@@ -216,7 +216,7 @@ forbidden_commands:
 
 ### **[P1]** `RULE-CONCURRENCY-001`：每个 Task 独立 worktree
 
-<sub>level: P1 · status: indexed · enforced_by: `（待机器化）` · source: §59 L2814</sub>
+<sub>level: P1 · status: active · enforced_by: `goalcli worktree-guard` · exit: 5 · source: §59 L2814</sub>
 
 并发执行时：
 
@@ -228,7 +228,7 @@ forbidden_commands:
 
 ### **[P1]** `RULE-CONCURRENCY-002`：必须有 Lock 文件
 
-<sub>level: P1 · status: indexed · enforced_by: `（待机器化）` · source: §59 L2826</sub>
+<sub>level: P1 · status: active · enforced_by: `goalcli worktree-guard` · exit: 5 · source: §59 L2826</sub>
 
 推荐：
 
@@ -253,7 +253,7 @@ expires_at: 2026-06-03T20:30:00+09:00
 
 ### **[P1]** `RULE-CONCURRENCY-003`：Release 必须串行
 
-<sub>level: P1 · status: indexed · enforced_by: `（待机器化）` · source: §59 L2851</sub>
+<sub>level: P1 · status: active · enforced_by: `goalcli worktree-guard` · exit: 5 · source: §59 L2851</sub>
 
 允许并发：
 
@@ -280,7 +280,7 @@ Downstream adoption baseline update
 
 ### **[P1]** `RULE-CONTEXT-COMPRESSION-001`：Goal 必须支持上下文压缩
 
-<sub>level: P1 · status: indexed · enforced_by: `（待机器化）` · source: §64 L3036</sub>
+<sub>level: P1 · status: active · enforced_by: `goalcli execution-context` · exit: 1 · source: §64 L3036</sub>
 
 大型 Goal 必须提供：
 
@@ -296,7 +296,7 @@ next-actions.md
 
 ### **[P1]** `RULE-CONTEXT-COMPRESSION-002`：上下文摘要不能替代原始 Evidence
 
-<sub>level: P1 · status: indexed · enforced_by: `（待机器化）` · source: §64 L3052</sub>
+<sub>level: P1 · status: active · enforced_by: `goalcli execution-context` · exit: 1 · source: §64 L3052</sub>
 
 摘要只能帮助阅读，不能作为完成证明。
 
@@ -339,16 +339,16 @@ Gate false positive > 10% → 需要调参
 
 ---
 
-## §83 goalkit 命令契约规则
+## §83 goalcli 命令契约规则
 
-### **[P1]** `RULE-GOALKIT-001`：goalkit 必须是 Goal Runtime 的唯一执行入口之一
+### **[P1]** `RULE-GOALCLI-001`：goalcli 必须是 Goal Runtime 的唯一执行入口之一
 
-<sub>level: P1 · status: active · enforced_by: `xlibgate` · exit: 1 · source: §83 L3644</sub>
+<sub>level: P1 · status: active · enforced_by: `goalcli` · exit: 1 · source: §83 L3644</sub>
 
 所有自动化动作必须优先通过：
 
 ```bash
-goalkit <domain> <action>
+goalcli <domain> <action>
 ```
 
 而不是每个 Agent 自己拼命令。
@@ -364,16 +364,16 @@ goalkit <domain> <action>
 统一 Gate 行为
 ```
 
-### **[P1]** `RULE-GOALKIT-002`：goalkit 命令必须幂等
+### **[P1]** `RULE-GOALCLI-002`：goalcli 命令必须幂等
 
-<sub>level: P1 · status: active · enforced_by: `xlibgate` · exit: 1 · source: §83 L3667</sub>
+<sub>level: P1 · status: active · enforced_by: `goalcli` · exit: 1 · source: §83 L3667</sub>
 
 重复执行不应破坏状态。
 
 例如：
 
 ```bash
-goalkit issues create --goal GOAL-20260603-001
+goalcli issues create --goal GOAL-20260603-001
 ```
 
 第二次执行时必须：
@@ -392,15 +392,15 @@ goalkit issues create --goal GOAL-20260603-001
 丢失 Issue 与 Task 映射
 ```
 
-### **[P1]** `RULE-GOALKIT-003`：goalkit 命令必须统一输出机器结果
+### **[P1]** `RULE-GOALCLI-003`：goalcli 命令必须统一输出机器结果
 
-<sub>level: P1 · status: active · enforced_by: `xlibgate` · exit: 1 · source: §83 L3695</sub>
+<sub>level: P1 · status: active · enforced_by: `goalcli` · exit: 1 · source: §83 L3695</sub>
 
 所有命令输出至少包含：
 
 ```json
 {
-  "command": "goalkit evidence check",
+  "command": "goalcli evidence check",
   "status": "passed",
   "goal_id": "GOAL-20260603-001",
   "reports": ["reports/evidence-check.json"],
@@ -418,11 +418,11 @@ reports/<command>.json
 
 ---
 
-## §84 goalkit Exit Code 规则
+## §84 goalcli Exit Code 规则
 
-### **[P1]** `RULE-GOALKIT-EXIT-001`：退出码必须标准化
+### **[P1]** `RULE-GOALCLI-EXIT-001`：退出码必须标准化
 
-<sub>level: P1 · status: active · enforced_by: `xlibgate` · exit: 1 · source: §84 L3721</sub>
+<sub>level: P1 · status: active · enforced_by: `goalcli` · exit: 1 · source: §84 L3721</sub>
 
 ```text
 0  = PASS
@@ -496,7 +496,7 @@ artifacts:
 
 ### **[P1]** `RULE-AGENT-TEAM-001`：复杂 Goal 必须拆 Agent 角色
 
-<sub>level: P1 · status: active · enforced_by: `xlibgate agent-team-contract` · exit: 1 · source: §100 L4305</sub>
+<sub>level: P1 · status: active · enforced_by: `goalcli agent-team-contract` · exit: 1 · source: §100 L4305</sub>
 
 推荐角色：
 
@@ -515,7 +515,7 @@ Retro Agent        # 复盘与补丁
 
 ### **[P1]** `RULE-AGENT-TEAM-002`：角色之间必须通过文件交接
 
-<sub>level: P1 · status: active · enforced_by: `xlibgate agent-team-contract` · exit: 1 · source: §100 L4324</sub>
+<sub>level: P1 · status: active · enforced_by: `goalcli agent-team-contract` · exit: 1 · source: §100 L4324</sub>
 
 禁止靠聊天记忆交接。
 
@@ -539,13 +539,13 @@ retrospective.md
 
 ### **[P1]** `RULE-HANDOFF-001`：每次 Agent 交接必须写 Handoff Note
 
-<sub>level: P1 · status: active · enforced_by: `xlibgate goal-handover` · exit: 1 · source: §101 L4346</sub>
+<sub>level: P1 · status: active · enforced_by: `goalcli goal-handover` · exit: 1 · source: §101 L4346</sub>
 
 ```md
 
 ### **[P1]** `RULE-HANDOFF-002`：没有 Handoff 不允许切换 Agent
 
-<sub>level: P1 · status: active · enforced_by: `xlibgate goal-handover` · exit: 1 · source: §101 L4375</sub>
+<sub>level: P1 · status: active · enforced_by: `goalcli goal-handover` · exit: 1 · source: §101 L4375</sub>
 
 否则容易出现：
 
@@ -562,7 +562,7 @@ PR 内容漂移
 
 ### **[P1]** `RULE-REPO-LAYOUT-001`：Goal Runtime 必须有固定目录结构
 
-<sub>level: P1 · status: indexed · enforced_by: `（待机器化）` · source: §113 L4761</sub>
+<sub>level: P1 · status: active · enforced_by: `goalcli boundary` · exit: 1 · source: §113 L4761</sub>
 
 推荐在 `xlib-standard` 中落地：
 
@@ -640,14 +640,14 @@ PR 内容漂移
 
 ---
 
-## §115 `goalkit.yaml` 配置规则
+## §115 `goalcli.yaml` 配置规则
 
-### **[P1]** `RULE-GOALKIT-CONFIG-001`：goalkit 必须有统一配置文件
+### **[P1]** `RULE-GOALCLI-CONFIG-001`：goalcli 必须有统一配置文件
 
-<sub>level: P1 · status: active · enforced_by: `xlibgate` · exit: 1 · source: §115 L4877</sub>
+<sub>level: P1 · status: active · enforced_by: `goalcli` · exit: 1 · source: §115 L4877</sub>
 
 ```yaml
-version: goalkit-v0.1.0
+version: goalcli-v0.1.0
 
 runtime:
   timezone: Asia/Tokyo
@@ -701,16 +701,16 @@ security:
 
 ---
 
-## §120 goalkit 内核架构规则
+## §120 goalcli 内核架构规则
 
-### **[P1]** `RULE-GOALKIT-ARCH-001`：goalkit v0.1.0 先做裁判，不做复杂 Agent
+### **[P1]** `RULE-GOALCLI-ARCH-001`：goalcli v0.1.0 先做裁判，不做复杂 Agent
 
-<sub>level: P1 · status: active · enforced_by: `xlibgate` · exit: 1 · source: §120 L5149</sub>
+<sub>level: P1 · status: active · enforced_by: `goalcli` · exit: 1 · source: §120 L5149</sub>
 
 内核模块建议：
 
 ```text
-cmd/goalkit/
+cmd/goalcli/
 internal/
 ├── config/
 ├── schema/
@@ -726,9 +726,9 @@ internal/
 └── gitutil/
 ```
 
-### **[P1]** `RULE-GOALKIT-ARCH-002`：每个 Checker 必须实现统一接口
+### **[P1]** `RULE-GOALCLI-ARCH-002`：每个 Checker 必须实现统一接口
 
-<sub>level: P1 · status: active · enforced_by: `xlibgate` · exit: 1 · source: §120 L5172</sub>
+<sub>level: P1 · status: active · enforced_by: `goalcli` · exit: 1 · source: §120 L5172</sub>
 
 伪接口：
 
@@ -755,7 +755,7 @@ type Checker interface {
 
 ### **[P1]** `RULE-CHECKER-001`：Checker 输出必须同时支持人读和机器读
 
-<sub>level: P1 · status: active · enforced_by: `xlibgate` · exit: 1 · source: §121 L5197</sub>
+<sub>level: P1 · status: active · enforced_by: `goalcli` · exit: 1 · source: §121 L5197</sub>
 
 每个检查器必须输出：
 
@@ -773,7 +773,7 @@ reports/worktree-check.txt
 
 ### **[P1]** `RULE-CHECKER-002`：JSON 报告必须统一结构
 
-<sub>level: P1 · status: active · enforced_by: `xlibgate` · exit: 1 · source: §121 L5215</sub>
+<sub>level: P1 · status: active · enforced_by: `goalcli` · exit: 1 · source: §121 L5215</sub>
 
 ```json
 {
@@ -812,8 +812,8 @@ git status
 git branch --show-current
 make worktree-check
 make schema-check
-goalkit goal status --goal <GOAL-ID>
-goalkit task status --task <TASK-ID>
+goalcli goal status --goal <GOAL-ID>
+goalcli task status --task <TASK-ID>
 ```
 
 禁止直接开始改文件。
@@ -865,7 +865,7 @@ Evidence ID
 
 ### **[P0]** `RULE-STOP-001`：以下情况必须停止执行
 
-<sub>level: P0 · status: indexed · enforced_by: `（待机器化）` · source: §145 L6006</sub>
+<sub>level: P0 · status: active · enforced_by: `make governance-check` · exit: 1 · source: §145 L6006</sub>
 
 ```text
 P0 Gate 失败
@@ -882,7 +882,7 @@ Schema 无效
 
 ### **[P0]** `RULE-STOP-002`：停止后必须生成 Blocker 记录
 
-<sub>level: P0 · status: indexed · enforced_by: `（待机器化）` · source: §145 L6023</sub>
+<sub>level: P0 · status: active · enforced_by: `make governance-check` · exit: 1 · source: §145 L6023</sub>
 
 ```md
 
@@ -892,7 +892,7 @@ Schema 无效
 
 ### **[P1]** `RULE-REPAIR-001`：失败后最多自动修复 N 次
 
-<sub>level: P1 · status: indexed · enforced_by: `（待机器化）` · source: §146 L6054</sub>
+<sub>level: P1 · status: active · enforced_by: `goalcli self-healing-skeleton` · exit: 1 · source: §146 L6054</sub>
 
 建议：
 
@@ -905,7 +905,7 @@ repair_policy:
 
 ### **[P1]** `RULE-REPAIR-002`：每次修复必须保留失败证据
 
-<sub>level: P1 · status: indexed · enforced_by: `（待机器化）` · source: §146 L6067</sub>
+<sub>level: P1 · status: active · enforced_by: `goalcli self-healing-skeleton` · exit: 1 · source: §146 L6067</sub>
 
 禁止覆盖失败报告。
 
@@ -924,7 +924,7 @@ reports/failures/<timestamp>-<gate>.txt
 
 ### **[P1]** `RULE-CONTROL-001`：`.agent` 是 Goal Runtime 控制平面
 
-<sub>level: P1 · status: indexed · enforced_by: `（待机器化）` · source: §173 L7100</sub>
+<sub>level: P1 · status: active · enforced_by: `goalcli goal-runtime` · exit: 1 · source: §173 L7100</sub>
 
 `.agent` 不是普通文档目录，而是运行时控制平面。
 
@@ -946,7 +946,7 @@ Audit Report
 
 ### **[P1]** `RULE-CONTROL-002`：控制平面优先于散落文档
 
-<sub>level: P1 · status: indexed · enforced_by: `（待机器化）` · source: §173 L7122</sub>
+<sub>level: P1 · status: active · enforced_by: `goalcli goal-runtime` · exit: 1 · source: §173 L7122</sub>
 
 优先级：
 
@@ -967,7 +967,7 @@ README              # 导航入口
 
 ## §175 命令事务规则
 
-### **[P1]** `RULE-CMD-TXN-001`：goalkit 命令必须事务化
+### **[P1]** `RULE-CMD-TXN-001`：goalcli 命令必须事务化
 
 <sub>level: P1 · status: indexed · enforced_by: `（待机器化）` · source: §175 L7174</sub>
 
@@ -985,7 +985,7 @@ precheck
 例如：
 
 ```bash
-goalkit worktree create --task TASK-001
+goalcli worktree create --task TASK-001
 ```
 
 内部必须执行：
@@ -1033,10 +1033,10 @@ Issue 创建了但 tasks.yaml 没回写
 必须支持：
 
 ```bash
-goalkit release publish --dry-run
-goalkit migrate --dry-run
-goalkit worktree clean --dry-run
-goalkit issues sync --dry-run
+goalcli release publish --dry-run
+goalcli migrate --dry-run
+goalcli worktree clean --dry-run
+goalcli issues sync --dry-run
 ```
 
 ### **[P1]** `RULE-DRYRUN-002`：dry-run 必须输出计划
@@ -1060,7 +1060,7 @@ goalkit issues sync --dry-run
 
 ### **[P1]** `RULE-AUTO-SAFETY-001`：自动化只能扩大确定性，不能扩大不确定性
 
-<sub>level: P1 · status: indexed · enforced_by: `（待机器化）` · source: §178 L7300</sub>
+<sub>level: P1 · status: active · enforced_by: `goalcli runtime-health` · exit: 1 · source: §178 L7300</sub>
 
 允许自动化：
 
@@ -1086,7 +1086,7 @@ goalkit issues sync --dry-run
 
 ### **[P1]** `RULE-AUTO-SAFETY-002`：高风险自动化必须先进入 Simulation
 
-<sub>level: P1 · status: indexed · enforced_by: `（待机器化）` · source: §178 L7326</sub>
+<sub>level: P1 · status: active · enforced_by: `goalcli runtime-health` · exit: 1 · source: §178 L7326</sub>
 
 高风险自动化包括：
 
@@ -1101,8 +1101,8 @@ goalkit issues sync --dry-run
 必须先执行：
 
 ```bash
-goalkit simulate adoption --target kernel
-goalkit simulate migrate --from rules-v1.5 --to rules-v1.6
+goalcli simulate adoption --target kernel
+goalcli simulate migrate --from rules-v1.5 --to rules-v1.6
 ```
 
 ---
@@ -1116,7 +1116,7 @@ goalkit simulate migrate --from rules-v1.5 --to rules-v1.6
 不需要第一阶段做 Web 服务，先生成静态报告：
 
 ```bash
-goalkit dashboard generate
+goalcli dashboard generate
 ```
 
 输出：
@@ -1182,7 +1182,7 @@ Traceability 覆盖率
 
 ### **[P1]** `RULE-AGENT-MEMORY-001`：Agent 记忆不能作为事实源
 
-<sub>level: P1 · status: indexed · enforced_by: `（待机器化）` · source: §193 L7811</sub>
+<sub>level: P1 · status: active · enforced_by: `goalcli agent-team-contract` · exit: 1 · source: §193 L7811</sub>
 
 Agent 可以参考历史记忆，但不能替代：
 
@@ -1197,7 +1197,7 @@ Release Manifest
 
 ### **[P1]** `RULE-AGENT-MEMORY-002`：重要上下文必须写入文件
 
-<sub>level: P1 · status: indexed · enforced_by: `（待机器化）` · source: §193 L7826</sub>
+<sub>level: P1 · status: active · enforced_by: `goalcli agent-team-contract` · exit: 1 · source: §193 L7826</sub>
 
 不能只存在聊天中。
 
@@ -1216,7 +1216,7 @@ next-actions.md
 
 ### **[P1]** `RULE-CONTEXT-WINDOW-001`：大型 Goal 必须分层摘要
 
-<sub>level: P1 · status: indexed · enforced_by: `（待机器化）` · source: §194 L7843</sub>
+<sub>level: P1 · status: active · enforced_by: `goalcli execution-context` · exit: 1 · source: §194 L7843</sub>
 
 必须提供：
 
@@ -1230,7 +1230,7 @@ next-actions.md
 
 ### **[P1]** `RULE-CONTEXT-WINDOW-002`：Agent 恢复时先读摘要，再读原文
 
-<sub>level: P1 · status: indexed · enforced_by: `（待机器化）` · source: §194 L7857</sub>
+<sub>level: P1 · status: active · enforced_by: `goalcli execution-context` · exit: 1 · source: §194 L7857</sub>
 
 读取顺序：
 
@@ -1250,19 +1250,19 @@ full design
 
 ### **[P1]** `RULE-BOOTSTRAP-001`：任何仓库接入 Goal Runtime 必须先 bootstrap
 
-<sub>level: P1 · status: indexed · enforced_by: `（待机器化）` · source: §206 L8171</sub>
+<sub>level: P1 · status: active · enforced_by: `goalcli install-runtime` · exit: 1 · source: §206 L8171</sub>
 
 接入命令：
 
 ```bash
-goalkit bootstrap repo --profile xlib-standard
+goalcli bootstrap repo --profile xlib-standard
 ```
 
 必须生成或检查：
 
 ```text
 .agent/
-goalkit.yaml
+goalcli.yaml
 Makefile gates
 scripts/harness/
 .githooks/
@@ -1275,12 +1275,12 @@ scripts/harness/
 
 ### **[P1]** `RULE-BOOTSTRAP-002`：bootstrap 必须幂等
 
-<sub>level: P1 · status: indexed · enforced_by: `（待机器化）` · source: §206 L8196</sub>
+<sub>level: P1 · status: active · enforced_by: `goalcli install-runtime` · exit: 1 · source: §206 L8196</sub>
 
 重复执行：
 
 ```bash
-goalkit bootstrap repo
+goalcli bootstrap repo
 ```
 
 不得重复覆盖用户修改。必须输出：
@@ -1305,10 +1305,10 @@ NEEDS_DECISION
 
 ### **[P1]** `RULE-DOCTOR-001`：必须提供一键诊断
 
-<sub>level: P1 · status: indexed · enforced_by: `（待机器化）` · source: §207 L8224</sub>
+<sub>level: P1 · status: active · enforced_by: `goalcli runtime-health` · exit: 1 · source: §207 L8224</sub>
 
 ```bash
-goalkit doctor
+goalcli doctor
 ```
 
 检查：
@@ -1328,14 +1328,14 @@ Registry 是否一致
 
 ### **[P1]** `RULE-DOCTOR-002`：doctor 不能修改状态
 
-<sub>level: P1 · status: indexed · enforced_by: `（待机器化）` · source: §207 L8247</sub>
+<sub>level: P1 · status: active · enforced_by: `goalcli runtime-health` · exit: 1 · source: §207 L8247</sub>
 
 `doctor` 只诊断，不修复。
 
 修复必须走：
 
 ```bash
-goalkit repair
+goalcli repair
 ```
 
 ---
@@ -1344,7 +1344,7 @@ goalkit repair
 
 ### **[P1]** `RULE-COMPILER-001`：Markdown Rule 必须可编译成 Policy Index
 
-<sub>level: P1 · status: indexed · enforced_by: `（待机器化）` · source: §209 L8285</sub>
+<sub>level: P1 · status: active · enforced_by: `goalcli cli-contract` · exit: 1 · source: §209 L8285</sub>
 
 输入：
 
@@ -1364,7 +1364,7 @@ goalkit repair
 
 ### **[P1]** `RULE-COMPILER-002`：编译失败必须阻断 Release
 
-<sub>level: P1 · status: indexed · enforced_by: `（待机器化）` · source: §209 L8305</sub>
+<sub>level: P1 · status: active · enforced_by: `goalcli cli-contract` · exit: 1 · source: §209 L8305</sub>
 
 ```bash
 make rule-compile
@@ -1386,7 +1386,7 @@ Policy 引用不存在 rule_id
 
 ### **[P1]** `RULE-GATE-DAG-001`：Gate 必须有依赖图
 
-<sub>level: P1 · status: indexed · enforced_by: `（待机器化）` · source: §211 L8356</sub>
+<sub>level: P1 · status: active · enforced_by: `goalcli makefile-baseline` · exit: 1 · source: §211 L8356</sub>
 
 示例：
 
@@ -1402,7 +1402,7 @@ schema-check
 
 ### **[P1]** `RULE-GATE-DAG-002`：禁止循环依赖
 
-<sub>level: P1 · status: indexed · enforced_by: `（待机器化）` · source: §211 L8372</sub>
+<sub>level: P1 · status: active · enforced_by: `goalcli makefile-baseline` · exit: 1 · source: §211 L8372</sub>
 
 例如：
 
@@ -1419,12 +1419,12 @@ release-check 又依赖 evidence-check
 
 ### **[P1]** `RULE-RECONCILE-001`：必须能修复状态不一致
 
-<sub>level: P1 · status: indexed · enforced_by: `（待机器化）` · source: §212 L8387</sub>
+<sub>level: P1 · status: active · enforced_by: `goalcli runtime-health` · exit: 1 · source: §212 L8387</sub>
 
 命令：
 
 ```bash
-goalkit reconcile --goal GOAL-20260603-001
+goalcli reconcile --goal GOAL-20260603-001
 ```
 
 检查并修复：
@@ -1441,7 +1441,7 @@ execution-log.md
 
 ### **[P1]** `RULE-RECONCILE-002`：reconcile 不能静默改状态
 
-<sub>level: P1 · status: indexed · enforced_by: `（待机器化）` · source: §212 L8409</sub>
+<sub>level: P1 · status: active · enforced_by: `goalcli runtime-health` · exit: 1 · source: §212 L8409</sub>
 
 必须输出：
 
@@ -1465,12 +1465,12 @@ NEEDS_HUMAN_APPROVAL
 
 ### **[P1]** `RULE-LEASE-001`：Agent 执行必须持有 Lease
 
-<sub>level: P1 · status: indexed · enforced_by: `（待机器化）` · source: §216 L8524</sub>
+<sub>level: P1 · status: active · enforced_by: `goalcli runtime-health` · exit: 1 · source: §216 L8524</sub>
 
 执行 Task 前：
 
 ```bash
-goalkit lease acquire --task TASK-001 --agent agent-01
+goalcli lease acquire --task TASK-001 --agent agent-01
 ```
 
 Lease 包含：
@@ -1486,10 +1486,10 @@ heartbeat_at:
 
 ### **[P1]** `RULE-LEASE-002`：Lease 超时必须释放或接管
 
-<sub>level: P1 · status: indexed · enforced_by: `（待机器化）` · source: §216 L8545</sub>
+<sub>level: P1 · status: active · enforced_by: `goalcli runtime-health` · exit: 1 · source: §216 L8545</sub>
 
 ```bash
-goalkit lease recover
+goalcli lease recover
 ```
 
 防止僵尸 Agent 占用任务。
@@ -1500,10 +1500,10 @@ goalkit lease recover
 
 ### **[P1]** `RULE-HEARTBEAT-001`：长任务必须写心跳
 
-<sub>level: P1 · status: indexed · enforced_by: `（待机器化）` · source: §217 L8557</sub>
+<sub>level: P1 · status: active · enforced_by: `goalcli runtime-health` · exit: 1 · source: §217 L8557</sub>
 
 ```bash
-goalkit heartbeat --task TASK-001
+goalcli heartbeat --task TASK-001
 ```
 
 心跳记录：
@@ -1518,7 +1518,7 @@ goalkit heartbeat --task TASK-001
 
 ### **[P1]** `RULE-HEARTBEAT-002`：无心跳任务进入 STALE
 
-<sub>level: P1 · status: indexed · enforced_by: `（待机器化）` · source: §217 L8575</sub>
+<sub>level: P1 · status: active · enforced_by: `goalcli runtime-health` · exit: 1 · source: §217 L8575</sub>
 
 超过 TTL：
 

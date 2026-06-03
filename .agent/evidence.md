@@ -15,7 +15,7 @@ Full Goal Runtime v3.1 的完成 Evidence 必须区分 required、extended、fin
 
 - `GOWORK=off make release-final-check`：通过且工作区 clean。
 - `GOWORK=off make release-preflight VERSION=<version>`：通过。
-- `xlibgate score --min 9.8`：通过。
+- `goalcli score --min 9.8`：通过。
 - kernel downstream smoke：通过。
 
 ## Declaration

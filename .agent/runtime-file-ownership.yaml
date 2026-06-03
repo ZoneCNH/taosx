@@ -24,14 +24,14 @@ owners:
     owner: gate-runtime
     review_required: true
     rationale: Gate 定义；修改可能改变 release/PR 阻断行为
-  "cmd/xlibgate/":
+  "cmd/goalcli/":
     owner: gate-runtime
     review_required: true
     rationale: 机器裁判内核，所有 Gate 的最终执行者
-  "internal/xlibgate/":
+  "internal/goalcli/":
     owner: gate-runtime
     review_required: true
-    rationale: xlibgate 子模块实现
+    rationale: goalcli 子模块实现
   "internal/releasequality/":
     owner: release
     review_required: true

@@ -28,7 +28,7 @@
 
 ## Gate
 
-`GOWORK=off make integration` 是默认下游兼容 gate。它通过 `cmd/xlibgate integration` 覆盖 generator smoke、`kernel`/`corekit` 代表路径和关键边界检查。
+`GOWORK=off make integration` 是默认下游兼容 gate。它通过 `cmd/goalcli integration` 覆盖 generator smoke、`kernel`/`corekit` 代表路径和关键边界检查。
 
 生成出的每个代表下游必须通过：
 

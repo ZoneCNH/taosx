@@ -16,6 +16,24 @@ commands:
   - name: worktree-guard
     phase: P0
     target: worktree-guard
+  - name: worktree-check
+    phase: P0
+    target: worktree-check
+  - name: context-check
+    phase: P0
+    target: context-check
+  - name: spec-check
+    phase: P0
+    target: spec-check
+  - name: design-check
+    phase: P0
+    target: design-check
+  - name: task-check
+    phase: P0
+    target: task-check
+  - name: pr-check
+    phase: P0
+    target: pr-check
   - name: evidence-check
     phase: P0
     target: evidence-check
@@ -133,6 +151,9 @@ commands:
   - name: rules-consistency-check
     phase: P0
     target: rules-consistency-check
+  - name: rules-verify
+    phase: P0
+    target: rules-verify
   - name: score
     phase: P0
     target: score

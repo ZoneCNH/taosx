@@ -1,3 +1,3 @@
 # Upgrade Standard Dry-run
 
-`xlibgate upgrade-standard --dry-run` 只验证合同文件存在，不提升版本或写 downstream。
+`goalcli upgrade-standard --dry-run` 只验证合同文件存在，不提升版本或写 downstream。

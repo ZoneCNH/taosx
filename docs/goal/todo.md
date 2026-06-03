@@ -47,7 +47,7 @@ harness+ self-improving
 issues
 
 
-汇总以上 完整的方案，使用 goalkit 版本 v0.1.0 开始
+汇总以上 完整的方案，使用 goalcli 版本 v0.1.0 开始
 深度检查，是否还有遗漏
 下载完整.md
 
@@ -115,7 +115,7 @@ harness
 
 
 提交git  push
-执行发布版本 0.4.5
+执行发布版本 0.4.6
 
 
 检查 是否需要更新对齐 同步文档
@@ -141,7 +141,7 @@ postgresx/redisx/kafkax/taosx/ossx 等为 L2，
 
 
 
- 目的：建立一个以 xlib-standard 为标准源、以 .agent 为运行时控制平面、以 xlibgate 为机器裁判、以 Evidence 为完成证明、以 downstream adoption 为扩张方式、以 self-improving 为复利机制的基础库标准工厂。
+ 目的：建立一个以 xlib-standard 为标准源、以 .agent 为运行时控制平面、以 goalcli 为机器裁判、以 Evidence 为完成证明、以 downstream adoption 为扩张方式、以 self-improving 为复利机制的基础库标准工厂。
  结合当前 https://github.com/ZoneCNH/xlib-standard  实际落地情况
  综合以上文档，
  汇总出完整的实现 目标的 goal 可以执行方案，下载.md

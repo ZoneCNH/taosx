@@ -19,7 +19,7 @@
 
 - `XLIB_CONTEXT=release_verify GOWORK=off make release-final-check`
 - `XLIB_CONTEXT=release_verify GOWORK=off make release-preflight VERSION=<version>`
-- `xlibgate score --min 9.8`
+- `goalcli score --min 9.8`
 - kernel downstream smoke：渲染后执行 `GOWORK=off go test ./...`、`make contracts`、`make boundary` 和 release Evidence 校验。
 
 ## Extended Gates

@@ -10,14 +10,14 @@ import (
 )
 
 func runGoalRuntimeCommand(command string, args []string, stdout io.Writer, stderr io.Writer) int {
-	flags := flag.NewFlagSet("xlibgate "+command, flag.ContinueOnError)
+	flags := flag.NewFlagSet("goalcli "+command, flag.ContinueOnError)
 	flags.SetOutput(stderr)
 	goalID := flags.String("goal-id", envDefault("GOAL_ID", goalruntime.DefaultGoalID), "goal identifier to evaluate")
 	flags.Bool("json", false, "emit JSON report")
 	dryRun := flags.Bool("dry-run", false, "run local planned-command contract check")
 	verify := flags.Bool("verify", false, "verify local planned-command contract markers")
-	mode := flags.String("mode", "FULL", "goalkit runtime evaluation mode")
-	writeEvidence := flags.Bool("write-evidence", false, "write source ledger entry and generated goalkit final evidence pack when applicable")
+	mode := flags.String("mode", "FULL", "goalcli runtime evaluation mode")
+	writeEvidence := flags.Bool("write-evidence", false, "write source ledger entry and generated goalcli final evidence pack when applicable")
 	flags.Bool("strict", false, "reserved strict contract flag")
 	if err := flags.Parse(args); err != nil {
 		if errors.Is(err, flag.ErrHelp) {

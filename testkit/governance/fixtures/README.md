@@ -1,3 +1,3 @@
 # Governance Fixtures
 
-This directory anchors lightweight governance fixture coverage for xlibgate v2.9.3.
+This directory anchors lightweight governance fixture coverage for goalcli v2.9.3.

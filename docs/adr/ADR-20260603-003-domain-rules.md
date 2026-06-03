@@ -23,7 +23,7 @@ ADR-20260603-002 把 `.worktree/goal-patch.md` 中 419 条规则机器化为 `re
 |---|---|---|
 | `.agent/rules/core-rules.md` | CORE / CONTEXT / STATE / SSOT / ID / MODE / FAILURE / SCORE / FREEZE / NAMING / GLOSSARY 等 | 49 (P0=11, P1=38) |
 | `.agent/rules/schema-registry-rules.md` | SCHEMA / REGISTRY / GOALPACK / GOLDEN / MIGRATION / DOC / DEBT / COMPAT 等 | 60 (P0=0, P1=60) |
-| `.agent/rules/agent-runtime-rules.md` | AGENT / LEASE / HEARTBEAT / CMD-TXN / DRYRUN / GOALKIT / DASHBOARD / METRIC 等 | 75 (P0=3, P1=72) |
+| `.agent/rules/agent-runtime-rules.md` | AGENT / LEASE / HEARTBEAT / CMD-TXN / DRYRUN / GOALCLI / DASHBOARD / METRIC 等 | 75 (P0=3, P1=72) |
 
 合计 **184 条**规则被正文化（占 registry.yaml 总量的 44%）。
 

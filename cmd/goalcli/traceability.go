@@ -57,7 +57,7 @@ type traceabilityRow struct {
 }
 
 func runTraceabilityCheck(args []string, stdout io.Writer, stderr io.Writer) int {
-	flags := flag.NewFlagSet("xlibgate traceability-check", flag.ContinueOnError)
+	flags := flag.NewFlagSet("goalcli traceability-check", flag.ContinueOnError)
 	flags.SetOutput(stderr)
 	matrixPath := flags.String("matrix", traceabilityMatrixPath, "path to traceability matrix markdown")
 	emitJSON := flags.Bool("json", true, "emit JSON gate report (default true)")

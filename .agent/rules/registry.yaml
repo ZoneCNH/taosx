@@ -29,7 +29,7 @@ rules:
     source_section: 60
     source_section_title: "Branch 命名规则"
     source_line: 2876
-    enforced_by: "xlibgate worktree-guard"
+    enforced_by: "goalcli worktree-guard"
     exit_code: 5
     status: active
   - id: RULE-BRANCH-002
@@ -38,7 +38,7 @@ rules:
     source_section: 60
     source_section_title: "Branch 命名规则"
     source_line: 2896
-    enforced_by: "xlibgate worktree-guard"
+    enforced_by: "goalcli worktree-guard"
     exit_code: 5
     status: active
   - id: RULE-BRANCH-PROTECTION-001
@@ -47,7 +47,7 @@ rules:
     source_section: 119
     source_section_title: "Branch Protection 规则"
     source_line: 5117
-    enforced_by: "xlibgate github-settings"
+    enforced_by: "goalcli github-settings"
     exit_code: 1
     status: active
   - id: RULE-BRANCH-PROTECTION-002
@@ -56,7 +56,7 @@ rules:
     source_section: 119
     source_section_title: "Branch Protection 规则"
     source_line: 5134
-    enforced_by: "xlibgate github-settings"
+    enforced_by: "goalcli github-settings"
     exit_code: 1
     status: active
   - id: RULE-COMMIT-001
@@ -97,7 +97,7 @@ rules:
     status: active
   - id: RULE-COMMIT-AUTO-001
     level: P0
-    title: "commit 必须由 goalkit 包装"
+    title: "commit 必须由 goalcli 包装"
     source_section: 39
     source_section_title: "Commit 自动化规则"
     source_line: 1946
@@ -128,7 +128,7 @@ rules:
     source_section: 89
     source_section_title: "Commit Evidence Binding 规则"
     source_line: 3928
-    enforced_by: "xlibgate evidence-check"
+    enforced_by: "goalcli evidence-check"
     exit_code: 8
     status: active
   - id: RULE-COMMIT-EVID-002
@@ -137,7 +137,7 @@ rules:
     source_section: 89
     source_section_title: "Commit Evidence Binding 规则"
     source_line: 3952
-    enforced_by: "xlibgate evidence-check"
+    enforced_by: "goalcli evidence-check"
     exit_code: 8
     status: active
   - id: RULE-CORE-001
@@ -146,7 +146,7 @@ rules:
     source_section: 1
     source_section_title: "第一性原理铁律"
     source_line: 56
-    enforced_by: "xlibgate evidence-check"
+    enforced_by: "goalcli evidence-check"
     exit_code: 8
     status: active
   - id: RULE-CORE-002
@@ -155,7 +155,7 @@ rules:
     source_section: 1
     source_section_title: "第一性原理铁律"
     source_line: 73
-    enforced_by: "xlibgate context-fast-check"
+    enforced_by: "goalcli context-fast-check"
     exit_code: 1
     status: active
   - id: RULE-CORE-003
@@ -164,7 +164,7 @@ rules:
     source_section: 1
     source_section_title: "第一性原理铁律"
     source_line: 94
-    enforced_by: "xlibgate acceptance-matrix"
+    enforced_by: "goalcli acceptance-matrix"
     exit_code: 1
     status: active
   - id: RULE-CORE-004
@@ -173,7 +173,7 @@ rules:
     source_section: 1
     source_section_title: "第一性原理铁律"
     source_line: 106
-    enforced_by: "xlibgate traceability-check"
+    enforced_by: "goalcli traceability-check"
     exit_code: 9
     status: active
   - id: RULE-CORE-005
@@ -191,7 +191,7 @@ rules:
     source_section: 1
     source_section_title: "第一性原理铁律"
     source_line: 132
-    enforced_by: "xlibgate self-improving-check"
+    enforced_by: "goalcli self-improving-check"
     exit_code: 1
     status: active
   - id: RULE-DOD-001
@@ -200,7 +200,7 @@ rules:
     source_section: 142
     source_section_title: "Definition of Done 规则"
     source_line: 5842
-    enforced_by: "xlibgate done-assertion"
+    enforced_by: "goalcli done-assertion"
     exit_code: 1
     status: active
   - id: RULE-DOD-002
@@ -209,7 +209,7 @@ rules:
     source_section: 142
     source_section_title: "Definition of Done 规则"
     source_line: 5859
-    enforced_by: "xlibgate done-assertion"
+    enforced_by: "goalcli done-assertion"
     exit_code: 1
     status: active
   - id: RULE-DOD-003
@@ -218,7 +218,7 @@ rules:
     source_section: 142
     source_section_title: "Definition of Done 规则"
     source_line: 5882
-    enforced_by: "xlibgate done-assertion"
+    enforced_by: "goalcli done-assertion"
     exit_code: 1
     status: active
   - id: RULE-DOR-001
@@ -227,7 +227,7 @@ rules:
     source_section: 141
     source_section_title: "Definition of Ready 规则"
     source_line: 5796
-    enforced_by: "xlibgate goal-acceptance"
+    enforced_by: "goalcli goal-acceptance"
     exit_code: 1
     status: active
   - id: RULE-DOR-002
@@ -236,7 +236,7 @@ rules:
     source_section: 141
     source_section_title: "Definition of Ready 规则"
     source_line: 5821
-    enforced_by: "xlibgate goal-acceptance"
+    enforced_by: "goalcli goal-acceptance"
     exit_code: 1
     status: active
   - id: RULE-EVID-ALG-001
@@ -245,7 +245,7 @@ rules:
     source_section: 124
     source_section_title: "Evidence Check 算法规则"
     source_line: 5334
-    enforced_by: "xlibgate evidence-check"
+    enforced_by: "goalcli evidence-check"
     exit_code: 8
     status: active
   - id: RULE-EVID-ALG-002
@@ -254,7 +254,7 @@ rules:
     source_section: 124
     source_section_title: "Evidence Check 算法规则"
     source_line: 5351
-    enforced_by: "xlibgate evidence-check"
+    enforced_by: "goalcli evidence-check"
     exit_code: 8
     status: active
   - id: RULE-EVIDENCE-001
@@ -263,7 +263,7 @@ rules:
     source_section: 12
     source_section_title: "Evidence 规则"
     source_line: 769
-    enforced_by: "xlibgate evidence-check"
+    enforced_by: "goalcli evidence-check"
     exit_code: 8
     status: active
   - id: RULE-EVIDENCE-002
@@ -272,7 +272,7 @@ rules:
     source_section: 12
     source_section_title: "Evidence 规则"
     source_line: 788
-    enforced_by: "xlibgate evidence-check"
+    enforced_by: "goalcli evidence-check"
     exit_code: 8
     status: active
   - id: RULE-EVIDENCE-003
@@ -281,7 +281,7 @@ rules:
     source_section: 12
     source_section_title: "Evidence 规则"
     source_line: 813
-    enforced_by: "xlibgate evidence-check"
+    enforced_by: "goalcli evidence-check"
     exit_code: 8
     status: active
   - id: RULE-EVIDENCE-ANTI-FAKE-001
@@ -290,7 +290,7 @@ rules:
     source_section: 62
     source_section_title: "Evidence 反作弊规则"
     source_line: 2944
-    enforced_by: "xlibgate evidence-check"
+    enforced_by: "goalcli evidence-check"
     exit_code: 8
     status: active
   - id: RULE-EVIDENCE-ANTI-FAKE-002
@@ -299,7 +299,7 @@ rules:
     source_section: 62
     source_section_title: "Evidence 反作弊规则"
     source_line: 2961
-    enforced_by: "xlibgate evidence-check"
+    enforced_by: "goalcli evidence-check"
     exit_code: 8
     status: active
   - id: RULE-EVIDENCE-ANTI-FAKE-003
@@ -308,7 +308,7 @@ rules:
     source_section: 62
     source_section_title: "Evidence 反作弊规则"
     source_line: 2975
-    enforced_by: "xlibgate evidence-check"
+    enforced_by: "goalcli evidence-check"
     exit_code: 8
     status: active
   - id: RULE-GATE-CONSISTENCY-001
@@ -317,7 +317,7 @@ rules:
     source_section: 66
     source_section_title: "本地与远端门禁一致性规则"
     source_line: 3104
-    enforced_by: "xlibgate makefile-baseline"
+    enforced_by: "goalcli makefile-baseline"
     exit_code: 1
     status: active
   - id: RULE-GATE-CONSISTENCY-002
@@ -326,7 +326,7 @@ rules:
     source_section: 66
     source_section_title: "本地与远端门禁一致性规则"
     source_line: 3117
-    enforced_by: "xlibgate makefile-baseline"
+    enforced_by: "goalcli makefile-baseline"
     exit_code: 1
     status: active
   - id: RULE-GHA-001
@@ -335,7 +335,7 @@ rules:
     source_section: 67
     source_section_title: "GitHub Actions 必备规则"
     source_line: 3125
-    enforced_by: "xlibgate github-governance"
+    enforced_by: "goalcli github-governance"
     exit_code: 1
     status: active
   - id: RULE-GHA-002
@@ -344,7 +344,7 @@ rules:
     source_section: 67
     source_section_title: "GitHub Actions 必备规则"
     source_line: 3138
-    enforced_by: "xlibgate github-governance"
+    enforced_by: "goalcli github-governance"
     exit_code: 1
     status: active
   - id: RULE-GHA-WORKFLOW-001
@@ -353,7 +353,7 @@ rules:
     source_section: 118
     source_section_title: "GitHub Actions 工作流规则"
     source_line: 5041
-    enforced_by: "xlibgate github-governance"
+    enforced_by: "goalcli github-governance"
     exit_code: 1
     status: active
   - id: RULE-GHA-WORKFLOW-002
@@ -362,7 +362,7 @@ rules:
     source_section: 118
     source_section_title: "GitHub Actions 工作流规则"
     source_line: 5054
-    enforced_by: "xlibgate github-governance"
+    enforced_by: "goalcli github-governance"
     exit_code: 1
     status: active
   - id: RULE-GHA-WORKFLOW-003
@@ -371,7 +371,7 @@ rules:
     source_section: 118
     source_section_title: "GitHub Actions 工作流规则"
     source_line: 5086
-    enforced_by: "xlibgate github-governance"
+    enforced_by: "goalcli github-governance"
     exit_code: 1
     status: active
   - id: RULE-HARNESS-001
@@ -416,7 +416,7 @@ rules:
     source_section: 75
     source_section_title: "Harness 自测试规则"
     source_line: 3367
-    enforced_by: "xlibgate governance-fixture-test"
+    enforced_by: "goalcli governance-fixture-test"
     exit_code: 1
     status: active
   - id: RULE-HARNESS-TEST-002
@@ -425,7 +425,7 @@ rules:
     source_section: 75
     source_section_title: "Harness 自测试规则"
     source_line: 3383
-    enforced_by: "xlibgate governance-fixture-test"
+    enforced_by: "goalcli governance-fixture-test"
     exit_code: 1
     status: active
   - id: RULE-HUMAN-001
@@ -434,7 +434,7 @@ rules:
     source_section: 48
     source_section_title: "Human Approval 规则"
     source_line: 2333
-    enforced_by: "xlibgate pr-template"
+    enforced_by: "goalcli pr-template"
     exit_code: 1
     status: active
   - id: RULE-ISSUE-001
@@ -443,7 +443,7 @@ rules:
     source_section: 13
     source_section_title: "Issue 自动化规则"
     source_line: 823
-    enforced_by: "xlibgate issue-registry"
+    enforced_by: "goalcli issue-registry"
     exit_code: 1
     status: active
   - id: RULE-ISSUE-002
@@ -452,7 +452,7 @@ rules:
     source_section: 13
     source_section_title: "Issue 自动化规则"
     source_line: 843
-    enforced_by: "xlibgate issue-registry"
+    enforced_by: "goalcli issue-registry"
     exit_code: 1
     status: active
   - id: RULE-ISSUE-003
@@ -461,7 +461,7 @@ rules:
     source_section: 13
     source_section_title: "Issue 自动化规则"
     source_line: 864
-    enforced_by: "xlibgate issue-registry"
+    enforced_by: "goalcli issue-registry"
     exit_code: 1
     status: active
   - id: RULE-ISSUE-AUTO-001
@@ -470,7 +470,7 @@ rules:
     source_section: 37
     source_section_title: "Issue 自动化详细规则"
     source_line: 1859
-    enforced_by: "xlibgate issue-registry"
+    enforced_by: "goalcli issue-registry"
     exit_code: 1
     status: active
   - id: RULE-ISSUE-AUTO-002
@@ -479,7 +479,7 @@ rules:
     source_section: 37
     source_section_title: "Issue 自动化详细规则"
     source_line: 1881
-    enforced_by: "xlibgate issue-registry"
+    enforced_by: "goalcli issue-registry"
     exit_code: 1
     status: active
   - id: RULE-ISSUE-LIFECYCLE-001
@@ -488,7 +488,7 @@ rules:
     source_section: 68
     source_section_title: "Issue 生命周期规则"
     source_line: 3153
-    enforced_by: "xlibgate issue-registry"
+    enforced_by: "goalcli issue-registry"
     exit_code: 1
     status: active
   - id: RULE-ISSUE-LIFECYCLE-002
@@ -497,7 +497,7 @@ rules:
     source_section: 68
     source_section_title: "Issue 生命周期规则"
     source_line: 3177
-    enforced_by: "xlibgate issue-registry"
+    enforced_by: "goalcli issue-registry"
     exit_code: 1
     status: active
   - id: RULE-MAIN-SYNC-001
@@ -506,7 +506,7 @@ rules:
     source_section: 94
     source_section_title: "主线同步协议"
     source_line: 4099
-    enforced_by: "xlibgate main-guard"
+    enforced_by: "goalcli main-guard"
     exit_code: 5
     status: active
   - id: RULE-MAIN-SYNC-002
@@ -515,7 +515,7 @@ rules:
     source_section: 94
     source_section_title: "主线同步协议"
     source_line: 4122
-    enforced_by: "xlibgate main-guard"
+    enforced_by: "goalcli main-guard"
     exit_code: 5
     status: active
   - id: RULE-MAKE-001
@@ -524,7 +524,7 @@ rules:
     source_section: 116
     source_section_title: "Makefile 契约规则"
     source_line: 4936
-    enforced_by: "xlibgate makefile-baseline"
+    enforced_by: "goalcli makefile-baseline"
     exit_code: 1
     status: active
   - id: RULE-MAKE-002
@@ -533,7 +533,7 @@ rules:
     source_section: 116
     source_section_title: "Makefile 契约规则"
     source_line: 4983
-    enforced_by: "xlibgate makefile-baseline"
+    enforced_by: "goalcli makefile-baseline"
     exit_code: 1
     status: active
   - id: RULE-MERGE-001
@@ -560,7 +560,7 @@ rules:
     source_section: 15
     source_section_title: "PR 规则"
     source_line: 922
-    enforced_by: "xlibgate pr-template"
+    enforced_by: "goalcli pr-template"
     exit_code: 1
     status: active
   - id: RULE-PR-002
@@ -569,7 +569,7 @@ rules:
     source_section: 15
     source_section_title: "PR 规则"
     source_line: 940
-    enforced_by: "xlibgate pr-template"
+    enforced_by: "goalcli pr-template"
     exit_code: 1
     status: active
   - id: RULE-PR-003
@@ -578,7 +578,7 @@ rules:
     source_section: 15
     source_section_title: "PR 规则"
     source_line: 948
-    enforced_by: "xlibgate pr-template"
+    enforced_by: "goalcli pr-template"
     exit_code: 1
     status: active
   - id: RULE-PR-004
@@ -587,16 +587,16 @@ rules:
     source_section: 15
     source_section_title: "PR 规则"
     source_line: 964
-    enforced_by: "xlibgate pr-template"
+    enforced_by: "goalcli pr-template"
     exit_code: 1
     status: active
   - id: RULE-PR-AUTO-001
     level: P0
-    title: "PR 必须由 goalkit 生成或校验"
+    title: "PR 必须由 goalcli 生成或校验"
     source_section: 40
     source_section_title: "PR 自动化规则"
     source_line: 1999
-    enforced_by: "xlibgate pr-template"
+    enforced_by: "goalcli pr-template"
     exit_code: 1
     status: active
   - id: RULE-PR-AUTO-002
@@ -605,7 +605,7 @@ rules:
     source_section: 40
     source_section_title: "PR 自动化规则"
     source_line: 2023
-    enforced_by: "xlibgate pr-template"
+    enforced_by: "goalcli pr-template"
     exit_code: 1
     status: active
   - id: RULE-PR-CHECK-001
@@ -632,7 +632,7 @@ rules:
     source_section: 69
     source_section_title: "PR 生命周期规则"
     source_line: 3191
-    enforced_by: "xlibgate pr-template"
+    enforced_by: "goalcli pr-template"
     exit_code: 1
     status: active
   - id: RULE-PR-LIFECYCLE-002
@@ -641,16 +641,16 @@ rules:
     source_section: 69
     source_section_title: "PR 生命周期规则"
     source_line: 3204
-    enforced_by: "xlibgate pr-template"
+    enforced_by: "goalcli pr-template"
     exit_code: 1
     status: active
   - id: RULE-PR-SYNC-001
     level: P0
-    title: "PR Body 必须由 goalkit 可重复生成"
+    title: "PR Body 必须由 goalcli 可重复生成"
     source_section: 90
     source_section_title: "PR 同步协议"
     source_line: 3968
-    enforced_by: "xlibgate pr-template"
+    enforced_by: "goalcli pr-template"
     exit_code: 1
     status: active
   - id: RULE-PR-SYNC-002
@@ -659,7 +659,7 @@ rules:
     source_section: 90
     source_section_title: "PR 同步协议"
     source_line: 3981
-    enforced_by: "xlibgate pr-template"
+    enforced_by: "goalcli pr-template"
     exit_code: 1
     status: active
   - id: RULE-REL-ARTIFACT-001
@@ -668,7 +668,7 @@ rules:
     source_section: 95
     source_section_title: "Release Artifact 规则"
     source_line: 4135
-    enforced_by: "xlibgate release-evidence-check"
+    enforced_by: "goalcli release-evidence-check"
     exit_code: 10
     status: active
   - id: RULE-REL-ARTIFACT-002
@@ -677,7 +677,7 @@ rules:
     source_section: 95
     source_section_title: "Release Artifact 规则"
     source_line: 4154
-    enforced_by: "xlibgate release-evidence-check"
+    enforced_by: "goalcli release-evidence-check"
     exit_code: 10
     status: active
   - id: RULE-RELEASE-001
@@ -686,7 +686,7 @@ rules:
     source_section: 16
     source_section_title: "Release 规则"
     source_line: 972
-    enforced_by: "xlibgate release-evidence-check"
+    enforced_by: "goalcli release-evidence-check"
     exit_code: 10
     status: active
   - id: RULE-RELEASE-002
@@ -695,7 +695,7 @@ rules:
     source_section: 16
     source_section_title: "Release 规则"
     source_line: 997
-    enforced_by: "xlibgate release-evidence-check"
+    enforced_by: "goalcli release-evidence-check"
     exit_code: 10
     status: active
   - id: RULE-RELEASE-003
@@ -704,7 +704,7 @@ rules:
     source_section: 16
     source_section_title: "Release 规则"
     source_line: 1009
-    enforced_by: "xlibgate release-evidence-check"
+    enforced_by: "goalcli release-evidence-check"
     exit_code: 10
     status: active
   - id: RULE-RELEASE-AUTO-001
@@ -713,7 +713,7 @@ rules:
     source_section: 42
     source_section_title: "Release 自动化规则"
     source_line: 2079
-    enforced_by: "xlibgate release-final-check"
+    enforced_by: "goalcli release-final-check"
     exit_code: 10
     status: active
   - id: RULE-RELEASE-AUTO-002
@@ -722,7 +722,7 @@ rules:
     source_section: 42
     source_section_title: "Release 自动化规则"
     source_line: 2098
-    enforced_by: "xlibgate release-final-check"
+    enforced_by: "goalcli release-final-check"
     exit_code: 10
     status: active
   - id: RULE-RELEASE-CHANNEL-001
@@ -731,7 +731,7 @@ rules:
     source_section: 70
     source_section_title: "Release Channel 规则"
     source_line: 3228
-    enforced_by: "xlibgate release-final-check"
+    enforced_by: "goalcli release-final-check"
     exit_code: 10
     status: active
   - id: RULE-RELEASE-CHANNEL-002
@@ -740,7 +740,7 @@ rules:
     source_section: 70
     source_section_title: "Release Channel 规则"
     source_line: 3240
-    enforced_by: "xlibgate release-final-check"
+    enforced_by: "goalcli release-final-check"
     exit_code: 10
     status: active
   - id: RULE-RELEASE-CHECK-001
@@ -749,7 +749,7 @@ rules:
     source_section: 127
     source_section_title: "Release Check 规则"
     source_line: 5439
-    enforced_by: "xlibgate release-evidence-check"
+    enforced_by: "goalcli release-evidence-check"
     exit_code: 10
     status: active
   - id: RULE-RELEASE-CHECK-002
@@ -758,7 +758,7 @@ rules:
     source_section: 127
     source_section_title: "Release Check 规则"
     source_line: 5451
-    enforced_by: "xlibgate release-evidence-check"
+    enforced_by: "goalcli release-evidence-check"
     exit_code: 10
     status: active
   - id: RULE-ROLLBACK-001
@@ -767,7 +767,7 @@ rules:
     source_section: 20
     source_section_title: "Risk / Decision / Rollback 规则"
     source_line: 1161
-    enforced_by: "xlibgate release-final-check"
+    enforced_by: "goalcli release-final-check"
     exit_code: 10
     status: active
   - id: RULE-ROLLBACK-002
@@ -776,7 +776,7 @@ rules:
     source_section: 72
     source_section_title: "Rollback 深化规则"
     source_line: 3282
-    enforced_by: "xlibgate release-final-check"
+    enforced_by: "goalcli release-final-check"
     exit_code: 10
     status: active
   - id: RULE-ROLLBACK-003
@@ -785,7 +785,7 @@ rules:
     source_section: 72
     source_section_title: "Rollback 深化规则"
     source_line: 3297
-    enforced_by: "xlibgate release-final-check"
+    enforced_by: "goalcli release-final-check"
     exit_code: 10
     status: active
   - id: RULE-SECRET-001
@@ -794,7 +794,7 @@ rules:
     source_section: 104
     source_section_title: "Secret Scan 规则"
     source_line: 4434
-    enforced_by: "xlibgate secrets"
+    enforced_by: "goalcli secrets"
     exit_code: 7
     status: active
   - id: RULE-SECRET-002
@@ -803,7 +803,7 @@ rules:
     source_section: 104
     source_section_title: "Secret Scan 规则"
     source_line: 4451
-    enforced_by: "xlibgate secrets"
+    enforced_by: "goalcli secrets"
     exit_code: 7
     status: active
   - id: RULE-SECRET-CHECK-001
@@ -812,7 +812,7 @@ rules:
     source_section: 125
     source_section_title: "Secret Check 规则"
     source_line: 5360
-    enforced_by: "xlibgate secrets"
+    enforced_by: "goalcli secrets"
     exit_code: 7
     status: active
   - id: RULE-SECRET-CHECK-002
@@ -821,7 +821,7 @@ rules:
     source_section: 125
     source_section_title: "Secret Check 规则"
     source_line: 5381
-    enforced_by: "xlibgate secrets"
+    enforced_by: "goalcli secrets"
     exit_code: 7
     status: active
   - id: RULE-SECURITY-001
@@ -830,7 +830,7 @@ rules:
     source_section: 21
     source_section_title: "Security 规则"
     source_line: 1181
-    enforced_by: "xlibgate secrets"
+    enforced_by: "goalcli secrets"
     exit_code: 7
     status: active
   - id: RULE-SECURITY-002
@@ -839,7 +839,7 @@ rules:
     source_section: 21
     source_section_title: "Security 规则"
     source_line: 1197
-    enforced_by: "xlibgate secrets"
+    enforced_by: "goalcli secrets"
     exit_code: 7
     status: active
   - id: RULE-SECURITY-003
@@ -848,7 +848,7 @@ rules:
     source_section: 21
     source_section_title: "Security 规则"
     source_line: 1207
-    enforced_by: "xlibgate secrets"
+    enforced_by: "goalcli secrets"
     exit_code: 7
     status: active
   - id: RULE-STATE-001
@@ -857,7 +857,7 @@ rules:
     source_section: 5
     source_section_title: "状态机规则"
     source_line: 344
-    enforced_by: "xlibgate goal-runtime"
+    enforced_by: "goalcli goal-runtime"
     exit_code: 1
     status: active
   - id: RULE-STATE-002
@@ -866,7 +866,7 @@ rules:
     source_section: 5
     source_section_title: "状态机规则"
     source_line: 366
-    enforced_by: "xlibgate goal-runtime"
+    enforced_by: "goalcli goal-runtime"
     exit_code: 1
     status: active
   - id: RULE-STATE-003
@@ -875,7 +875,7 @@ rules:
     source_section: 5
     source_section_title: "状态机规则"
     source_line: 381
-    enforced_by: "xlibgate goal-runtime"
+    enforced_by: "goalcli goal-runtime"
     exit_code: 1
     status: active
   - id: RULE-STATE-GATE-001
@@ -884,7 +884,7 @@ rules:
     source_section: 143
     source_section_title: "状态迁移门禁规则"
     source_line: 5901
-    enforced_by: "xlibgate goal-runtime"
+    enforced_by: "goalcli goal-runtime"
     exit_code: 1
     status: active
   - id: RULE-STATE-GATE-002
@@ -893,7 +893,7 @@ rules:
     source_section: 143
     source_section_title: "状态迁移门禁规则"
     source_line: 5920
-    enforced_by: "xlibgate goal-runtime"
+    enforced_by: "goalcli goal-runtime"
     exit_code: 1
     status: active
   - id: RULE-STOP-001
@@ -920,7 +920,7 @@ rules:
     source_section: 103
     source_section_title: "Supply Chain 规则"
     source_line: 4411
-    enforced_by: "xlibgate dependency-check"
+    enforced_by: "goalcli dependency-check"
     exit_code: 1
     status: active
   - id: RULE-SUPPLY-002
@@ -929,7 +929,7 @@ rules:
     source_section: 103
     source_section_title: "Supply Chain 规则"
     source_line: 4426
-    enforced_by: "xlibgate dependency-check"
+    enforced_by: "goalcli dependency-check"
     exit_code: 1
     status: active
   - id: RULE-TRACE-001
@@ -938,7 +938,7 @@ rules:
     source_section: 36
     source_section_title: "Traceability 强制规则"
     source_line: 1824
-    enforced_by: "xlibgate traceability-check"
+    enforced_by: "goalcli traceability-check"
     exit_code: 9
     status: active
   - id: RULE-TRACE-002
@@ -947,7 +947,7 @@ rules:
     source_section: 36
     source_section_title: "Traceability 强制规则"
     source_line: 1842
-    enforced_by: "xlibgate traceability-check"
+    enforced_by: "goalcli traceability-check"
     exit_code: 9
     status: active
   - id: RULE-TRACE-ALG-001
@@ -956,7 +956,7 @@ rules:
     source_section: 123
     source_section_title: "Traceability 检查算法规则"
     source_line: 5300
-    enforced_by: "xlibgate traceability-check"
+    enforced_by: "goalcli traceability-check"
     exit_code: 9
     status: active
   - id: RULE-TRACE-ALG-002
@@ -965,7 +965,7 @@ rules:
     source_section: 123
     source_section_title: "Traceability 检查算法规则"
     source_line: 5320
-    enforced_by: "xlibgate traceability-check"
+    enforced_by: "goalcli traceability-check"
     exit_code: 9
     status: active
   - id: RULE-VIOLATION-001
@@ -1010,7 +1010,7 @@ rules:
     source_section: 10
     source_section_title: "Worktree-Only 规则"
     source_line: 637
-    enforced_by: "xlibgate worktree-guard"
+    enforced_by: "goalcli worktree-guard"
     exit_code: 5
     status: active
   - id: RULE-WORKTREE-002
@@ -1019,7 +1019,7 @@ rules:
     source_section: 10
     source_section_title: "Worktree-Only 规则"
     source_line: 646
-    enforced_by: "xlibgate worktree-guard"
+    enforced_by: "goalcli worktree-guard"
     exit_code: 5
     status: active
   - id: RULE-WORKTREE-003
@@ -1028,7 +1028,7 @@ rules:
     source_section: 10
     source_section_title: "Worktree-Only 规则"
     source_line: 659
-    enforced_by: "xlibgate worktree-guard"
+    enforced_by: "goalcli worktree-guard"
     exit_code: 5
     status: active
   - id: RULE-WORKTREE-004
@@ -1037,7 +1037,7 @@ rules:
     source_section: 10
     source_section_title: "Worktree-Only 规则"
     source_line: 671
-    enforced_by: "xlibgate worktree-guard"
+    enforced_by: "goalcli worktree-guard"
     exit_code: 5
     status: active
   - id: RULE-WORKTREE-005
@@ -1046,7 +1046,7 @@ rules:
     source_section: 10
     source_section_title: "Worktree-Only 规则"
     source_line: 684
-    enforced_by: "xlibgate worktree-guard"
+    enforced_by: "goalcli worktree-guard"
     exit_code: 5
     status: active
   - id: RULE-WORKTREE-AUTO-001
@@ -1055,7 +1055,7 @@ rules:
     source_section: 38
     source_section_title: "Branch / Worktree 自动化规则"
     source_line: 1904
-    enforced_by: "xlibgate worktree-guard"
+    enforced_by: "goalcli worktree-guard"
     exit_code: 5
     status: active
   - id: RULE-WORKTREE-AUTO-002
@@ -1064,7 +1064,7 @@ rules:
     source_section: 38
     source_section_title: "Branch / Worktree 自动化规则"
     source_line: 1917
-    enforced_by: "xlibgate worktree-guard"
+    enforced_by: "goalcli worktree-guard"
     exit_code: 5
     status: active
   - id: RULE-WORKTREE-AUTO-003
@@ -1073,7 +1073,7 @@ rules:
     source_section: 38
     source_section_title: "Branch / Worktree 自动化规则"
     source_line: 1933
-    enforced_by: "xlibgate worktree-guard"
+    enforced_by: "goalcli worktree-guard"
     exit_code: 5
     status: active
   - id: RULE-WORKTREE-CLEAN-001
@@ -1082,7 +1082,7 @@ rules:
     source_section: 93
     source_section_title: "Worktree 清理协议"
     source_line: 4066
-    enforced_by: "xlibgate worktree-guard"
+    enforced_by: "goalcli worktree-guard"
     exit_code: 5
     status: active
   - id: RULE-WORKTREE-CLEAN-002
@@ -1091,7 +1091,7 @@ rules:
     source_section: 93
     source_section_title: "Worktree 清理协议"
     source_line: 4084
-    enforced_by: "xlibgate worktree-guard"
+    enforced_by: "goalcli worktree-guard"
     exit_code: 5
     status: active
   - id: RULE-ADOPTION-GATE-001
@@ -1100,7 +1100,7 @@ rules:
     source_section: 107
     source_section_title: "Adoption Gate 规则"
     source_line: 4534
-    enforced_by: "xlibgate downstream-adoption"
+    enforced_by: "goalcli downstream-adoption"
     exit_code: 1
     status: active
   - id: RULE-ADOPTION-GATE-002
@@ -1109,7 +1109,7 @@ rules:
     source_section: 107
     source_section_title: "Adoption Gate 规则"
     source_line: 4555
-    enforced_by: "xlibgate downstream-adoption"
+    enforced_by: "goalcli downstream-adoption"
     exit_code: 1
     status: active
   - id: RULE-ADOPTION-SCORE-001
@@ -1118,7 +1118,7 @@ rules:
     source_section: 167
     source_section_title: "Downstream Adoption Scoring 规则"
     source_line: 6773
-    enforced_by: "xlibgate downstream-adoption"
+    enforced_by: "goalcli downstream-adoption"
     exit_code: 1
     status: active
   - id: RULE-ADOPTION-SCORE-002
@@ -1127,7 +1127,7 @@ rules:
     source_section: 167
     source_section_title: "Downstream Adoption Scoring 规则"
     source_line: 6790
-    enforced_by: "xlibgate downstream-adoption"
+    enforced_by: "goalcli downstream-adoption"
     exit_code: 1
     status: active
   - id: RULE-AGENT-001
@@ -1136,7 +1136,7 @@ rules:
     source_section: 57
     source_section_title: "Agent 执行协议"
     source_line: 2699
-    enforced_by: "xlibgate agent-team-contract"
+    enforced_by: "goalcli agent-team-contract"
     exit_code: 1
     status: active
   - id: RULE-AGENT-002
@@ -1145,7 +1145,7 @@ rules:
     source_section: 57
     source_section_title: "Agent 执行协议"
     source_line: 2722
-    enforced_by: "xlibgate agent-team-contract"
+    enforced_by: "goalcli agent-team-contract"
     exit_code: 1
     status: active
   - id: RULE-AGENT-003
@@ -1154,7 +1154,7 @@ rules:
     source_section: 57
     source_section_title: "Agent 执行协议"
     source_line: 2747
-    enforced_by: "xlibgate agent-team-contract"
+    enforced_by: "goalcli agent-team-contract"
     exit_code: 1
     status: active
   - id: RULE-AGENT-AUTH-001
@@ -1163,7 +1163,7 @@ rules:
     source_section: 58
     source_section_title: "Agent 权限边界规则"
     source_line: 2772
-    enforced_by: "xlibgate agent-team-contract"
+    enforced_by: "goalcli agent-team-contract"
     exit_code: 1
     status: active
   - id: RULE-AGENT-AUTH-002
@@ -1172,7 +1172,7 @@ rules:
     source_section: 58
     source_section_title: "Agent 权限边界规则"
     source_line: 2799
-    enforced_by: "xlibgate agent-team-contract"
+    enforced_by: "goalcli agent-team-contract"
     exit_code: 1
     status: active
   - id: RULE-AGENT-MEMORY-001
@@ -1181,7 +1181,7 @@ rules:
     source_section: 193
     source_section_title: "Agent 记忆与文件事实规则"
     source_line: 7811
-    enforced_by: "xlibgate agent-team-contract"
+    enforced_by: "goalcli agent-team-contract"
     exit_code: 1
     status: active
   - id: RULE-AGENT-MEMORY-002
@@ -1190,7 +1190,7 @@ rules:
     source_section: 193
     source_section_title: "Agent 记忆与文件事实规则"
     source_line: 7826
-    enforced_by: "xlibgate agent-team-contract"
+    enforced_by: "goalcli agent-team-contract"
     exit_code: 1
     status: active
   - id: RULE-AGENT-TEAM-001
@@ -1199,7 +1199,7 @@ rules:
     source_section: 100
     source_section_title: "Agent Team 规则"
     source_line: 4305
-    enforced_by: "xlibgate agent-team-contract"
+    enforced_by: "goalcli agent-team-contract"
     exit_code: 1
     status: active
   - id: RULE-AGENT-TEAM-002
@@ -1208,7 +1208,7 @@ rules:
     source_section: 100
     source_section_title: "Agent Team 规则"
     source_line: 4324
-    enforced_by: "xlibgate agent-team-contract"
+    enforced_by: "goalcli agent-team-contract"
     exit_code: 1
     status: active
   - id: RULE-ANTI-CARGO-001
@@ -1253,7 +1253,7 @@ rules:
     source_section: 99
     source_section_title: "AutoResearch 深化规则"
     source_line: 4276
-    enforced_by: "xlibgate autoresearch"
+    enforced_by: "goalcli autoresearch"
     exit_code: 1
     status: active
   - id: RULE-AR-002
@@ -1262,7 +1262,7 @@ rules:
     source_section: 99
     source_section_title: "AutoResearch 深化规则"
     source_line: 4293
-    enforced_by: "xlibgate autoresearch"
+    enforced_by: "goalcli autoresearch"
     exit_code: 1
     status: active
   - id: RULE-ARCHIVE-001
@@ -1289,7 +1289,7 @@ rules:
     source_section: 78
     source_section_title: "审计规则"
     source_line: 3465
-    enforced_by: "xlibgate goal-certify"
+    enforced_by: "goalcli goal-certify"
     exit_code: 1
     status: active
   - id: RULE-AUDIT-002
@@ -1298,7 +1298,7 @@ rules:
     source_section: 78
     source_section_title: "审计规则"
     source_line: 3482
-    enforced_by: "xlibgate goal-certify"
+    enforced_by: "goalcli goal-certify"
     exit_code: 1
     status: active
   - id: RULE-AUDIT-CHECK-001
@@ -1307,7 +1307,7 @@ rules:
     source_section: 129
     source_section_title: "Audit Check 规则"
     source_line: 5490
-    enforced_by: "xlibgate goal-certify"
+    enforced_by: "goalcli goal-certify"
     exit_code: 1
     status: active
   - id: RULE-AUDIT-CHECK-002
@@ -1316,7 +1316,7 @@ rules:
     source_section: 129
     source_section_title: "Audit Check 规则"
     source_line: 5510
-    enforced_by: "xlibgate goal-certify"
+    enforced_by: "goalcli goal-certify"
     exit_code: 1
     status: active
   - id: RULE-AUDIT-LEVEL-001
@@ -1325,7 +1325,7 @@ rules:
     source_section: 181
     source_section_title: "审计等级规则"
     source_line: 7422
-    enforced_by: "xlibgate goal-certify"
+    enforced_by: "goalcli goal-certify"
     exit_code: 1
     status: active
   - id: RULE-AUDIT-LEVEL-002
@@ -1334,7 +1334,7 @@ rules:
     source_section: 181
     source_section_title: "审计等级规则"
     source_line: 7432
-    enforced_by: "xlibgate goal-certify"
+    enforced_by: "goalcli goal-certify"
     exit_code: 1
     status: active
   - id: RULE-AUTO-SAFETY-001
@@ -1343,7 +1343,7 @@ rules:
     source_section: 178
     source_section_title: "自动化安全边界规则"
     source_line: 7300
-    enforced_by: "xlibgate runtime-health"
+    enforced_by: "goalcli runtime-health"
     exit_code: 1
     status: active
   - id: RULE-AUTO-SAFETY-002
@@ -1352,7 +1352,7 @@ rules:
     source_section: 178
     source_section_title: "自动化安全边界规则"
     source_line: 7326
-    enforced_by: "xlibgate runtime-health"
+    enforced_by: "goalcli runtime-health"
     exit_code: 1
     status: active
   - id: RULE-BATCH-001
@@ -1370,7 +1370,7 @@ rules:
     source_section: 206
     source_section_title: "Runtime Bootstrap 规则"
     source_line: 8171
-    enforced_by: "xlibgate install-runtime"
+    enforced_by: "goalcli install-runtime"
     exit_code: 1
     status: active
   - id: RULE-BOOTSTRAP-002
@@ -1379,7 +1379,7 @@ rules:
     source_section: 206
     source_section_title: "Runtime Bootstrap 规则"
     source_line: 8196
-    enforced_by: "xlibgate install-runtime"
+    enforced_by: "goalcli install-runtime"
     exit_code: 1
     status: active
   - id: RULE-CANCEL-001
@@ -1424,7 +1424,7 @@ rules:
     source_section: 148
     source_section_title: "变更类型规则"
     source_line: 6142
-    enforced_by: "xlibgate traceability-check"
+    enforced_by: "goalcli traceability-check"
     exit_code: 9
     status: active
   - id: RULE-CHANGE-TYPE-002
@@ -1433,7 +1433,7 @@ rules:
     source_section: 148
     source_section_title: "变更类型规则"
     source_line: 6163
-    enforced_by: "xlibgate traceability-check"
+    enforced_by: "goalcli traceability-check"
     exit_code: 9
     status: active
   - id: RULE-CHANGELOG-001
@@ -1442,7 +1442,7 @@ rules:
     source_section: 96
     source_section_title: "Changelog 规则"
     source_line: 4170
-    enforced_by: "xlibgate changelog"
+    enforced_by: "goalcli changelog"
     exit_code: 1
     status: active
   - id: RULE-CHANGELOG-002
@@ -1451,7 +1451,7 @@ rules:
     source_section: 96
     source_section_title: "Changelog 规则"
     source_line: 4189
-    enforced_by: "xlibgate changelog"
+    enforced_by: "goalcli changelog"
     exit_code: 1
     status: active
   - id: RULE-CHECKER-001
@@ -1460,7 +1460,7 @@ rules:
     source_section: 121
     source_section_title: "Checker 输出规则"
     source_line: 5197
-    enforced_by: "xlibgate"
+    enforced_by: "goalcli"
     exit_code: 1
     status: active
   - id: RULE-CHECKER-002
@@ -1469,7 +1469,7 @@ rules:
     source_section: 121
     source_section_title: "Checker 输出规则"
     source_line: 5215
-    enforced_by: "xlibgate"
+    enforced_by: "goalcli"
     exit_code: 1
     status: active
   - id: RULE-CI-001
@@ -1478,7 +1478,7 @@ rules:
     source_section: 65
     source_section_title: "CI Gate 编排规则"
     source_line: 3060
-    enforced_by: "xlibgate context-fast-check"
+    enforced_by: "goalcli context-fast-check"
     exit_code: 1
     status: active
   - id: RULE-CI-002
@@ -1487,7 +1487,7 @@ rules:
     source_section: 65
     source_section_title: "CI Gate 编排规则"
     source_line: 3089
-    enforced_by: "xlibgate context-fast-check"
+    enforced_by: "goalcli context-fast-check"
     exit_code: 1
     status: active
   - id: RULE-CLASS-001
@@ -1496,12 +1496,12 @@ rules:
     source_section: 28
     source_section_title: "规则分级体系"
     source_line: 1504
-    enforced_by: "xlibgate goal-runtime"
+    enforced_by: "goalcli goal-runtime"
     exit_code: 1
     status: active
   - id: RULE-CMD-TXN-001
     level: P1
-    title: "goalkit 命令必须事务化"
+    title: "goalcli 命令必须事务化"
     source_section: 175
     source_section_title: "命令事务规则"
     source_line: 7174
@@ -1541,7 +1541,7 @@ rules:
     source_section: 150
     source_section_title: "Backward Compatibility 规则"
     source_line: 6221
-    enforced_by: "xlibgate policy-schema"
+    enforced_by: "goalcli policy-schema"
     exit_code: 6
     status: active
   - id: RULE-COMPAT-002
@@ -1550,7 +1550,7 @@ rules:
     source_section: 150
     source_section_title: "Backward Compatibility 规则"
     source_line: 6227
-    enforced_by: "xlibgate policy-schema"
+    enforced_by: "goalcli policy-schema"
     exit_code: 6
     status: active
   - id: RULE-COMPAT-GUARD-001
@@ -1559,7 +1559,7 @@ rules:
     source_section: 231
     source_section_title: "Compatibility Guard 规则"
     source_line: 8961
-    enforced_by: "xlibgate downstream-adoption"
+    enforced_by: "goalcli downstream-adoption"
     exit_code: 1
     status: active
   - id: RULE-COMPAT-GUARD-002
@@ -1568,7 +1568,7 @@ rules:
     source_section: 231
     source_section_title: "Compatibility Guard 规则"
     source_line: 8972
-    enforced_by: "xlibgate downstream-adoption"
+    enforced_by: "goalcli downstream-adoption"
     exit_code: 1
     status: active
   - id: RULE-COMPAT-MATRIX-001
@@ -1577,7 +1577,7 @@ rules:
     source_section: 188
     source_section_title: "Rule Compatibility Matrix 规则"
     source_line: 7656
-    enforced_by: "xlibgate policy-schema"
+    enforced_by: "goalcli policy-schema"
     exit_code: 6
     status: active
   - id: RULE-COMPAT-MATRIX-002
@@ -1586,7 +1586,7 @@ rules:
     source_section: 188
     source_section_title: "Rule Compatibility Matrix 规则"
     source_line: 7674
-    enforced_by: "xlibgate policy-schema"
+    enforced_by: "goalcli policy-schema"
     exit_code: 6
     status: active
   - id: RULE-COMPILER-001
@@ -1595,7 +1595,7 @@ rules:
     source_section: 209
     source_section_title: "Rule Compiler 规则"
     source_line: 8285
-    enforced_by: "xlibgate cli-contract"
+    enforced_by: "goalcli cli-contract"
     exit_code: 1
     status: active
   - id: RULE-COMPILER-002
@@ -1604,7 +1604,7 @@ rules:
     source_section: 209
     source_section_title: "Rule Compiler 规则"
     source_line: 8305
-    enforced_by: "xlibgate cli-contract"
+    enforced_by: "goalcli cli-contract"
     exit_code: 1
     status: active
   - id: RULE-CONCURRENCY-001
@@ -1613,7 +1613,7 @@ rules:
     source_section: 59
     source_section_title: "并发执行规则"
     source_line: 2814
-    enforced_by: "xlibgate worktree-guard"
+    enforced_by: "goalcli worktree-guard"
     exit_code: 5
     status: active
   - id: RULE-CONCURRENCY-002
@@ -1622,7 +1622,7 @@ rules:
     source_section: 59
     source_section_title: "并发执行规则"
     source_line: 2826
-    enforced_by: "xlibgate worktree-guard"
+    enforced_by: "goalcli worktree-guard"
     exit_code: 5
     status: active
   - id: RULE-CONCURRENCY-003
@@ -1631,7 +1631,7 @@ rules:
     source_section: 59
     source_section_title: "并发执行规则"
     source_line: 2851
-    enforced_by: "xlibgate worktree-guard"
+    enforced_by: "goalcli worktree-guard"
     exit_code: 5
     status: active
   - id: RULE-CONFLICT-001
@@ -1640,7 +1640,7 @@ rules:
     source_section: 213
     source_section_title: "Source of Truth Conflict 规则"
     source_line: 8431
-    enforced_by: "xlibgate goal-runtime"
+    enforced_by: "goalcli goal-runtime"
     exit_code: 1
     status: active
   - id: RULE-CONFLICT-002
@@ -1649,7 +1649,7 @@ rules:
     source_section: 213
     source_section_title: "Source of Truth Conflict 规则"
     source_line: 8445
-    enforced_by: "xlibgate goal-runtime"
+    enforced_by: "goalcli goal-runtime"
     exit_code: 1
     status: active
   - id: RULE-CONTEXT-001
@@ -1658,7 +1658,7 @@ rules:
     source_section: 6
     source_section_title: "Context Recovery 规则"
     source_line: 396
-    enforced_by: "xlibgate context-fast-check"
+    enforced_by: "goalcli context-fast-check"
     exit_code: 1
     status: active
   - id: RULE-CONTEXT-002
@@ -1667,7 +1667,7 @@ rules:
     source_section: 6
     source_section_title: "Context Recovery 规则"
     source_line: 421
-    enforced_by: "xlibgate context-fast-check"
+    enforced_by: "goalcli context-fast-check"
     exit_code: 1
     status: active
   - id: RULE-CONTEXT-003
@@ -1676,7 +1676,7 @@ rules:
     source_section: 6
     source_section_title: "Context Recovery 规则"
     source_line: 434
-    enforced_by: "xlibgate context-fast-check"
+    enforced_by: "goalcli context-fast-check"
     exit_code: 1
     status: active
   - id: RULE-CONTEXT-COMPRESSION-001
@@ -1685,7 +1685,7 @@ rules:
     source_section: 64
     source_section_title: "上下文压缩规则"
     source_line: 3036
-    enforced_by: "xlibgate execution-context"
+    enforced_by: "goalcli execution-context"
     exit_code: 1
     status: active
   - id: RULE-CONTEXT-COMPRESSION-002
@@ -1694,7 +1694,7 @@ rules:
     source_section: 64
     source_section_title: "上下文压缩规则"
     source_line: 3052
-    enforced_by: "xlibgate execution-context"
+    enforced_by: "goalcli execution-context"
     exit_code: 1
     status: active
   - id: RULE-CONTEXT-WINDOW-001
@@ -1703,7 +1703,7 @@ rules:
     source_section: 194
     source_section_title: "Context Window 防爆规则"
     source_line: 7843
-    enforced_by: "xlibgate execution-context"
+    enforced_by: "goalcli execution-context"
     exit_code: 1
     status: active
   - id: RULE-CONTEXT-WINDOW-002
@@ -1712,7 +1712,7 @@ rules:
     source_section: 194
     source_section_title: "Context Window 防爆规则"
     source_line: 7857
-    enforced_by: "xlibgate execution-context"
+    enforced_by: "goalcli execution-context"
     exit_code: 1
     status: active
   - id: RULE-CONTROL-001
@@ -1721,7 +1721,7 @@ rules:
     source_section: 173
     source_section_title: "控制平面规则"
     source_line: 7100
-    enforced_by: "xlibgate goal-runtime"
+    enforced_by: "goalcli goal-runtime"
     exit_code: 1
     status: active
   - id: RULE-CONTROL-002
@@ -1730,7 +1730,7 @@ rules:
     source_section: 173
     source_section_title: "控制平面规则"
     source_line: 7122
-    enforced_by: "xlibgate goal-runtime"
+    enforced_by: "goalcli goal-runtime"
     exit_code: 1
     status: active
   - id: RULE-COVERAGE-001
@@ -1739,7 +1739,7 @@ rules:
     source_section: 210
     source_section_title: "Rule Coverage 规则"
     source_line: 8325
-    enforced_by: "xlibgate traceability-check"
+    enforced_by: "goalcli traceability-check"
     exit_code: 9
     status: active
   - id: RULE-COVERAGE-002
@@ -1748,7 +1748,7 @@ rules:
     source_section: 210
     source_section_title: "Rule Coverage 规则"
     source_line: 8342
-    enforced_by: "xlibgate traceability-check"
+    enforced_by: "goalcli traceability-check"
     exit_code: 9
     status: active
   - id: RULE-DASHBOARD-001
@@ -1793,7 +1793,7 @@ rules:
     source_section: 105
     source_section_title: "结构债规则"
     source_line: 4468
-    enforced_by: "xlibgate debt"
+    enforced_by: "goalcli debt"
     exit_code: 1
     status: active
   - id: RULE-DEBT-002
@@ -1802,7 +1802,7 @@ rules:
     source_section: 105
     source_section_title: "结构债规则"
     source_line: 4484
-    enforced_by: "xlibgate debt"
+    enforced_by: "goalcli debt"
     exit_code: 1
     status: active
   - id: RULE-DECISION-001
@@ -1820,7 +1820,7 @@ rules:
     source_section: 102
     source_section_title: "依赖升级规则"
     source_line: 4390
-    enforced_by: "xlibgate dependency-check"
+    enforced_by: "goalcli dependency-check"
     exit_code: 1
     status: active
   - id: RULE-DEPENDENCY-002
@@ -1829,7 +1829,7 @@ rules:
     source_section: 102
     source_section_title: "依赖升级规则"
     source_line: 4396
-    enforced_by: "xlibgate dependency-check"
+    enforced_by: "goalcli dependency-check"
     exit_code: 1
     status: active
   - id: RULE-DEPRECATION-001
@@ -1883,7 +1883,7 @@ rules:
     source_section: 63
     source_section_title: "文档膨胀控制规则"
     source_line: 2989
-    enforced_by: "xlibgate docs-check"
+    enforced_by: "goalcli docs-check"
     exit_code: 1
     status: active
   - id: RULE-DOC-002
@@ -1892,7 +1892,7 @@ rules:
     source_section: 63
     source_section_title: "文档膨胀控制规则"
     source_line: 3003
-    enforced_by: "xlibgate docs-check"
+    enforced_by: "goalcli docs-check"
     exit_code: 1
     status: active
   - id: RULE-DOC-003
@@ -1901,7 +1901,7 @@ rules:
     source_section: 63
     source_section_title: "文档膨胀控制规则"
     source_line: 3022
-    enforced_by: "xlibgate docs-check"
+    enforced_by: "goalcli docs-check"
     exit_code: 1
     status: active
   - id: RULE-DOC-DEBT-001
@@ -1910,7 +1910,7 @@ rules:
     source_section: 184
     source_section_title: "文档债规则"
     source_line: 7513
-    enforced_by: "xlibgate debt"
+    enforced_by: "goalcli debt"
     exit_code: 1
     status: active
   - id: RULE-DOC-DEBT-002
@@ -1919,7 +1919,7 @@ rules:
     source_section: 184
     source_section_title: "文档债规则"
     source_line: 7533
-    enforced_by: "xlibgate debt"
+    enforced_by: "goalcli debt"
     exit_code: 1
     status: active
   - id: RULE-DOCTOR-001
@@ -1928,7 +1928,7 @@ rules:
     source_section: 207
     source_section_title: "Runtime Doctor 规则"
     source_line: 8224
-    enforced_by: "xlibgate runtime-health"
+    enforced_by: "goalcli runtime-health"
     exit_code: 1
     status: active
   - id: RULE-DOCTOR-002
@@ -1937,7 +1937,7 @@ rules:
     source_section: 207
     source_section_title: "Runtime Doctor 规则"
     source_line: 8247
-    enforced_by: "xlibgate runtime-health"
+    enforced_by: "goalcli runtime-health"
     exit_code: 1
     status: active
   - id: RULE-DOWNSTREAM-001
@@ -1946,7 +1946,7 @@ rules:
     source_section: 45
     source_section_title: "Downstream Adoption 规则"
     source_line: 2207
-    enforced_by: "xlibgate downstream-adoption"
+    enforced_by: "goalcli downstream-adoption"
     exit_code: 1
     status: active
   - id: RULE-DOWNSTREAM-002
@@ -1955,7 +1955,7 @@ rules:
     source_section: 45
     source_section_title: "Downstream Adoption 规则"
     source_line: 2227
-    enforced_by: "xlibgate downstream-adoption"
+    enforced_by: "goalcli downstream-adoption"
     exit_code: 1
     status: active
   - id: RULE-DOWNSTREAM-003
@@ -1964,7 +1964,7 @@ rules:
     source_section: 45
     source_section_title: "Downstream Adoption 规则"
     source_line: 2241
-    enforced_by: "xlibgate downstream-adoption"
+    enforced_by: "goalcli downstream-adoption"
     exit_code: 1
     status: active
   - id: RULE-DOWNSTREAM-CONTRACT-001
@@ -1973,7 +1973,7 @@ rules:
     source_section: 187
     source_section_title: "Downstream Contract 规则"
     source_line: 7617
-    enforced_by: "xlibgate downstream-registry"
+    enforced_by: "goalcli downstream-registry"
     exit_code: 1
     status: active
   - id: RULE-DOWNSTREAM-CONTRACT-002
@@ -1982,7 +1982,7 @@ rules:
     source_section: 187
     source_section_title: "Downstream Contract 规则"
     source_line: 7632
-    enforced_by: "xlibgate downstream-registry"
+    enforced_by: "goalcli downstream-registry"
     exit_code: 1
     status: active
   - id: RULE-DOWNSTREAM-SYNC-001
@@ -1991,7 +1991,7 @@ rules:
     source_section: 79
     source_section_title: "Downstream Sync 规则"
     source_line: 3500
-    enforced_by: "xlibgate downstream-registry"
+    enforced_by: "goalcli downstream-registry"
     exit_code: 1
     status: active
   - id: RULE-DOWNSTREAM-SYNC-002
@@ -2000,7 +2000,7 @@ rules:
     source_section: 79
     source_section_title: "Downstream Sync 规则"
     source_line: 3531
-    enforced_by: "xlibgate downstream-registry"
+    enforced_by: "goalcli downstream-registry"
     exit_code: 1
     status: active
   - id: RULE-DRIFT-001
@@ -2009,7 +2009,7 @@ rules:
     source_section: 46
     source_section_title: "Drift Detection 规则"
     source_line: 2274
-    enforced_by: "xlibgate docs-drift"
+    enforced_by: "goalcli docs-drift"
     exit_code: 1
     status: active
   - id: RULE-DRIFT-002
@@ -2018,7 +2018,7 @@ rules:
     source_section: 46
     source_section_title: "Drift Detection 规则"
     source_line: 2287
-    enforced_by: "xlibgate docs-drift"
+    enforced_by: "goalcli docs-drift"
     exit_code: 1
     status: active
   - id: RULE-DRIFT-BUDGET-001
@@ -2027,7 +2027,7 @@ rules:
     source_section: 226
     source_section_title: "Drift Budget 规则"
     source_line: 8823
-    enforced_by: "xlibgate debt"
+    enforced_by: "goalcli debt"
     exit_code: 1
     status: active
   - id: RULE-DRIFT-BUDGET-002
@@ -2036,7 +2036,7 @@ rules:
     source_section: 226
     source_section_title: "Drift Budget 规则"
     source_line: 8835
-    enforced_by: "xlibgate debt"
+    enforced_by: "goalcli debt"
     exit_code: 1
     status: active
   - id: RULE-DRYRUN-001
@@ -2063,7 +2063,7 @@ rules:
     source_section: 224
     source_section_title: "Evidence Loss Recovery 规则"
     source_line: 8764
-    enforced_by: "xlibgate evidence-check"
+    enforced_by: "goalcli evidence-check"
     exit_code: 8
     status: active
   - id: RULE-EVID-LOSS-002
@@ -2072,7 +2072,7 @@ rules:
     source_section: 224
     source_section_title: "Evidence Loss Recovery 规则"
     source_line: 8775
-    enforced_by: "xlibgate evidence-check"
+    enforced_by: "goalcli evidence-check"
     exit_code: 8
     status: active
   - id: RULE-EVIDENCE-COVERAGE-001
@@ -2081,7 +2081,7 @@ rules:
     source_section: 153
     source_section_title: "Evidence Coverage 规则"
     source_line: 6307
-    enforced_by: "xlibgate evidence-check"
+    enforced_by: "goalcli evidence-check"
     exit_code: 8
     status: active
   - id: RULE-EVIDENCE-COVERAGE-002
@@ -2090,7 +2090,7 @@ rules:
     source_section: 153
     source_section_title: "Evidence Coverage 规则"
     source_line: 6326
-    enforced_by: "xlibgate evidence-check"
+    enforced_by: "goalcli evidence-check"
     exit_code: 8
     status: active
   - id: RULE-EVIDENCE-HASH-001
@@ -2099,7 +2099,7 @@ rules:
     source_section: 180
     source_section_title: "Evidence Hash 规则"
     source_line: 7384
-    enforced_by: "xlibgate release-evidence-hash"
+    enforced_by: "goalcli release-evidence-hash"
     exit_code: 8
     status: active
   - id: RULE-EVIDENCE-HASH-002
@@ -2108,7 +2108,7 @@ rules:
     source_section: 180
     source_section_title: "Evidence Hash 规则"
     source_line: 7403
-    enforced_by: "xlibgate release-evidence-hash"
+    enforced_by: "goalcli release-evidence-hash"
     exit_code: 8
     status: active
   - id: RULE-EVIDENCE-RETENTION-001
@@ -2117,7 +2117,7 @@ rules:
     source_section: 179
     source_section_title: "Evidence 长期保存规则"
     source_line: 7349
-    enforced_by: "xlibgate evidence-check"
+    enforced_by: "goalcli evidence-check"
     exit_code: 8
     status: active
   - id: RULE-EVIDENCE-RETENTION-002
@@ -2126,7 +2126,7 @@ rules:
     source_section: 179
     source_section_title: "Evidence 长期保存规则"
     source_line: 7363
-    enforced_by: "xlibgate evidence-check"
+    enforced_by: "goalcli evidence-check"
     exit_code: 8
     status: active
   - id: RULE-FACTORY-001
@@ -2171,7 +2171,7 @@ rules:
     source_section: 61
     source_section_title: "文件变更规则"
     source_line: 2914
-    enforced_by: "xlibgate runtime-file-ownership"
+    enforced_by: "goalcli runtime-file-ownership"
     exit_code: 1
     status: active
   - id: RULE-FILE-002
@@ -2180,7 +2180,7 @@ rules:
     source_section: 61
     source_section_title: "文件变更规则"
     source_line: 2927
-    enforced_by: "xlibgate runtime-file-ownership"
+    enforced_by: "goalcli runtime-file-ownership"
     exit_code: 1
     status: active
   - id: RULE-FREEZE-003
@@ -2189,7 +2189,7 @@ rules:
     source_section: 221
     source_section_title: "Release Freeze Deepening 规则"
     source_line: 8665
-    enforced_by: "xlibgate scope-lock"
+    enforced_by: "goalcli scope-lock"
     exit_code: 1
     status: active
   - id: RULE-FREEZE-004
@@ -2198,7 +2198,7 @@ rules:
     source_section: 221
     source_section_title: "Release Freeze Deepening 规则"
     source_line: 8681
-    enforced_by: "xlibgate scope-lock"
+    enforced_by: "goalcli scope-lock"
     exit_code: 1
     status: active
   - id: RULE-FREEZE-RULE-001
@@ -2225,7 +2225,7 @@ rules:
     source_section: 211
     source_section_title: "Gate Dependency Graph 规则"
     source_line: 8356
-    enforced_by: "xlibgate makefile-baseline"
+    enforced_by: "goalcli makefile-baseline"
     exit_code: 1
     status: active
   - id: RULE-GATE-DAG-002
@@ -2234,7 +2234,7 @@ rules:
     source_section: 211
     source_section_title: "Gate Dependency Graph 规则"
     source_line: 8372
-    enforced_by: "xlibgate makefile-baseline"
+    enforced_by: "goalcli makefile-baseline"
     exit_code: 1
     status: active
   - id: RULE-GITHUB-ISSUE-001
@@ -2243,7 +2243,7 @@ rules:
     source_section: 86
     source_section_title: "GitHub Issue 自动化协议"
     source_line: 3791
-    enforced_by: "xlibgate issue-registry"
+    enforced_by: "goalcli issue-registry"
     exit_code: 1
     status: active
   - id: RULE-GITHUB-ISSUE-002
@@ -2252,7 +2252,7 @@ rules:
     source_section: 86
     source_section_title: "GitHub Issue 自动化协议"
     source_line: 3810
-    enforced_by: "xlibgate issue-registry"
+    enforced_by: "goalcli issue-registry"
     exit_code: 1
     status: active
   - id: RULE-GITHUB-ISSUE-003
@@ -2261,7 +2261,7 @@ rules:
     source_section: 86
     source_section_title: "GitHub Issue 自动化协议"
     source_line: 3831
-    enforced_by: "xlibgate issue-registry"
+    enforced_by: "goalcli issue-registry"
     exit_code: 1
     status: active
   - id: RULE-GLOSSARY-001
@@ -2288,7 +2288,7 @@ rules:
     source_section: 160
     source_section_title: "Goal Freeze 规则"
     source_line: 6548
-    enforced_by: "xlibgate scope-lock"
+    enforced_by: "goalcli scope-lock"
     exit_code: 1
     status: active
   - id: RULE-GOAL-FREEZE-002
@@ -2297,7 +2297,7 @@ rules:
     source_section: 160
     source_section_title: "Goal Freeze 规则"
     source_line: 6573
-    enforced_by: "xlibgate scope-lock"
+    enforced_by: "goalcli scope-lock"
     exit_code: 1
     status: active
   - id: RULE-GOAL-MERGE-001
@@ -2333,7 +2333,7 @@ rules:
     source_section: 154
     source_section_title: "Test Pyramid for Goal Runtime 规则"
     source_line: 6347
-    enforced_by: "xlibgate governance-fixture-test"
+    enforced_by: "goalcli governance-fixture-test"
     exit_code: 1
     status: active
   - id: RULE-GOAL-TEST-002
@@ -2342,70 +2342,70 @@ rules:
     source_section: 154
     source_section_title: "Test Pyramid for Goal Runtime 规则"
     source_line: 6378
-    enforced_by: "xlibgate governance-fixture-test"
+    enforced_by: "goalcli governance-fixture-test"
     exit_code: 1
     status: active
-  - id: RULE-GOALKIT-001
+  - id: RULE-GOALCLI-001
     level: P1
-    title: "goalkit 必须是 Goal Runtime 的唯一执行入口之一"
+    title: "goalcli 必须是 Goal Runtime 的唯一执行入口之一"
     source_section: 83
-    source_section_title: "goalkit 命令契约规则"
+    source_section_title: "goalcli 命令契约规则"
     source_line: 3644
-    enforced_by: "xlibgate"
+    enforced_by: "goalcli"
     exit_code: 1
     status: active
-  - id: RULE-GOALKIT-002
+  - id: RULE-GOALCLI-002
     level: P1
-    title: "goalkit 命令必须幂等"
+    title: "goalcli 命令必须幂等"
     source_section: 83
-    source_section_title: "goalkit 命令契约规则"
+    source_section_title: "goalcli 命令契约规则"
     source_line: 3667
-    enforced_by: "xlibgate"
+    enforced_by: "goalcli"
     exit_code: 1
     status: active
-  - id: RULE-GOALKIT-003
+  - id: RULE-GOALCLI-003
     level: P1
-    title: "goalkit 命令必须统一输出机器结果"
+    title: "goalcli 命令必须统一输出机器结果"
     source_section: 83
-    source_section_title: "goalkit 命令契约规则"
+    source_section_title: "goalcli 命令契约规则"
     source_line: 3695
-    enforced_by: "xlibgate"
+    enforced_by: "goalcli"
     exit_code: 1
     status: active
-  - id: RULE-GOALKIT-ARCH-001
+  - id: RULE-GOALCLI-ARCH-001
     level: P1
-    title: "goalkit v0.1.0 先做裁判，不做复杂 Agent"
+    title: "goalcli v0.1.0 先做裁判，不做复杂 Agent"
     source_section: 120
-    source_section_title: "goalkit 内核架构规则"
+    source_section_title: "goalcli 内核架构规则"
     source_line: 5149
-    enforced_by: "xlibgate"
+    enforced_by: "goalcli"
     exit_code: 1
     status: active
-  - id: RULE-GOALKIT-ARCH-002
+  - id: RULE-GOALCLI-ARCH-002
     level: P1
     title: "每个 Checker 必须实现统一接口"
     source_section: 120
-    source_section_title: "goalkit 内核架构规则"
+    source_section_title: "goalcli 内核架构规则"
     source_line: 5172
-    enforced_by: "xlibgate"
+    enforced_by: "goalcli"
     exit_code: 1
     status: active
-  - id: RULE-GOALKIT-CONFIG-001
+  - id: RULE-GOALCLI-CONFIG-001
     level: P1
-    title: "goalkit 必须有统一配置文件"
+    title: "goalcli 必须有统一配置文件"
     source_section: 115
-    source_section_title: "`goalkit.yaml` 配置规则"
+    source_section_title: "`goalcli.yaml` 配置规则"
     source_line: 4877
-    enforced_by: "xlibgate"
+    enforced_by: "goalcli"
     exit_code: 1
     status: active
-  - id: RULE-GOALKIT-EXIT-001
+  - id: RULE-GOALCLI-EXIT-001
     level: P1
     title: "退出码必须标准化"
     source_section: 84
-    source_section_title: "goalkit Exit Code 规则"
+    source_section_title: "goalcli Exit Code 规则"
     source_line: 3721
-    enforced_by: "xlibgate"
+    enforced_by: "goalcli"
     exit_code: 1
     status: active
   - id: RULE-GOALPACK-001
@@ -2414,7 +2414,7 @@ rules:
     source_section: 56
     source_section_title: "Goal Pack 规则"
     source_line: 2651
-    enforced_by: "xlibgate pack-gate"
+    enforced_by: "goalcli pack-gate"
     exit_code: 1
     status: active
   - id: RULE-GOALPACK-002
@@ -2423,7 +2423,7 @@ rules:
     source_section: 56
     source_section_title: "Goal Pack 规则"
     source_line: 2679
-    enforced_by: "xlibgate pack-gate"
+    enforced_by: "goalcli pack-gate"
     exit_code: 1
     status: active
   - id: RULE-GOLDEN-001
@@ -2432,7 +2432,7 @@ rules:
     source_section: 76
     source_section_title: "Golden Path 规则"
     source_line: 3400
-    enforced_by: "xlibgate governance-fixture-test"
+    enforced_by: "goalcli governance-fixture-test"
     exit_code: 1
     status: active
   - id: RULE-GOLDEN-002
@@ -2441,7 +2441,7 @@ rules:
     source_section: 76
     source_section_title: "Golden Path 规则"
     source_line: 3422
-    enforced_by: "xlibgate governance-fixture-test"
+    enforced_by: "goalcli governance-fixture-test"
     exit_code: 1
     status: active
   - id: RULE-GOLDEN-PACK-001
@@ -2450,7 +2450,7 @@ rules:
     source_section: 155
     source_section_title: "Golden Goal Pack 标准"
     source_line: 6392
-    enforced_by: "xlibgate pack-gate"
+    enforced_by: "goalcli pack-gate"
     exit_code: 1
     status: active
   - id: RULE-GOLDEN-PACK-002
@@ -2459,7 +2459,7 @@ rules:
     source_section: 155
     source_section_title: "Golden Goal Pack 标准"
     source_line: 6414
-    enforced_by: "xlibgate pack-gate"
+    enforced_by: "goalcli pack-gate"
     exit_code: 1
     status: active
   - id: RULE-GOV-CADENCE-001
@@ -2486,7 +2486,7 @@ rules:
     source_section: 101
     source_section_title: "Agent Handoff 规则"
     source_line: 4346
-    enforced_by: "xlibgate goal-handover"
+    enforced_by: "goalcli goal-handover"
     exit_code: 1
     status: active
   - id: RULE-HANDOFF-002
@@ -2495,7 +2495,7 @@ rules:
     source_section: 101
     source_section_title: "Agent Handoff 规则"
     source_line: 4375
-    enforced_by: "xlibgate goal-handover"
+    enforced_by: "goalcli goal-handover"
     exit_code: 1
     status: active
   - id: RULE-HARNESS-PATCH-001
@@ -2522,7 +2522,7 @@ rules:
     source_section: 217
     source_section_title: "Agent Heartbeat 规则"
     source_line: 8557
-    enforced_by: "xlibgate runtime-health"
+    enforced_by: "goalcli runtime-health"
     exit_code: 1
     status: active
   - id: RULE-HEARTBEAT-002
@@ -2531,7 +2531,7 @@ rules:
     source_section: 217
     source_section_title: "Agent Heartbeat 规则"
     source_line: 8575
-    enforced_by: "xlibgate runtime-health"
+    enforced_by: "goalcli runtime-health"
     exit_code: 1
     status: active
   - id: RULE-HOOKS-001
@@ -2558,7 +2558,7 @@ rules:
     source_section: 4
     source_section_title: "ID 规则"
     source_line: 298
-    enforced_by: "xlibgate goal-runtime"
+    enforced_by: "goalcli goal-runtime"
     exit_code: 1
     status: active
   - id: RULE-ID-002
@@ -2567,7 +2567,7 @@ rules:
     source_section: 4
     source_section_title: "ID 规则"
     source_line: 323
-    enforced_by: "xlibgate goal-runtime"
+    enforced_by: "goalcli goal-runtime"
     exit_code: 1
     status: active
   - id: RULE-IMPACT-001
@@ -2576,7 +2576,7 @@ rules:
     source_section: 149
     source_section_title: "Impact Analysis 规则"
     source_line: 6183
-    enforced_by: "xlibgate standard-impact-check"
+    enforced_by: "goalcli standard-impact-check"
     exit_code: 1
     status: active
   - id: RULE-IMPACT-002
@@ -2585,7 +2585,7 @@ rules:
     source_section: 149
     source_section_title: "Impact Analysis 规则"
     source_line: 6200
-    enforced_by: "xlibgate standard-impact-check"
+    enforced_by: "goalcli standard-impact-check"
     exit_code: 1
     status: active
   - id: RULE-INCIDENT-001
@@ -2612,7 +2612,7 @@ rules:
     source_section: 166
     source_section_title: "New Issue Candidate 规则"
     source_line: 6736
-    enforced_by: "xlibgate issue-registry"
+    enforced_by: "goalcli issue-registry"
     exit_code: 1
     status: active
   - id: RULE-ISSUE-CANDIDATE-002
@@ -2621,7 +2621,7 @@ rules:
     source_section: 166
     source_section_title: "New Issue Candidate 规则"
     source_line: 6758
-    enforced_by: "xlibgate issue-registry"
+    enforced_by: "goalcli issue-registry"
     exit_code: 1
     status: active
   - id: RULE-LABEL-001
@@ -2630,7 +2630,7 @@ rules:
     source_section: 87
     source_section_title: "GitHub Label 规则"
     source_line: 3851
-    enforced_by: "xlibgate github-settings"
+    enforced_by: "goalcli github-settings"
     exit_code: 1
     status: active
   - id: RULE-LABEL-002
@@ -2639,7 +2639,7 @@ rules:
     source_section: 87
     source_section_title: "GitHub Label 规则"
     source_line: 3886
-    enforced_by: "xlibgate github-settings"
+    enforced_by: "goalcli github-settings"
     exit_code: 1
     status: active
   - id: RULE-LEASE-001
@@ -2648,7 +2648,7 @@ rules:
     source_section: 216
     source_section_title: "Agent Lease 规则"
     source_line: 8524
-    enforced_by: "xlibgate runtime-health"
+    enforced_by: "goalcli runtime-health"
     exit_code: 1
     status: active
   - id: RULE-LEASE-002
@@ -2657,7 +2657,7 @@ rules:
     source_section: 216
     source_section_title: "Agent Lease 规则"
     source_line: 8545
-    enforced_by: "xlibgate runtime-health"
+    enforced_by: "goalcli runtime-health"
     exit_code: 1
     status: active
   - id: RULE-MAIN-RECOVERY-001
@@ -2666,7 +2666,7 @@ rules:
     source_section: 223
     source_section_title: "Main Pollution Recovery 规则"
     source_line: 8733
-    enforced_by: "xlibgate main-guard"
+    enforced_by: "goalcli main-guard"
     exit_code: 5
     status: active
   - id: RULE-MAIN-RECOVERY-002
@@ -2675,7 +2675,7 @@ rules:
     source_section: 223
     source_section_title: "Main Pollution Recovery 规则"
     source_line: 8746
-    enforced_by: "xlibgate main-guard"
+    enforced_by: "goalcli main-guard"
     exit_code: 5
     status: active
   - id: RULE-MATURITY-001
@@ -2684,7 +2684,7 @@ rules:
     source_section: 200
     source_section_title: "最终闭环成熟度等级"
     source_line: 7996
-    enforced_by: "xlibgate conformance-profile"
+    enforced_by: "goalcli conformance-profile"
     exit_code: 1
     status: active
   - id: RULE-MATURITY-002
@@ -2693,7 +2693,7 @@ rules:
     source_section: 200
     source_section_title: "最终闭环成熟度等级"
     source_line: 8020
-    enforced_by: "xlibgate conformance-profile"
+    enforced_by: "goalcli conformance-profile"
     exit_code: 1
     status: active
   - id: RULE-MERGE-QUEUE-001
@@ -2702,7 +2702,7 @@ rules:
     source_section: 157
     source_section_title: "PR Merge Queue 规则"
     source_line: 6456
-    enforced_by: "xlibgate pr-template"
+    enforced_by: "goalcli pr-template"
     exit_code: 1
     status: active
   - id: RULE-MERGE-QUEUE-002
@@ -2711,7 +2711,7 @@ rules:
     source_section: 157
     source_section_title: "PR Merge Queue 规则"
     source_line: 6472
-    enforced_by: "xlibgate pr-template"
+    enforced_by: "goalcli pr-template"
     exit_code: 1
     status: active
   - id: RULE-METRIC-001
@@ -2756,7 +2756,7 @@ rules:
     source_section: 151
     source_section_title: "Migration Script 规则"
     source_line: 6252
-    enforced_by: "xlibgate policy-schema"
+    enforced_by: "goalcli policy-schema"
     exit_code: 6
     status: active
   - id: RULE-MIGRATION-002
@@ -2765,7 +2765,7 @@ rules:
     source_section: 151
     source_section_title: "Migration Script 规则"
     source_line: 6265
-    enforced_by: "xlibgate policy-schema"
+    enforced_by: "goalcli policy-schema"
     exit_code: 6
     status: active
   - id: RULE-MILESTONE-001
@@ -2774,7 +2774,7 @@ rules:
     source_section: 88
     source_section_title: "Milestone 规则"
     source_line: 3900
-    enforced_by: "xlibgate goal-runtime"
+    enforced_by: "goalcli goal-runtime"
     exit_code: 1
     status: active
   - id: RULE-MILESTONE-002
@@ -2783,7 +2783,7 @@ rules:
     source_section: 88
     source_section_title: "Milestone 规则"
     source_line: 3912
-    enforced_by: "xlibgate goal-runtime"
+    enforced_by: "goalcli goal-runtime"
     exit_code: 1
     status: active
   - id: RULE-MODE-001
@@ -2792,7 +2792,7 @@ rules:
     source_section: 2
     source_section_title: "Goal Runtime 模式规则"
     source_line: 151
-    enforced_by: "xlibgate goal-runtime"
+    enforced_by: "goalcli goal-runtime"
     exit_code: 1
     status: active
   - id: RULE-MODE-GATE-001
@@ -2801,7 +2801,7 @@ rules:
     source_section: 131
     source_section_title: "Lite / Standard / Full Gate 矩阵"
     source_line: 5567
-    enforced_by: "xlibgate goal-runtime"
+    enforced_by: "goalcli goal-runtime"
     exit_code: 1
     status: active
   - id: RULE-MULTIREPO-001
@@ -2810,7 +2810,7 @@ rules:
     source_section: 186
     source_section_title: "Multi-Repo Goal 规则"
     source_line: 7585
-    enforced_by: "xlibgate downstream-registry"
+    enforced_by: "goalcli downstream-registry"
     exit_code: 1
     status: active
   - id: RULE-MULTIREPO-002
@@ -2819,7 +2819,7 @@ rules:
     source_section: 186
     source_section_title: "Multi-Repo Goal 规则"
     source_line: 7601
-    enforced_by: "xlibgate downstream-registry"
+    enforced_by: "goalcli downstream-registry"
     exit_code: 1
     status: active
   - id: RULE-NAMING-001
@@ -2828,7 +2828,7 @@ rules:
     source_section: 198
     source_section_title: "Naming Normalization 规则"
     source_line: 7945
-    enforced_by: "xlibgate naming"
+    enforced_by: "goalcli naming"
     exit_code: 1
     status: active
   - id: RULE-OBJECT-001
@@ -2837,7 +2837,7 @@ rules:
     source_section: 3
     source_section_title: "Goal 对象模型规则"
     source_line: 252
-    enforced_by: "xlibgate goal-runtime"
+    enforced_by: "goalcli goal-runtime"
     exit_code: 1
     status: active
   - id: RULE-OBJECT-002
@@ -2846,7 +2846,7 @@ rules:
     source_section: 3
     source_section_title: "Goal 对象模型规则"
     source_line: 275
-    enforced_by: "xlibgate goal-runtime"
+    enforced_by: "goalcli goal-runtime"
     exit_code: 1
     status: active
   - id: RULE-ORDER-001
@@ -2855,7 +2855,7 @@ rules:
     source_section: 137
     source_section_title: "执行顺序规则"
     source_line: 5695
-    enforced_by: "xlibgate goal-runtime"
+    enforced_by: "goalcli goal-runtime"
     exit_code: 1
     status: active
   - id: RULE-ORPHAN-001
@@ -2864,7 +2864,7 @@ rules:
     source_section: 197
     source_section_title: "No-Orphan 规则"
     source_line: 7919
-    enforced_by: "xlibgate goal-runtime"
+    enforced_by: "goalcli goal-runtime"
     exit_code: 1
     status: active
   - id: RULE-ORPHAN-002
@@ -2873,7 +2873,7 @@ rules:
     source_section: 197
     source_section_title: "No-Orphan 规则"
     source_line: 7935
-    enforced_by: "xlibgate goal-runtime"
+    enforced_by: "goalcli goal-runtime"
     exit_code: 1
     status: active
   - id: RULE-OWNERSHIP-001
@@ -2882,7 +2882,7 @@ rules:
     source_section: 147
     source_section_title: "文件所有权规则"
     source_line: 6084
-    enforced_by: "xlibgate runtime-file-ownership"
+    enforced_by: "goalcli runtime-file-ownership"
     exit_code: 1
     status: active
   - id: RULE-OWNERSHIP-002
@@ -2891,7 +2891,7 @@ rules:
     source_section: 147
     source_section_title: "文件所有权规则"
     source_line: 6115
-    enforced_by: "xlibgate runtime-file-ownership"
+    enforced_by: "goalcli runtime-file-ownership"
     exit_code: 1
     status: active
   - id: RULE-PARITY-001
@@ -2900,7 +2900,7 @@ rules:
     source_section: 215
     source_section_title: "Local Parity 规则"
     source_line: 8490
-    enforced_by: "xlibgate makefile-baseline"
+    enforced_by: "goalcli makefile-baseline"
     exit_code: 1
     status: active
   - id: RULE-PARITY-002
@@ -2909,7 +2909,7 @@ rules:
     source_section: 215
     source_section_title: "Local Parity 规则"
     source_line: 8508
-    enforced_by: "xlibgate makefile-baseline"
+    enforced_by: "goalcli makefile-baseline"
     exit_code: 1
     status: active
   - id: RULE-PARTIAL-RELEASE-001
@@ -2918,7 +2918,7 @@ rules:
     source_section: 159
     source_section_title: "Partial Release 规则"
     source_line: 6520
-    enforced_by: "xlibgate release-final-check"
+    enforced_by: "goalcli release-final-check"
     exit_code: 10
     status: active
   - id: RULE-PARTIAL-RELEASE-002
@@ -2927,7 +2927,7 @@ rules:
     source_section: 159
     source_section_title: "Partial Release 规则"
     source_line: 6534
-    enforced_by: "xlibgate release-final-check"
+    enforced_by: "goalcli release-final-check"
     exit_code: 10
     status: active
   - id: RULE-PERMISSION-001
@@ -2936,7 +2936,7 @@ rules:
     source_section: 177
     source_section_title: "外部系统权限规则"
     source_line: 7261
-    enforced_by: "xlibgate github-settings"
+    enforced_by: "goalcli github-settings"
     exit_code: 1
     status: active
   - id: RULE-PERMISSION-002
@@ -2945,7 +2945,7 @@ rules:
     source_section: 177
     source_section_title: "外部系统权限规则"
     source_line: 7286
-    enforced_by: "xlibgate github-settings"
+    enforced_by: "goalcli github-settings"
     exit_code: 1
     status: active
   - id: RULE-PR-BOT-001
@@ -2954,7 +2954,7 @@ rules:
     source_section: 91
     source_section_title: "PR Comment Bot 规则"
     source_line: 3996
-    enforced_by: "xlibgate pr-template"
+    enforced_by: "goalcli pr-template"
     exit_code: 1
     status: active
   - id: RULE-PR-BOT-002
@@ -2963,7 +2963,7 @@ rules:
     source_section: 91
     source_section_title: "PR Comment Bot 规则"
     source_line: 4015
-    enforced_by: "xlibgate pr-template"
+    enforced_by: "goalcli pr-template"
     exit_code: 1
     status: active
   - id: RULE-PR-SIZE-001
@@ -2972,7 +2972,7 @@ rules:
     source_section: 219
     source_section_title: "PR Size Limit 规则"
     source_line: 8614
-    enforced_by: "xlibgate pr-template"
+    enforced_by: "goalcli pr-template"
     exit_code: 1
     status: active
   - id: RULE-PR-SIZE-002
@@ -2981,7 +2981,7 @@ rules:
     source_section: 219
     source_section_title: "PR Size Limit 规则"
     source_line: 8629
-    enforced_by: "xlibgate pr-template"
+    enforced_by: "goalcli pr-template"
     exit_code: 1
     status: active
   - id: RULE-PRIORITY-001
@@ -2990,7 +2990,7 @@ rules:
     source_section: 29
     source_section_title: "规则裁决优先级"
     source_line: 1581
-    enforced_by: "xlibgate goal-runtime"
+    enforced_by: "goalcli goal-runtime"
     exit_code: 1
     status: active
   - id: RULE-PRIORITY-002
@@ -2999,7 +2999,7 @@ rules:
     source_section: 29
     source_section_title: "规则裁决优先级"
     source_line: 1606
-    enforced_by: "xlibgate goal-runtime"
+    enforced_by: "goalcli goal-runtime"
     exit_code: 1
     status: active
   - id: RULE-PROFILE-001
@@ -3008,7 +3008,7 @@ rules:
     source_section: 214
     source_section_title: "Runtime Install Profile 规则"
     source_line: 8464
-    enforced_by: "xlibgate conformance-profile"
+    enforced_by: "goalcli conformance-profile"
     exit_code: 1
     status: active
   - id: RULE-PROFILE-002
@@ -3017,7 +3017,7 @@ rules:
     source_section: 214
     source_section_title: "Runtime Install Profile 规则"
     source_line: 8476
-    enforced_by: "xlibgate conformance-profile"
+    enforced_by: "goalcli conformance-profile"
     exit_code: 1
     status: active
   - id: RULE-PROMOTE-001
@@ -3026,7 +3026,7 @@ rules:
     source_section: 230
     source_section_title: "Downstream Promotion 规则"
     source_line: 8932
-    enforced_by: "xlibgate downstream-adoption"
+    enforced_by: "goalcli downstream-adoption"
     exit_code: 1
     status: active
   - id: RULE-PROMOTE-002
@@ -3035,7 +3035,7 @@ rules:
     source_section: 230
     source_section_title: "Downstream Promotion 规则"
     source_line: 8946
-    enforced_by: "xlibgate downstream-adoption"
+    enforced_by: "goalcli downstream-adoption"
     exit_code: 1
     status: active
   - id: RULE-PROMOTION-001
@@ -3044,7 +3044,7 @@ rules:
     source_section: 191
     source_section_title: "Release Promotion 规则"
     source_line: 7759
-    enforced_by: "xlibgate release-final-check"
+    enforced_by: "goalcli release-final-check"
     exit_code: 10
     status: active
   - id: RULE-PROMOTION-002
@@ -3053,7 +3053,7 @@ rules:
     source_section: 191
     source_section_title: "Release Promotion 规则"
     source_line: 7769
-    enforced_by: "xlibgate release-final-check"
+    enforced_by: "goalcli release-final-check"
     exit_code: 10
     status: active
   - id: RULE-PROMPT-PATCH-001
@@ -3080,7 +3080,7 @@ rules:
     source_section: 212
     source_section_title: "State Reconciliation 规则"
     source_line: 8387
-    enforced_by: "xlibgate runtime-health"
+    enforced_by: "goalcli runtime-health"
     exit_code: 1
     status: active
   - id: RULE-RECONCILE-002
@@ -3089,7 +3089,7 @@ rules:
     source_section: 212
     source_section_title: "State Reconciliation 规则"
     source_line: 8409
-    enforced_by: "xlibgate runtime-health"
+    enforced_by: "goalcli runtime-health"
     exit_code: 1
     status: active
   - id: RULE-REGISTRY-001
@@ -3098,7 +3098,7 @@ rules:
     source_section: 33
     source_section_title: "Goal Registry 规则"
     source_line: 1723
-    enforced_by: "xlibgate command-registry"
+    enforced_by: "goalcli command-registry"
     exit_code: 1
     status: active
   - id: RULE-REGISTRY-002
@@ -3107,7 +3107,7 @@ rules:
     source_section: 33
     source_section_title: "Goal Registry 规则"
     source_line: 1749
-    enforced_by: "xlibgate command-registry"
+    enforced_by: "goalcli command-registry"
     exit_code: 1
     status: active
   - id: RULE-REGISTRY-CONSISTENCY-001
@@ -3116,7 +3116,7 @@ rules:
     source_section: 152
     source_section_title: "Registry Consistency 规则"
     source_line: 6276
-    enforced_by: "xlibgate command-registry"
+    enforced_by: "goalcli command-registry"
     exit_code: 1
     status: active
   - id: RULE-REGISTRY-CONSISTENCY-002
@@ -3125,7 +3125,7 @@ rules:
     source_section: 152
     source_section_title: "Registry Consistency 规则"
     source_line: 6290
-    enforced_by: "xlibgate command-registry"
+    enforced_by: "goalcli command-registry"
     exit_code: 1
     status: active
   - id: RULE-REGISTRY-LOCK-001
@@ -3134,7 +3134,7 @@ rules:
     source_section: 185
     source_section_title: "Registry Lock 规则"
     source_line: 7549
-    enforced_by: "xlibgate command-registry"
+    enforced_by: "goalcli command-registry"
     exit_code: 1
     status: active
   - id: RULE-REGISTRY-LOCK-002
@@ -3143,7 +3143,7 @@ rules:
     source_section: 185
     source_section_title: "Registry Lock 规则"
     source_line: 7563
-    enforced_by: "xlibgate command-registry"
+    enforced_by: "goalcli command-registry"
     exit_code: 1
     status: active
   - id: RULE-RELEASE-TRAIN-001
@@ -3152,7 +3152,7 @@ rules:
     source_section: 158
     source_section_title: "Release Train 规则"
     source_line: 6488
-    enforced_by: "xlibgate release-final-check"
+    enforced_by: "goalcli release-final-check"
     exit_code: 10
     status: active
   - id: RULE-RELEASE-TRAIN-002
@@ -3161,7 +3161,7 @@ rules:
     source_section: 158
     source_section_title: "Release Train 规则"
     source_line: 6505
-    enforced_by: "xlibgate release-final-check"
+    enforced_by: "goalcli release-final-check"
     exit_code: 10
     status: active
   - id: RULE-REPAIR-001
@@ -3170,7 +3170,7 @@ rules:
     source_section: 146
     source_section_title: "Agent Repair Loop 规则"
     source_line: 6054
-    enforced_by: "xlibgate self-healing-skeleton"
+    enforced_by: "goalcli self-healing-skeleton"
     exit_code: 1
     status: active
     duplicate_at: [8261]
@@ -3180,7 +3180,7 @@ rules:
     source_section: 146
     source_section_title: "Agent Repair Loop 规则"
     source_line: 6067
-    enforced_by: "xlibgate self-healing-skeleton"
+    enforced_by: "goalcli self-healing-skeleton"
     exit_code: 1
     status: active
     duplicate_at: [8273]
@@ -3190,7 +3190,7 @@ rules:
     source_section: 113
     source_section_title: "仓库落地总目录规则"
     source_line: 4761
-    enforced_by: "xlibgate boundary"
+    enforced_by: "goalcli boundary"
     exit_code: 1
     status: active
   - id: RULE-REPORT-001
@@ -3217,7 +3217,7 @@ rules:
     source_section: 18
     source_section_title: "AutoResearch 规则"
     source_line: 1071
-    enforced_by: "xlibgate autoresearch"
+    enforced_by: "goalcli autoresearch"
     exit_code: 1
     status: active
   - id: RULE-RESEARCH-002
@@ -3226,7 +3226,7 @@ rules:
     source_section: 18
     source_section_title: "AutoResearch 规则"
     source_line: 1088
-    enforced_by: "xlibgate autoresearch"
+    enforced_by: "goalcli autoresearch"
     exit_code: 1
     status: active
   - id: RULE-RETRO-001
@@ -3235,7 +3235,7 @@ rules:
     source_section: 17
     source_section_title: "Retrospective / Self-improving 规则"
     source_line: 1025
-    enforced_by: "xlibgate self-improving-check"
+    enforced_by: "goalcli self-improving-check"
     exit_code: 1
     status: active
   - id: RULE-RETRO-002
@@ -3244,7 +3244,7 @@ rules:
     source_section: 17
     source_section_title: "Retrospective / Self-improving 规则"
     source_line: 1042
-    enforced_by: "xlibgate self-improving-check"
+    enforced_by: "goalcli self-improving-check"
     exit_code: 1
     status: active
   - id: RULE-RETRO-003
@@ -3253,7 +3253,7 @@ rules:
     source_section: 17
     source_section_title: "Retrospective / Self-improving 规则"
     source_line: 1056
-    enforced_by: "xlibgate self-improving-check"
+    enforced_by: "goalcli self-improving-check"
     exit_code: 1
     status: active
   - id: RULE-RETRO-CHECK-001
@@ -3262,7 +3262,7 @@ rules:
     source_section: 128
     source_section_title: "Retro Check 规则"
     source_line: 5464
-    enforced_by: "xlibgate self-improving-check"
+    enforced_by: "goalcli self-improving-check"
     exit_code: 1
     status: active
   - id: RULE-RETRO-CHECK-002
@@ -3271,7 +3271,7 @@ rules:
     source_section: 128
     source_section_title: "Retro Check 规则"
     source_line: 5482
-    enforced_by: "xlibgate self-improving-check"
+    enforced_by: "goalcli self-improving-check"
     exit_code: 1
     status: active
   - id: RULE-REVIEW-001
@@ -3280,7 +3280,7 @@ rules:
     source_section: 43
     source_section_title: "Review 规则"
     source_line: 2117
-    enforced_by: "xlibgate pr-template"
+    enforced_by: "goalcli pr-template"
     exit_code: 1
     status: active
   - id: RULE-REVIEW-002
@@ -3289,7 +3289,7 @@ rules:
     source_section: 43
     source_section_title: "Review 规则"
     source_line: 2134
-    enforced_by: "xlibgate pr-template"
+    enforced_by: "goalcli pr-template"
     exit_code: 1
     status: active
   - id: RULE-REVIEW-BOT-001
@@ -3298,7 +3298,7 @@ rules:
     source_section: 92
     source_section_title: "Review Bot 与人工 Review 边界"
     source_line: 4031
-    enforced_by: "xlibgate pr-template"
+    enforced_by: "goalcli pr-template"
     exit_code: 1
     status: active
   - id: RULE-REVIEW-BOT-002
@@ -3307,7 +3307,7 @@ rules:
     source_section: 92
     source_section_title: "Review Bot 与人工 Review 边界"
     source_line: 4058
-    enforced_by: "xlibgate pr-template"
+    enforced_by: "goalcli pr-template"
     exit_code: 1
     status: active
   - id: RULE-RISK-001
@@ -3325,7 +3325,7 @@ rules:
     source_section: 192
     source_section_title: "Roll-forward 规则"
     source_line: 7785
-    enforced_by: "xlibgate release-final-check"
+    enforced_by: "goalcli release-final-check"
     exit_code: 10
     status: active
   - id: RULE-ROLLFORWARD-002
@@ -3334,7 +3334,7 @@ rules:
     source_section: 192
     source_section_title: "Roll-forward 规则"
     source_line: 7796
-    enforced_by: "xlibgate release-final-check"
+    enforced_by: "goalcli release-final-check"
     exit_code: 10
     status: active
   - id: RULE-ROOT-001
@@ -3343,7 +3343,7 @@ rules:
     source_section: 114
     source_section_title: "根目录工具规则"
     source_line: 4841
-    enforced_by: "xlibgate boundary"
+    enforced_by: "goalcli boundary"
     exit_code: 1
     status: active
   - id: RULE-RULE-BLOAT-001
@@ -3352,7 +3352,7 @@ rules:
     source_section: 183
     source_section_title: "规则膨胀控制规则"
     source_line: 7473
-    enforced_by: "xlibgate docs-check"
+    enforced_by: "goalcli docs-check"
     exit_code: 1
     status: active
   - id: RULE-RULE-BLOAT-002
@@ -3361,7 +3361,7 @@ rules:
     source_section: 183
     source_section_title: "规则膨胀控制规则"
     source_line: 7490
-    enforced_by: "xlibgate docs-check"
+    enforced_by: "goalcli docs-check"
     exit_code: 1
     status: active
   - id: RULE-RULE-PATCH-001
@@ -3370,7 +3370,7 @@ rules:
     source_section: 165
     source_section_title: "Rule Patch 生效规则"
     source_line: 6713
-    enforced_by: "xlibgate docs-check"
+    enforced_by: "goalcli docs-check"
     exit_code: 1
     status: active
   - id: RULE-RULE-PATCH-002
@@ -3379,7 +3379,7 @@ rules:
     source_section: 165
     source_section_title: "Rule Patch 生效规则"
     source_line: 6726
-    enforced_by: "xlibgate docs-check"
+    enforced_by: "goalcli docs-check"
     exit_code: 1
     status: active
   - id: RULE-RUNBOOK-001
@@ -3415,7 +3415,7 @@ rules:
     source_section: 108
     source_section_title: "Goal Runtime 版本兼容规则"
     source_line: 4566
-    enforced_by: "xlibgate upgrade-runtime"
+    enforced_by: "goalcli upgrade-runtime"
     exit_code: 1
     status: active
   - id: RULE-RUNTIME-COMPAT-002
@@ -3424,7 +3424,7 @@ rules:
     source_section: 108
     source_section_title: "Goal Runtime 版本兼容规则"
     source_line: 4580
-    enforced_by: "xlibgate upgrade-runtime"
+    enforced_by: "goalcli upgrade-runtime"
     exit_code: 1
     status: active
   - id: RULE-SCHEMA-001
@@ -3433,7 +3433,7 @@ rules:
     source_section: 55
     source_section_title: "Schema-first 规则"
     source_line: 2592
-    enforced_by: "xlibgate policy-schema"
+    enforced_by: "goalcli policy-schema"
     exit_code: 6
     status: active
   - id: RULE-SCHEMA-002
@@ -3442,7 +3442,7 @@ rules:
     source_section: 55
     source_section_title: "Schema-first 规则"
     source_line: 2630
-    enforced_by: "xlibgate policy-schema"
+    enforced_by: "goalcli policy-schema"
     exit_code: 6
     status: active
   - id: RULE-SCHEMA-MIN-001
@@ -3451,7 +3451,7 @@ rules:
     source_section: 122
     source_section_title: "Schema 最小字段规则"
     source_line: 5243
-    enforced_by: "xlibgate policy-schema"
+    enforced_by: "goalcli policy-schema"
     exit_code: 6
     status: active
   - id: RULE-SCHEMA-MIN-002
@@ -3460,7 +3460,7 @@ rules:
     source_section: 122
     source_section_title: "Schema 最小字段规则"
     source_line: 5262
-    enforced_by: "xlibgate policy-schema"
+    enforced_by: "goalcli policy-schema"
     exit_code: 6
     status: active
   - id: RULE-SCHEMA-MIN-003
@@ -3469,7 +3469,7 @@ rules:
     source_section: 122
     source_section_title: "Schema 最小字段规则"
     source_line: 5280
-    enforced_by: "xlibgate policy-schema"
+    enforced_by: "goalcli policy-schema"
     exit_code: 6
     status: active
   - id: RULE-SCORE-001
@@ -3478,7 +3478,7 @@ rules:
     source_section: 50
     source_section_title: "评分规则"
     source_line: 2392
-    enforced_by: "xlibgate score"
+    enforced_by: "goalcli score"
     exit_code: 1
     status: active
   - id: RULE-SI-001
@@ -3487,7 +3487,7 @@ rules:
     source_section: 44
     source_section_title: "Self-improving 运行规则"
     source_line: 2154
-    enforced_by: "xlibgate self-improving-check"
+    enforced_by: "goalcli self-improving-check"
     exit_code: 1
     status: active
   - id: RULE-SI-002
@@ -3496,7 +3496,7 @@ rules:
     source_section: 44
     source_section_title: "Self-improving 运行规则"
     source_line: 2168
-    enforced_by: "xlibgate self-improving-check"
+    enforced_by: "goalcli self-improving-check"
     exit_code: 1
     status: active
   - id: RULE-SI-003
@@ -3505,7 +3505,7 @@ rules:
     source_section: 44
     source_section_title: "Self-improving 运行规则"
     source_line: 2180
-    enforced_by: "xlibgate self-improving-check"
+    enforced_by: "goalcli self-improving-check"
     exit_code: 1
     status: active
   - id: RULE-SIMPLICITY-001
@@ -3514,7 +3514,7 @@ rules:
     source_section: 130
     source_section_title: "防过度工程化规则"
     source_line: 5523
-    enforced_by: "xlibgate minimal-kernel"
+    enforced_by: "goalcli minimal-kernel"
     exit_code: 1
     status: active
   - id: RULE-SIMPLICITY-002
@@ -3523,7 +3523,7 @@ rules:
     source_section: 130
     source_section_title: "防过度工程化规则"
     source_line: 5549
-    enforced_by: "xlibgate minimal-kernel"
+    enforced_by: "goalcli minimal-kernel"
     exit_code: 1
     status: active
   - id: RULE-SPEC-001
@@ -3532,7 +3532,7 @@ rules:
     source_section: 7
     source_section_title: "Spec 规则"
     source_line: 455
-    enforced_by: "xlibgate acceptance-matrix"
+    enforced_by: "goalcli acceptance-matrix"
     exit_code: 1
     status: active
   - id: RULE-SPEC-002
@@ -3541,7 +3541,7 @@ rules:
     source_section: 7
     source_section_title: "Spec 规则"
     source_line: 472
-    enforced_by: "xlibgate acceptance-matrix"
+    enforced_by: "goalcli acceptance-matrix"
     exit_code: 1
     status: active
   - id: RULE-SPEC-003
@@ -3550,7 +3550,7 @@ rules:
     source_section: 7
     source_section_title: "Spec 规则"
     source_line: 483
-    enforced_by: "xlibgate acceptance-matrix"
+    enforced_by: "goalcli acceptance-matrix"
     exit_code: 1
     status: active
   - id: RULE-SPEC-004
@@ -3559,7 +3559,7 @@ rules:
     source_section: 7
     source_section_title: "Spec 规则"
     source_line: 506
-    enforced_by: "xlibgate acceptance-matrix"
+    enforced_by: "goalcli acceptance-matrix"
     exit_code: 1
     status: active
   - id: RULE-SSOT-001
@@ -3568,7 +3568,7 @@ rules:
     source_section: 174
     source_section_title: "SSOT 事实源规则"
     source_line: 7143
-    enforced_by: "xlibgate goal-runtime"
+    enforced_by: "goalcli goal-runtime"
     exit_code: 1
     status: active
   - id: RULE-SSOT-002
@@ -3577,7 +3577,7 @@ rules:
     source_section: 174
     source_section_title: "SSOT 事实源规则"
     source_line: 7159
-    enforced_by: "xlibgate goal-runtime"
+    enforced_by: "goalcli goal-runtime"
     exit_code: 1
     status: active
   - id: RULE-SUNSET-001
@@ -3586,7 +3586,7 @@ rules:
     source_section: 227
     source_section_title: "Rule Sunset 规则"
     source_line: 8845
-    enforced_by: "xlibgate policy-schema"
+    enforced_by: "goalcli policy-schema"
     exit_code: 6
     status: active
   - id: RULE-SUNSET-002
@@ -3595,7 +3595,7 @@ rules:
     source_section: 227
     source_section_title: "Rule Sunset 规则"
     source_line: 8860
-    enforced_by: "xlibgate policy-schema"
+    enforced_by: "goalcli policy-schema"
     exit_code: 6
     status: active
   - id: RULE-TASK-001
@@ -3604,7 +3604,7 @@ rules:
     source_section: 9
     source_section_title: "Plan / Task 规则"
     source_line: 577
-    enforced_by: "xlibgate traceability-check"
+    enforced_by: "goalcli traceability-check"
     exit_code: 9
     status: active
   - id: RULE-TASK-002
@@ -3613,7 +3613,7 @@ rules:
     source_section: 9
     source_section_title: "Plan / Task 规则"
     source_line: 591
-    enforced_by: "xlibgate traceability-check"
+    enforced_by: "goalcli traceability-check"
     exit_code: 9
     status: active
   - id: RULE-TASK-003
@@ -3622,7 +3622,7 @@ rules:
     source_section: 9
     source_section_title: "Plan / Task 规则"
     source_line: 612
-    enforced_by: "xlibgate traceability-check"
+    enforced_by: "goalcli traceability-check"
     exit_code: 9
     status: active
   - id: RULE-TASK-004
@@ -3631,7 +3631,7 @@ rules:
     source_section: 9
     source_section_title: "Plan / Task 规则"
     source_line: 629
-    enforced_by: "xlibgate traceability-check"
+    enforced_by: "goalcli traceability-check"
     exit_code: 9
     status: active
   - id: RULE-TEMPLATE-001
@@ -3640,7 +3640,7 @@ rules:
     source_section: 74
     source_section_title: "模板同步规则"
     source_line: 3339
-    enforced_by: "xlibgate docs-check"
+    enforced_by: "goalcli docs-check"
     exit_code: 1
     status: active
   - id: RULE-TEMPLATE-002
@@ -3649,7 +3649,7 @@ rules:
     source_section: 74
     source_section_title: "模板同步规则"
     source_line: 3353
-    enforced_by: "xlibgate docs-check"
+    enforced_by: "goalcli docs-check"
     exit_code: 1
     status: active
   - id: RULE-TRUST-001
@@ -3676,7 +3676,7 @@ rules:
     source_section: 71
     source_section_title: "版本规则"
     source_line: 3257
-    enforced_by: "xlibgate changelog"
+    enforced_by: "goalcli changelog"
     exit_code: 1
     status: active
   - id: RULE-VERSION-002
@@ -3685,7 +3685,7 @@ rules:
     source_section: 71
     source_section_title: "版本规则"
     source_line: 3267
-    enforced_by: "xlibgate changelog"
+    enforced_by: "goalcli changelog"
     exit_code: 1
     status: active
   - id: RULE-VIOLATION-FIXTURE-001
@@ -3694,7 +3694,7 @@ rules:
     source_section: 156
     source_section_title: "Violation Fixture 标准"
     source_line: 6426
-    enforced_by: "xlibgate governance-fixture-test"
+    enforced_by: "goalcli governance-fixture-test"
     exit_code: 1
     status: active
   - id: RULE-VIOLATION-FIXTURE-002
@@ -3703,7 +3703,7 @@ rules:
     source_section: 156
     source_section_title: "Violation Fixture 标准"
     source_line: 6441
-    enforced_by: "xlibgate governance-fixture-test"
+    enforced_by: "goalcli governance-fixture-test"
     exit_code: 1
     status: active
   - id: RULE-VIOLATION-SEVERITY-001
@@ -3730,7 +3730,7 @@ rules:
     source_section: 218
     source_section_title: "Worktree Garbage Collection 规则"
     source_line: 8589
-    enforced_by: "xlibgate worktree-guard"
+    enforced_by: "goalcli worktree-guard"
     exit_code: 5
     status: active
   - id: RULE-WT-GC-002
@@ -3739,7 +3739,7 @@ rules:
     source_section: 218
     source_section_title: "Worktree Garbage Collection 规则"
     source_line: 8606
-    enforced_by: "xlibgate worktree-guard"
+    enforced_by: "goalcli worktree-guard"
     exit_code: 5
     status: active
   - id: RULE-XGO-001
@@ -3748,7 +3748,7 @@ rules:
     source_section: 22
     source_section_title: "xlib-standard / kernel / x.go 专用规则"
     source_line: 1264
-    enforced_by: "xlibgate boundary"
+    enforced_by: "goalcli boundary"
     exit_code: 1
     status: active
   - id: RULE-XSTACK-001
@@ -3757,7 +3757,7 @@ rules:
     source_section: 22
     source_section_title: "xlib-standard / kernel / x.go 专用规则"
     source_line: 1225
-    enforced_by: "xlibgate attest-conformance"
+    enforced_by: "goalcli attest-conformance"
     exit_code: 1
     status: active
   - id: RULE-XSTACK-002
@@ -3766,7 +3766,7 @@ rules:
     source_section: 22
     source_section_title: "xlib-standard / kernel / x.go 专用规则"
     source_line: 1238
-    enforced_by: "xlibgate attest-conformance"
+    enforced_by: "goalcli attest-conformance"
     exit_code: 1
     status: active
   - id: RULE-XSTACK-003
@@ -3775,7 +3775,7 @@ rules:
     source_section: 22
     source_section_title: "xlib-standard / kernel / x.go 专用规则"
     source_line: 1246
-    enforced_by: "xlibgate attest-conformance"
+    enforced_by: "goalcli attest-conformance"
     exit_code: 1
     status: active
   - id: RULE-XSTACK-ADMISSION-001
@@ -3784,7 +3784,7 @@ rules:
     source_section: 168
     source_section_title: "xstack 分层准入规则"
     source_line: 6803
-    enforced_by: "xlibgate attest-conformance"
+    enforced_by: "goalcli attest-conformance"
     exit_code: 1
     status: active
   - id: RULE-XSTACK-ADMISSION-002
@@ -3793,6 +3793,6 @@ rules:
     source_section: 168
     source_section_title: "xstack 分层准入规则"
     source_line: 6820
-    enforced_by: "xlibgate attest-conformance"
+    enforced_by: "goalcli attest-conformance"
     exit_code: 1
     status: active
