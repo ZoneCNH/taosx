@@ -111,6 +111,7 @@ func TestGoalRuntimeSchemasAreValidJSON(t *testing.T) {
 		"policy.schema.json",
 		"execution-evidence.schema.json",
 		"downstream-adoption-proof.schema.json",
+		"docker-toolchain.schema.json",
 	} {
 		t.Run(path, func(t *testing.T) {
 			content, err := os.ReadFile(path)

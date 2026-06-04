@@ -109,6 +109,32 @@ func run(args []string, stdin io.Reader, stdout io.Writer, stderr io.Writer) int
 		return runExternal(stdin, stdout, stderr, "./scripts/check_dependency_diff.sh")
 	case "docs-check":
 		return runExternal(stdin, stdout, stderr, "./scripts/check_docs.sh")
+	case "docker-toolchain-check":
+		return runExternal(stdin, stdout, stderr, "./scripts/docker/check_toolchain.sh", args[1:]...)
+	case "docker-drift-check":
+		return runExternal(stdin, stdout, stderr, "./scripts/docker/check_toolchain.sh", append([]string{"--drift"}, args[1:]...)...)
+	case "docker-build":
+		return runExternal(stdin, stdout, stderr, "./scripts/docker/docker_gate.sh", append([]string{"build"}, args[1:]...)...)
+	case "docker-build-check":
+		return runExternal(stdin, stdout, stderr, "./scripts/docker/docker_gate.sh", append([]string{"build-check"}, args[1:]...)...)
+	case "docker-shell":
+		return runExternal(stdin, stdout, stderr, "./scripts/docker/docker_gate.sh", append([]string{"shell"}, args[1:]...)...)
+	case "docker-ci":
+		return runExternal(stdin, stdout, stderr, "./scripts/docker/docker_gate.sh", append([]string{"ci"}, args[1:]...)...)
+	case "docker-release-check":
+		return runExternal(stdin, stdout, stderr, "./scripts/docker/docker_gate.sh", append([]string{"release-check"}, args[1:]...)...)
+	case "docker-release-final-check":
+		return runExternal(stdin, stdout, stderr, "./scripts/docker/docker_gate.sh", append([]string{"release-final-check"}, args[1:]...)...)
+	case "docker-goalcli":
+		return runExternal(stdin, stdout, stderr, "./scripts/docker/docker_gate.sh", append([]string{"goalcli"}, args[1:]...)...)
+	case "docker-goalcli-image":
+		return runExternal(stdin, stdout, stderr, "./scripts/docker/docker_gate.sh", append([]string{"goalcli-image"}, args[1:]...)...)
+	case "docker-goalcli-version":
+		return runExternal(stdin, stdout, stderr, "./scripts/docker/docker_gate.sh", append([]string{"goalcli-version"}, args[1:]...)...)
+	case "docker-runtime-check":
+		return runExternal(stdin, stdout, stderr, "./scripts/docker/docker_gate.sh", append([]string{"runtime-check"}, args[1:]...)...)
+	case "docker-contract":
+		return runExternal(stdin, stdout, stderr, "./scripts/docker/docker_gate.sh", append([]string{"contract"}, args[1:]...)...)
 	case "evidence", "manifest":
 		return runExternal(stdin, stdout, stderr, "go", "run", "./internal/tools/releasemanifest", "--out", "release/manifest/latest.json")
 	case "integration":
@@ -287,6 +313,19 @@ commands:
   domain [debt args]
   doctor [--json]
   docs-check
+  docker-build
+  docker-build-check
+  docker-ci
+  docker-contract
+  docker-drift-check
+  docker-goalcli
+  docker-goalcli-image
+  docker-goalcli-version
+  docker-release-check
+  docker-release-final-check
+  docker-runtime-check
+  docker-shell
+  docker-toolchain-check
   design-check [--json]
   downstream-adoption
   downstream-baseline

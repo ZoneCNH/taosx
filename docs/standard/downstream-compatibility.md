@@ -5,7 +5,10 @@
 ## 默认下游
 
 - `kernel`：默认 L0 集成目标，module path 为 `github.com/ZoneCNH/kernel`，是 Full Goal Runtime v3.1 的必跑下游集成目标。
-- `corekit`：中性组织路径 smoke，module path 为 `example.com/acme/corekit`，用于证明 generator 不依赖固定组织、GitHub owner 或 module prefix。
+- `configx`：L1 配置基础库代表目标，module path 为 `github.com/ZoneCNH/configx`，用于证明横向治理能力库形态仍可生成。
+- `redisx`：L2 profile 基础设施代表目标，module path 为 `github.com/ZoneCNH/redisx`，用于证明具体适配库形态仍可生成。
+
+`corekit` 仍作为中性组织路径的专项 smoke / registry 目标保留，但当前默认 `make integration` 不再运行该 legacy 目标。
 
 旧 `foundationx` 只作为迁移兼容名出现，不再是默认下游。
 
@@ -28,20 +31,25 @@
 
 ## Gate
 
-`GOWORK=off make integration` 是默认下游兼容 gate。它通过 `cmd/goalcli integration` 覆盖 generator smoke、`kernel`/`corekit` 代表路径和关键边界检查。
+`GOWORK=off make integration` 是默认下游兼容 gate。它通过 `cmd/goalcli integration` 覆盖 generator smoke、`kernel` / `configx` / `redisx` 代表路径和关键边界检查。
 
 生成出的每个代表下游必须通过：
 
 ```bash
 GOWORK=off go mod tidy
+GOWORK=off make docker-toolchain-check
 GOWORK=off go test ./...
 GOWORK=off make contracts
 GOWORK=off make boundary
+GOWORK=off make standard-impact-check
+GOWORK=off make debt
+GOWORK=off make debt-evidence
+GOWORK=off make debt-evidence-checksum-check
 CHECK_STATUS=passed GOWORK=off make evidence
 RELEASE_EVIDENCE_REQUIRE_PASSED=1 GOWORK=off make release-evidence-check
 ```
 
-这些命令需要在 `kernel` 和 `corekit` 的渲染结果中通过；失败时不得宣称 downstream compatible。当新增 profile 时，在不污染默认 `make ci` 的前提下补充 profile-specific smoke 或 extended gate。
+这些命令需要在 `kernel`、`configx` 和 `redisx` 的渲染结果中通过；失败时不得宣称 downstream compatible。当新增 profile 时，在不污染默认 `make ci` 的前提下补充 profile-specific smoke 或 extended gate。
 
 ## 兼容破坏
 

@@ -13,7 +13,7 @@
 
 ## 下游
 
-默认下游集成目标是 `kernel`，中性路径 smoke 目标是 `corekit`。旧 `baselib-template` / `foundationx` 名称仅作为迁移文档语境保留。
+默认下游集成目标是 `kernel`、`configx` 和 `redisx`。`corekit` 仅作为中性路径专项 smoke / registry 目标保留，不再属于默认 `make integration` 目标。旧 `baselib-template` / `foundationx` 名称仅作为迁移文档语境保留。
 
 ## 发布
 

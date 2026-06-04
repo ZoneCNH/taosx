@@ -1,0 +1,17 @@
+{
+  "name": "Go Toolchain Runtime",
+  "dockerComposeFile": "../docker-compose.yml",
+  "service": "dev",
+  "runServices": ["dev"],
+  "remoteUser": "xlib",
+  "workspaceFolder": "/workspace",
+  "remoteEnv": {
+    "GOWORK": "off",
+    "XLIB_CONTEXT": "docker_toolchain"
+  },
+  "customizations": {
+    "vscode": {
+      "extensions": ["golang.Go"]
+    }
+  }
+}

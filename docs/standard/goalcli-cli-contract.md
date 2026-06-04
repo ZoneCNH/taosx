@@ -71,6 +71,19 @@
 - `debt-evidence`
 - `debt-evidence-checksum-check`
 - `debt-evidence-hash`
+- `docker-toolchain-check`
+- `docker-build`
+- `docker-build-check`
+- `docker-shell`
+- `docker-ci`
+- `docker-release-check`
+- `docker-release-final-check`
+- `docker-goalcli`
+- `docker-goalcli-image`
+- `docker-goalcli-version`
+- `docker-runtime-check`
+- `docker-drift-check`
+- `docker-contract`
 
 ## 下游同步计划命令
 
@@ -143,6 +156,12 @@ Goalcli MVA commands（`goal-acceptance`、`goal-delivery`、`goal-handover`、`
 Debt governance commands 是 P0 release-blocking gates。`goalcli debt` 运行完整 debt scanner，`architecture`、`domain`、`docs-drift`、`dependency-debt`、`security-debt`、`testing-debt`、`implementation-debt` 和 `downstream-debt` 运行同一策略的聚焦切片。scanner 复用本地 boundary、docs、dependency diff 和 secret checks；scanner 失败必须返回非 0，不能作为 passed evidence。
 
 `goalcli debt-evidence` 将生成的 evidence 写入 `release/debt/latest.json`、`release/debt/latest.md` 和 `release/debt/latest.json.sha256`。这些 latest evidence 文件是可复现 release artifacts，并且故意被 git 忽略。P0 debt rules 不允许例外：`.agent/policies/debt/` 下的 policy 文件和 `.agent/registries/debt/` 下的 registry 文件不得引入 P0 exception markers，且 release verification 必须在 debt status 不是 `passed` 时失败。
+
+## Docker Toolchain Runtime commands
+
+Docker Toolchain Runtime commands 由 `scripts/docker/check_toolchain.sh` 与 `scripts/docker/docker_gate.sh` 委托执行，作为同一 `goalcli` gate surface 的容器化运行时契约。`docker-toolchain-check` 校验 Dockerfile、Compose、devcontainer、CI、manifest、docs 和 downstream 模板锚点；`docker-build`、`docker-build-check`、`docker-shell`、`docker-ci`、`docker-release-check`、`docker-release-final-check`、`docker-goalcli`、`docker-goalcli-image`、`docker-goalcli-version` 提供镜像和容器内 gate 入口；`docker-runtime-check`、`docker-drift-check`、`docker-contract` 证明运行时、漂移和契约面没有分叉。
+
+这些命令不得绕过 `make ci`、`make release-check`、Harness gate 或 release manifest evidence。缺少 Docker daemon 时，静态 contract check 可以作为 drift evidence，但不能替代实际 image build evidence。
 
 ## Goalcli v0.1.0 MVA runtime commands
 

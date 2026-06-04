@@ -27,6 +27,19 @@ targets:
   - rules-verify
   - downstream-debt
   - downstream-sync-plan
+  - docker-toolchain-check
+  - docker-build
+  - docker-build-check
+  - docker-shell
+  - docker-ci
+  - docker-release-check
+  - docker-release-final-check
+  - docker-goalcli
+  - docker-goalcli-image
+  - docker-goalcli-version
+  - docker-runtime-check
+  - docker-drift-check
+  - docker-contract
   - debt-evidence-hash
   - debt-evidence-checksum-check
   - evidence

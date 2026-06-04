@@ -106,6 +106,45 @@ commands:
   - name: downstream-sync-plan
     phase: P0
     target: downstream-sync-plan
+  - name: docker-toolchain-check
+    phase: P0
+    target: docker-toolchain-check
+  - name: docker-build
+    phase: P0
+    target: docker-build
+  - name: docker-build-check
+    phase: P0
+    target: docker-build-check
+  - name: docker-shell
+    phase: P0
+    target: docker-shell
+  - name: docker-ci
+    phase: P0
+    target: docker-ci
+  - name: docker-release-check
+    phase: P0
+    target: docker-release-check
+  - name: docker-release-final-check
+    phase: P0
+    target: docker-release-final-check
+  - name: docker-goalcli
+    phase: P0
+    target: docker-goalcli
+  - name: docker-goalcli-image
+    phase: P0
+    target: docker-goalcli-image
+  - name: docker-goalcli-version
+    phase: P0
+    target: docker-goalcli-version
+  - name: docker-runtime-check
+    phase: P0
+    target: docker-runtime-check
+  - name: docker-drift-check
+    phase: P0
+    target: docker-drift-check
+  - name: docker-contract
+    phase: P0
+    target: docker-contract
   - name: debt-evidence
     phase: P0
     target: debt-evidence

@@ -13,6 +13,8 @@ field_semantics:
   "registry_state": "标准源声明的目标登记态；不等于 downstream implemented。"
   "adoption_status": "采纳结论；只有带当前 downstream 命令输出的 proof-based adoption 才能写入 adopted。"
   "evidence_state": "证据状态；not_run、registry_gap_only 或 dry-run 不能作为 release gate passed evidence。"
+  "docker_contract_required": "Docker Toolchain Runtime 是否为生成模板继承要求；true 代表必须保留 Dockerfile、compose、devcontainer、scripts/docker 与 make docker-* targets。"
+  "docker_contract_status": "Docker contract 采纳状态；pending/not_run 不能升级为 proof-based adoption。"
 
 current_registry:
   - repo: kernel/configx
@@ -42,46 +44,79 @@ standard_target_libraries:
     registry_state: standard_target_declared
     adoption_status: not_adopted
     evidence_state: not_run
+    docker_contract_required: true
+    docker_contract_status: pending
+    docker_contract_evidence_state: not_run
   - name: configx
     registry_state: standard_target_declared
     adoption_status: not_adopted
     evidence_state: not_run
+    docker_contract_required: true
+    docker_contract_status: pending
+    docker_contract_evidence_state: not_run
   - name: observex
     registry_state: standard_target_declared
     adoption_status: not_adopted
     evidence_state: not_run
+    docker_contract_required: true
+    docker_contract_status: pending
+    docker_contract_evidence_state: not_run
   - name: testkitx
     registry_state: standard_target_declared
     adoption_status: not_adopted
     evidence_state: not_run
+    docker_contract_required: true
+    docker_contract_status: pending
+    docker_contract_evidence_state: not_run
   - name: postgresx
     registry_state: standard_target_declared
     adoption_status: not_adopted
     evidence_state: not_run
+    docker_contract_required: true
+    docker_contract_status: pending
+    docker_contract_evidence_state: not_run
   - name: redisx
     registry_state: standard_target_declared
     adoption_status: not_adopted
     evidence_state: not_run
+    docker_contract_required: true
+    docker_contract_status: pending
+    docker_contract_evidence_state: not_run
   - name: kafkax
     registry_state: standard_target_declared
     adoption_status: not_adopted
     evidence_state: not_run
+    docker_contract_required: true
+    docker_contract_status: pending
+    docker_contract_evidence_state: not_run
   - name: natsx
     registry_state: standard_target_declared
     adoption_status: not_adopted
     evidence_state: not_run
+    docker_contract_required: false
+    docker_contract_status: exempt_current_registry_gap
+    docker_contract_evidence_state: not_run
   - name: taosx
     registry_state: standard_target_declared
     adoption_status: not_adopted
     evidence_state: not_run
+    docker_contract_required: true
+    docker_contract_status: pending
+    docker_contract_evidence_state: not_run
   - name: ossx
     registry_state: standard_target_declared
     adoption_status: not_adopted
     evidence_state: not_run
+    docker_contract_required: true
+    docker_contract_status: pending
+    docker_contract_evidence_state: not_run
   - name: clickhousex
     registry_state: standard_target_declared
     adoption_status: not_adopted
     evidence_state: not_run
+    docker_contract_required: true
+    docker_contract_status: pending
+    docker_contract_evidence_state: not_run
 
 first_pr_mva_assertions:
   no_downstream_repo_write: true

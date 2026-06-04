@@ -131,7 +131,7 @@
 ### 修复
 
 - Release manifest 测试改用临时 git fixture 构造 `.omc/state/agent-replay-fixture.jsonl`，避免依赖本地 Agent 运行态文件。
-- GitHub Actions workflow 固定 `checkout`、`setup-go`、`cache` 和 `upload-artifact` 的 40 位 commit SHA，并将 `govulncheck` 固定为 `v1.3.0`。
+- GitHub Actions workflow 固定 `checkout`、`setup-go`、`cache` 和 `upload-artifact` 的 40 位 commit SHA，并将 `govulncheck` 固定为 `v1.1.4`。
 - Secret Gate 同时排除 `.omc` 和 `.omx` 本地运行态目录，避免扫描 Agent 状态文件时产生误报。
 - `goalcli` dry-run verifier 在具备 manifest 覆盖时返回 `passed`，避免 `--verify` 模式继续报告 planned gap。
 - `downstream-baseline`、`downstream-adoption` 和 `upgrade-standard` 默认使用 manifest-only dry-run，只有显式传入 `--repo` 时才检查本地 downstream 路径。

@@ -27,3 +27,13 @@ GOWORK=off make --warn-undefined-variables governance-check
 ## 下游 kernel/configx 未通过
 
 不要用本仓库的占位文件替代下游证据。需要在真实下游仓库运行采纳/兼容命令，并把输出记录到正式证据链。
+
+## Docker Toolchain Runtime
+
+Docker 相关失败按以下分类排查：
+
+- CLI 缺失：安装 Docker；仅静态检查环境可用 `XLIB_DOCKER_ALLOW_MISSING=1 GOWORK=off make docker-toolchain-check` 记录环境不可用，不得当作 release 通过证据。
+- daemon 不可用：启动 Docker daemon 后重跑 `GOWORK=off make docker-toolchain-check`。
+- buildx/BuildKit 缺失：运行 `docker buildx inspect --bootstrap` 或升级 Docker。
+- `GOWORK` 未关闭：使用 `GOWORK=off make docker-ci` 或 `XLIB_CONTEXT=release_verify GOWORK=off make docker-release-check`。
+- 下游模板漂移：确认渲染产物包含 `Dockerfile`、`docker-compose.yml`、`.dockerignore`、`.devcontainer/devcontainer.json`、`scripts/docker/docker_gate.sh`、`make docker-toolchain-check`、`make docker-ci` 和 `make docker-release-check`。

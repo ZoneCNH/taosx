@@ -88,7 +88,7 @@ make evidence
 
 `release-check` 和 `release-check-extended` 已依赖 `dependency-check`、`standard-impact-check` 和 `docs-check`，用于在生成 Evidence 前确认依赖漂移自动化、标准影响报告、标准文档入口、下游同步策略、链接、模板占位符、当前命名、关键文本和 release manifest 协议没有漂移。`dependency-check` 读取 `renovate.json`、`.github/dependabot.yml` 和 `go.mod`；`standard-impact-check` 生成 `release/standard-impact/latest.md`，并把 `downstream_sync_required`、`downstream_release_decision`（只允许 `required` / `not_required`）和 `repository_rules_release_decision`（只允许 `audit_required` / `not_required`）结论交给 release manifest。`docs-check` 是结构性 gate，不替代人工语义审查。
 
-Release gate 还必须执行 `GOWORK=off go run ./cmd/goalcli score --min 9.8`。GitHub Actions workflow 引用的第三方 Action 必须固定为 40 位 commit SHA 并保留来源 tag 注释；CI、Release Check 和 Security workflow 仅在 `XLIB_ENABLE_VULNCHECK=1` 时安装 `govulncheck`，且必须使用固定基线 `golang.org/x/vuln/cmd/govulncheck@v1.3.0`，不得用 `@latest` 作为发布门禁配置。
+Release gate 还必须执行 `GOWORK=off go run ./cmd/goalcli score --min 9.8`。GitHub Actions workflow 引用的第三方 Action 必须固定为 40 位 commit SHA 并保留来源 tag 注释；CI、Release Check 和 Security workflow 仅在 `XLIB_ENABLE_VULNCHECK=1` 时安装 `govulncheck`，且必须使用固定基线 `golang.org/x/vuln/cmd/govulncheck@v1.1.4`，不得用 `@latest` 作为发布门禁配置。
 
 生成 `kernel` 示例：
 
@@ -118,3 +118,15 @@ Full Goal Runtime v3.1 位于 [.agent](.agent/)，其中 [goal-runtime](.agent/r
 `go test ./...` 必须覆盖公共包、`internal/`、`contracts/`、`testkit/` 和 `examples/`。当前示例 smoke 测试会验证 `examples/basic` 输出模块名、`examples/config` 输出脱敏值、`examples/health` 输出健康状态，防止文档示例和模板行为漂移。
 
 `scripts/run_fuzz_smoke.sh` 默认执行快速 fuzz smoke，`FUZZ_SMOKE_TIME` 未设置时每个 fuzz target 使用 `10s`。需要深度 fuzz 时显式设置更长时间，例如 `FUZZ_SMOKE_TIME=2m make fuzz-smoke`，并在最终 Evidence/DONE 说明中记录该时间配置。
+
+## Docker Toolchain Runtime
+
+[Docker Toolchain Runtime](docs/standard/docker-toolchain-standard.md) 是工具链运行时，不是第二套 gate。它定义 `.dockerignore` / `.git` build context 边界、BuildKit/cache/volume、环境变量 pass-through（`XLIB_CONTEXT`、`GOWORK`、`VERSION`、`DOWNSTREAM`、`XLIB_ENABLE_VULNCHECK`）和下游模板继承规则。
+
+```bash
+GOWORK=off make docker-toolchain-check
+GOWORK=off make docker-ci
+XLIB_CONTEXT=release_verify GOWORK=off make docker-release-check
+```
+
+`docker-ci` 只在容器运行时中调用既有 `make ci`；`docker-release-check` 只在容器运行时中调用既有 `make release-check`。发布、Harness、CI 和 downstream verification 仍必须使用 `GOWORK=off`。

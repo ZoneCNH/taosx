@@ -34,7 +34,7 @@ Full Goal Runtime v3.1 以 `cmd/goalcli` 作为 Go gate runtime。Makefile targe
 | P1 Governance Dry Run | `GOWORK=off make p1-governance-check` | 验证 policy schema、GitHub settings intent、toolchain、Evidence artifacts、naming、install/upgrade runtime 与 release-ready 文档，不读取外部 secrets。 |
 | P2 Runtime Dry Run | `GOWORK=off make p2-runtime-check` | 验证 standard-source/l0-kernel conformance、pack-standard/pack-gate/pack-evidence、downstream patch-only、runtime-file-ownership 和 execution-context。 |
 
-这些 target 是 `docs/goal.md` v2.9.3 可执行方案的验收入口；CI 通过 `GOWORK=off XLIB_CONTEXT=ci_pull_request make release-check` 覆盖 `governance-check`、`p1-governance-check` 与 `p2-runtime-check`，避免 workflow 层重复执行同一治理链。
+这些 target 是 `docs/goal/goal.md` v2.9.3 可执行方案的验收入口；CI 通过 `GOWORK=off XLIB_CONTEXT=ci_pull_request make release-check` 覆盖 `governance-check`、`p1-governance-check` 与 `p2-runtime-check`，避免 workflow 层重复执行同一治理链。
 
 `issue-registry` 是语义 gate：它校验 issue ID 唯一且按前缀连续、状态为 `implemented`，并要求每个条目具备命令和 Evidence。`agent-team-contract`、`acceptance-matrix`、`runtime-health` 和 `execution-context` 的 dry-run 必须读取对应文件并检查 `schema_version` 等语义 marker，不能退化为文件存在检查。
 
@@ -68,7 +68,8 @@ Generator gate 必须证明模板能生成代表性下游，而不是只证明 `
 代表下游：
 
 - `kernel`
-- `corekit`
+- `configx`
+- `redisx`
 
 旧 `foundationx` 只作为迁移兼容扫描项，不再作为默认下游。
 
@@ -87,7 +88,7 @@ Secret scan 会排除 `.git`、`.omc`、`.omx`、`.worktree` 和 `vendor` 等本
 
 ## Workflow Supply Chain Gate
 
-CI、Release Check、Integration 和 Security workflow 引用的第三方 Action 必须固定为 40 位 commit SHA，并保留来源 tag 注释。`govulncheck` 仅在 `XLIB_ENABLE_VULNCHECK=1` 时安装，且必须使用固定版本；当前发布门禁基线是 `golang.org/x/vuln/cmd/govulncheck@v1.3.0`。
+CI、Release Check、Integration 和 Security workflow 引用的第三方 Action 必须固定为 40 位 commit SHA，并保留来源 tag 注释。`govulncheck` 仅在 `XLIB_ENABLE_VULNCHECK=1` 时安装，且必须使用固定版本；当前发布门禁基线是 `golang.org/x/vuln/cmd/govulncheck@v1.1.4`。
 
 ## Context Runtime v4 profile gates 发布门禁
 

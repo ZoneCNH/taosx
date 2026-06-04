@@ -34,6 +34,11 @@ release/debt/latest.json
 release/debt/latest.md
 release/debt/latest.json.sha256
 
+# Generated Docker evidence (environment-dependent: Docker versions, image digests)
+release/docker/toolchain-check.md
+release/docker/toolchain-drift.md
+release/evidence/docker-toolchain-summary.json
+
 # Generated Context Runtime artifacts. Keep checked-in examples/templates explicit.
 .agent/context/packs/*.md
 !.agent/context/packs/example.md
@@ -80,6 +85,9 @@ override.tf.json
 .omc/
 .omx/
 .worktree/
+
+# Docker tool prefetch cache
+.cache/
 .claude/settings.local.json
 
 # env file

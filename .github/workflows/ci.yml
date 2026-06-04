@@ -32,7 +32,7 @@ jobs:
 
       - name: Install govulncheck (optional)
         if: ${{ env.XLIB_ENABLE_VULNCHECK == '1' }}
-        run: go install golang.org/x/vuln/cmd/govulncheck@v1.3.0
+        run: go install golang.org/x/vuln/cmd/govulncheck@v1.1.4
 
       - name: Release Check
         env:
@@ -77,4 +77,52 @@ jobs:
             release/debt/latest.json
             release/debt/latest.md
             release/debt/latest.json.sha256
+          if-no-files-found: warn
+
+  docker-contract:
+    runs-on: ubuntu-latest
+    env:
+      DOCKER_BUILDKIT: "1"
+      COMPOSE_DOCKER_CLI_BUILD: "1"
+      GOWORK: off
+      XLIB_CONTEXT: ci_pull_request
+      XLIB_ENABLE_VULNCHECK: ${{ vars.XLIB_ENABLE_VULNCHECK }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # tag v6.0.2
+
+      - name: Setup Go
+        uses: actions/setup-go@40f1582b2485089dde7abd97c1529aa768e1baff # tag v5
+        with:
+          go-version-file: go.mod
+          cache: true
+          cache-dependency-path: go.sum
+
+      - name: Setup Docker Buildx
+        uses: docker/setup-buildx-action@8d2750c68a42422c14e847fe6c8ac0403b4cbd6f # tag v3
+
+      - name: Docker toolchain check
+        run: make docker-toolchain-check
+
+      - name: Docker build contract
+        run: make docker-build-check
+
+      - name: Docker CI gate
+        run: make docker-ci
+
+      - name: Docker release gate
+        env:
+          XLIB_CONTEXT: release_verify
+          VERSION: ci-docker-contract-${{ github.run_id }}
+        run: make docker-release-check
+
+      - name: Upload Docker contract evidence
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # tag v7.0.1
+        with:
+          name: docker-contract-${{ github.run_id }}
+          path: |
+            release/evidence/docker-toolchain-summary.json
+            release/docker/*.md
           if-no-files-found: warn

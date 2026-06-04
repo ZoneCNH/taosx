@@ -94,6 +94,50 @@ func TestRenderTemplateIncludesGoalcliControlPlane(t *testing.T) {
 	}
 }
 
+func TestRenderTemplateIncludesDockerContract(t *testing.T) {
+	outDir := filepath.Join(t.TempDir(), "kernel")
+	cmd := exec.Command(
+		"bash",
+		"render_template.sh",
+		"--module-name",
+		"kernel",
+		"--module-path",
+		"github.com/ZoneCNH/kernel",
+		"--package-name",
+		"kernel",
+		"--out",
+		outDir,
+	)
+
+	output, err := cmd.CombinedOutput()
+	if err != nil {
+		t.Fatalf("render template: %v\n%s", err, output)
+	}
+
+	for _, required := range []string{
+		"Dockerfile",
+		"docker-compose.yml",
+		".dockerignore",
+		filepath.Join(".devcontainer", "devcontainer.json"),
+		filepath.Join("scripts", "docker", "check_toolchain.sh"),
+		filepath.Join("scripts", "docker", "docker_gate.sh"),
+	} {
+		if _, err := os.Stat(filepath.Join(outDir, required)); err != nil {
+			t.Fatalf("rendered template missing Docker contract path %s: %v", required, err)
+		}
+	}
+
+	makefile, err := os.ReadFile(filepath.Join(outDir, "Makefile"))
+	if err != nil {
+		t.Fatalf("read rendered Makefile: %v", err)
+	}
+	for _, target := range []string{"docker-toolchain-check", "docker-ci", "docker-release-check"} {
+		if !strings.Contains(string(makefile), target) {
+			t.Fatalf("rendered Makefile missing Docker contract target %s", target)
+		}
+	}
+}
+
 func TestRenderTemplatePrunesOmittedAgentInboxIndexEntries(t *testing.T) {
 	outDir := filepath.Join(t.TempDir(), "kernel")
 	cmd := exec.Command(

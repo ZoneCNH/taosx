@@ -96,6 +96,36 @@ required_gates:
   - id: doctor
     command: "GOWORK=off make doctor"
     purpose: "runtime preflight checks"
+  - id: docker_toolchain_check
+    command: "GOWORK=off make docker-toolchain-check"
+    purpose: "Docker Toolchain Runtime static contract and host capability evidence"
+  - id: docker_build_check
+    command: "GOWORK=off make docker-build-check"
+    purpose: "BuildKit toolchain image build check"
+  - id: docker_ci
+    command: "GOWORK=off make docker-ci"
+    purpose: "Dockerized CI gate"
+  - id: docker_release_check
+    command: "XLIB_CONTEXT=release_verify GOWORK=off make docker-release-check"
+    purpose: "Dockerized release-check gate"
+  - id: docker_release_final_check
+    command: "XLIB_CONTEXT=release_verify GOWORK=off make docker-release-final-check"
+    purpose: "Dockerized final release gate"
+  - id: docker_goalcli_image
+    command: "GOWORK=off make docker-goalcli-image"
+    purpose: "goalcli runtime image build contract"
+  - id: docker_goalcli_version
+    command: "GOWORK=off make docker-goalcli-version"
+    purpose: "goalcli runtime image version contract"
+  - id: docker_runtime_check
+    command: "GOWORK=off make docker-runtime-check"
+    purpose: "goalcli-runtime image boundary check"
+  - id: docker_drift_check
+    command: "GOWORK=off make docker-drift-check"
+    purpose: "Docker contract drift report"
+  - id: docker_contract
+    command: "GOWORK=off make docker-contract"
+    purpose: "Docker contract aggregate gate"
   - id: governance_release_scope
     command: "GOWORK=off make governance-check"
     purpose: "P0 worktree, evidence, boundary, security, contracts, docs, CLI, and registry gates"

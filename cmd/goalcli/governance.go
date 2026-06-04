@@ -69,6 +69,16 @@ func runDoctor(args []string, stdout io.Writer, stderr io.Writer) int {
 	}
 	if isXlibStandardSourceModule() {
 		required = append([]string{"docs/goal/goal.md"}, required...)
+		required = append(required,
+			"docs/standard/docker-toolchain-standard.md",
+			"contracts/docker-toolchain.schema.json",
+			"Dockerfile",
+			".dockerignore",
+			"docker-compose.yml",
+			".devcontainer/devcontainer.json",
+			"scripts/docker/check_toolchain.sh",
+			"scripts/docker/docker_gate.sh",
+		)
 	}
 	var gaps []string
 	for _, path := range required {
@@ -407,7 +417,26 @@ func runMakefileBaseline(args []string, stdout io.Writer, stderr io.Writer) int 
 
 func requiredMakefileTargets() []string {
 	requiredTargets := append([]string{"fmt", "vet", "lint", "test", "race", "boundary", "security", "contracts", "schema-check", "docs-check", "rules-verify", "downstream-sync-plan", "evidence", "score-check", "main-guard", "worktree-guard", "worktree-check", "context-check", "spec-check", "design-check", "task-check", "pr-check", "evidence-check", "cli-contract", "issue-registry", "command-registry", "makefile-baseline", "audit-goal", "dashboard-generate", "governance-check", "p1-governance-check", "execution-context", "p2-runtime-check", "release-check", "release-final-check"}, contextRuntimeTargets()...)
+	requiredTargets = append(requiredTargets, dockerMakefileTargets()...)
 	return append(requiredTargets, goalcliMakefileTargets()...)
+}
+
+func dockerMakefileTargets() []string {
+	return []string{
+		"docker-toolchain-check",
+		"docker-build",
+		"docker-build-check",
+		"docker-shell",
+		"docker-ci",
+		"docker-release-check",
+		"docker-release-final-check",
+		"docker-goalcli",
+		"docker-goalcli-image",
+		"docker-goalcli-version",
+		"docker-runtime-check",
+		"docker-drift-check",
+		"docker-contract",
+	}
 }
 
 func goalcliMakefileTargets() []string {
@@ -1471,6 +1500,19 @@ var commandRegistryCommands = []string{
 	"implementation-debt",
 	"downstream-debt",
 	"downstream-sync-plan",
+	"docker-toolchain-check",
+	"docker-build",
+	"docker-build-check",
+	"docker-shell",
+	"docker-ci",
+	"docker-release-check",
+	"docker-release-final-check",
+	"docker-goalcli",
+	"docker-goalcli-image",
+	"docker-goalcli-version",
+	"docker-runtime-check",
+	"docker-drift-check",
+	"docker-contract",
 	"debt-evidence",
 	"debt-evidence-checksum-check",
 	"debt-evidence-hash",

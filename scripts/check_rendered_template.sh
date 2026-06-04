@@ -42,6 +42,29 @@ if [[ "$package_name" != "templatex" && -e "$repo_dir/pkg/templatex" ]]; then
   exit 1
 fi
 
+required_paths=(
+  "Dockerfile"
+  "docker-compose.yml"
+  ".dockerignore"
+  ".devcontainer/devcontainer.json"
+  "scripts/docker/check_toolchain.sh"
+  "scripts/docker/docker_gate.sh"
+)
+
+for required_path in "${required_paths[@]}"; do
+  if [[ ! -e "$repo_dir/$required_path" ]]; then
+    echo "ERROR: rendered Docker contract path missing: $required_path" >&2
+    exit 1
+  fi
+done
+
+for required_target in docker-toolchain-check docker-build docker-build-check docker-shell docker-ci docker-release-check docker-release-final-check docker-goalcli docker-goalcli-image docker-goalcli-version docker-runtime-check docker-drift-check docker-contract; do
+  if ! grep -Eq "^\\.PHONY:.*[[:space:]]${required_target}([[:space:]]|$)|^${required_target}:" "$repo_dir/Makefile"; then
+    echo "ERROR: rendered Makefile missing Docker contract target: $required_target" >&2
+    exit 1
+  fi
+done
+
 scan_regex() {
   local pattern="$1"
   local label="$2"
@@ -95,6 +118,8 @@ scan_template_placeholders() {
       --glob '!**/scripts/check_docs.sh' \
       --glob '!scripts/check_rendered_template.sh' \
       --glob '!**/scripts/check_rendered_template.sh' \
+      --glob '!scripts/docker/docker_gate.sh' \
+      --glob '!**/scripts/docker/docker_gate.sh' \
       --glob '!scripts/run_fuzz_smoke.sh' \
       --glob '!**/scripts/run_fuzz_smoke.sh' \
       --glob '!release/manifest/template.json' \
@@ -112,6 +137,7 @@ scan_template_placeholders() {
       -not -path '*/docs/goal.md' \
       -not -path '*/scripts/check_docs.sh' \
       -not -path '*/scripts/check_rendered_template.sh' \
+      -not -path '*/scripts/docker/docker_gate.sh' \
       -not -path '*/scripts/run_fuzz_smoke.sh' \
       -not -path '*/release/manifest/template.json' \
       -print0 | xargs -0 grep -InE "$pattern"; then
