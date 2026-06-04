@@ -74,4 +74,4 @@ GOWORK=off make release-final-check
 
 ## Docker Toolchain Runtime 模板继承
 
-生成后的下游库必须继承 Docker Toolchain Runtime contract：`Dockerfile`、`docker-compose.yml`、`.dockerignore`、`.devcontainer/devcontainer.json`、`scripts/docker/check_toolchain.sh`、`scripts/docker/docker_gate.sh` 以及 `make docker-toolchain-check`、`make docker-ci`、`make docker-release-check`。`scripts/check_rendered_template.sh` 会扫描这些文件和 targets，防止下游 Docker contract 漂移。
+生成后的下游库必须继承 Docker Toolchain Runtime contract：`Dockerfile`、`docker-compose.yml`、`.dockerignore`、`.devcontainer/devcontainer.json`、`scripts/docker/check_toolchain.sh`、`scripts/docker/docker_gate.sh`，以及 `docker-toolchain-check`、`docker-build`、`docker-build-check`、`docker-shell`、`docker-ci`、`docker-release-check`、`docker-release-final-check`、`docker-goalcli`、`docker-goalcli-image`、`docker-goalcli-version`、`docker-runtime-check`、`docker-drift-check`、`docker-contract`。`scripts/check_rendered_template.sh` 会扫描这些文件和 targets，防止下游 Docker contract 漂移。

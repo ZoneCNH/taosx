@@ -8,7 +8,7 @@ Full Goal Runtime v3.1 的完成 Evidence 必须区分 required、extended、fin
 - `GOWORK=off make boundary`：通过。
 - `GOWORK=off make contracts`：通过。
 - `GOWORK=off make docs-check`：通过。
-- `GOWORK=off make security`：默认 secret scan 通过；若设置 `XLIB_ENABLE_VULNCHECK=1`，还必须证明 `govulncheck` 通过。
+- `GOWORK=off make security`：默认 secret scan 通过；若设置 `XLIB_ENABLE_VULNCHECK=1` 且一周窗口到期、状态文件缺失，或 `XLIB_FORCE_VULNCHECK=1`，还必须证明 `govulncheck` 通过。
 - `GOWORK=off make release-check`：通过，并生成 `release/manifest/latest.json` 与 `.sha256`。
 
 ## Final Evidence

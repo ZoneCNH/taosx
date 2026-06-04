@@ -8,7 +8,7 @@
 - Unit Test Gate：`GOWORK=off make test`
 - Race Test Gate：`GOWORK=off make race`
 - Boundary Gate：`GOWORK=off make boundary`
-- Secret Gate：`GOWORK=off make security`，必须委托 `goalcli security` 默认完成密钥扫描；仅当 `XLIB_ENABLE_VULNCHECK=1` 时先执行漏洞扫描
+- Secret Gate：`GOWORK=off make security`，必须委托 `goalcli security` 默认完成密钥扫描；仅当 `XLIB_ENABLE_VULNCHECK=1` 且一周窗口到期，或 `XLIB_FORCE_VULNCHECK=1` 时先执行漏洞扫描
 - Contract Gate：`GOWORK=off make contracts`
 - Docs Gate：`GOWORK=off make docs-check`
 - Integration Gate：`GOWORK=off make integration`，默认下游为 `kernel`

@@ -40,10 +40,10 @@ XLIB_CONTEXT=release_verify GOWORK=off make release-final-check
 打 tag 前推荐使用 release preflight：
 
 ```bash
-XLIB_CONTEXT=release_verify GOWORK=off make release-preflight VERSION=v0.4.7
+XLIB_CONTEXT=release_verify GOWORK=off make release-preflight VERSION=v0.4.13
 ```
 
-`release-preflight` 会先检查版本号、当前分支、工作区洁净状态、`main` 与 `origin/main` 是否一致、目标 tag 是否已存在、`CHANGELOG.md` 是否包含目标版本，以及 `golangci-lint` 是否已安装；只有设置 `XLIB_ENABLE_VULNCHECK=1` 时才额外要求 `govulncheck`。随后以 `GOWORK=off` 和 `XLIB_CONTEXT=release_verify` 运行 `release-final-check`。tag 应在该入口通过后再创建和推送。
+`release-preflight` 会先检查版本号、当前分支、工作区洁净状态、`main` 与 `origin/main` 是否一致、目标 tag 是否已存在、`CHANGELOG.md` 是否包含目标版本，以及 `golangci-lint` 是否已安装。只有设置 `XLIB_ENABLE_VULNCHECK=1` 且一周漏洞扫描窗口到期、状态文件缺失或 `XLIB_FORCE_VULNCHECK=1` 时，才额外要求 `govulncheck`。随后以 `GOWORK=off` 和 `XLIB_CONTEXT=release_verify` 运行 `release-final-check`。tag 应在该入口通过后再创建和推送。
 
 ## GitHub Release 发布对象
 
@@ -91,11 +91,11 @@ fuzz-smoke
 
 - `golangci-lint`
 
-`make security` 默认只运行 secret scan；只有设置 `XLIB_ENABLE_VULNCHECK=1` 时才追加 `govulncheck ./...`，此时 `govulncheck` 也必须可用。缺少默认必需工具或启用漏洞扫描时缺少 `govulncheck`，本地 Makefile 必须硬失败。GitHub Actions CI 和 Release Check workflow 默认不安装或访问漏洞库；只有显式启用 `XLIB_ENABLE_VULNCHECK=1` 时才安装固定版本 `govulncheck`。
+`make security` 默认只运行 secret scan；只有设置 `XLIB_ENABLE_VULNCHECK=1` 且一周漏洞扫描窗口到期、状态文件缺失，或 `XLIB_FORCE_VULNCHECK=1` 时才追加 `govulncheck ./...`。缺少默认必需工具，或漏洞扫描到期/强制执行时缺少 `govulncheck`，本地 Makefile 必须硬失败。GitHub Actions CI、Release Check、Auto Patch 和 Docker Contract workflow 默认不安装或访问漏洞库；Security workflow 每周定时强制执行固定版本 `govulncheck`。
 
-GitHub Actions workflow 引用的第三方 Action 必须固定为 40 位 commit SHA，并用注释保留来源 tag 供审计。CI、Release Check 和 Security workflow 在 `XLIB_ENABLE_VULNCHECK=1` 时安装 `govulncheck` 必须使用固定版本；当前基线是 `golang.org/x/vuln/cmd/govulncheck@v1.1.4`，不得在发布门禁中使用 `@latest`。
+GitHub Actions workflow 引用的第三方 Action 必须固定为 40 位 commit SHA，并用注释保留来源 tag 供审计。启用或定时运行 `govulncheck` 时必须使用固定版本；当前基线是 `golang.org/x/vuln/cmd/govulncheck@v1.1.4`，不得在发布门禁中使用 `@latest`。
 
-`make security` 必须委托 `goalcli security` 默认运行 secret scan；只有设置 `XLIB_ENABLE_VULNCHECK=1` 时才先运行漏洞扫描再运行密钥扫描.
+`make security` 必须委托 `goalcli security` 默认运行 secret scan；只有设置 `XLIB_ENABLE_VULNCHECK=1` 且扫描窗口到期，或 `XLIB_FORCE_VULNCHECK=1` 时才先运行漏洞扫描再运行密钥扫描。
 
 ## Evidence
 
@@ -137,7 +137,7 @@ Extended Evidence 推荐额外记录：
 - `make golden` 结果。
 - compatibility 和 observability contract 结果。
 
-`source_digest` 基于 `git ls-files` 中的受跟踪文件内容计算；`contracts` 固定记录核心 contract 文件的 SHA256；`dependencies` 来自 `go list -m -json all`；`tools` 记录 Go、`golangci-lint` 和按 `XLIB_ENABLE_VULNCHECK` 启用状态记录的 `govulncheck` 版本或可用状态。这些字段由 `internal/tools/releasemanifest` 生成并校验，不再由 shell 拼接 JSON。
+`source_digest` 基于 `git ls-files` 中的受跟踪文件内容计算；`contracts` 固定记录核心 contract 文件的 SHA256；`dependencies` 来自 `go list -m -json all`；`tools` 记录 Go、`golangci-lint` 和按 `XLIB_ENABLE_VULNCHECK` / 一周窗口状态记录的 `govulncheck` 版本或可用状态。这些字段由 `internal/tools/releasemanifest` 生成并校验，不再由 shell 拼接 JSON。
 
 `make integration` 会通过 `cmd/goalcli integration` 调用 `scripts/render_template.sh`，生成临时 `kernel`、`configx` 和 `redisx` 三个下游库，并对每个生成目录执行：
 

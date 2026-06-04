@@ -12,6 +12,7 @@ import (
 	"sort"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/ZoneCNH/xlib-standard/internal/goalruntime"
 	"github.com/ZoneCNH/xlib-standard/internal/releasequality"
@@ -460,6 +461,58 @@ func TestRunSecurityOptInExecutesVulnerabilityScanBeforeSecrets(t *testing.T) {
 	}
 	if calls := readText(t, callLog); calls != "govulncheck ./...\ncheck_secrets.sh\n" {
 		t.Fatalf("security calls = %q; want vulnerability scan before secrets when opt-in is enabled", calls)
+	}
+}
+
+func TestRunSecurityOptInSkipsVulnerabilityScanWithinWeeklyInterval(t *testing.T) {
+	root, callLog := setupSecurityFixture(t)
+	writeVulncheckState(t, root, time.Now().UTC().Add(-time.Hour))
+	t.Setenv("XLIB_ENABLE_VULNCHECK", "1")
+	var stdout, stderr bytes.Buffer
+
+	got := run([]string{"security"}, strings.NewReader(""), &stdout, &stderr)
+
+	if got != 0 {
+		t.Fatalf("security exit = %d, stderr %q, stdout %q; want 0", got, stderr.String(), stdout.String())
+	}
+	if calls := readText(t, callLog); calls != "check_secrets.sh\n" {
+		t.Fatalf("security calls = %q; want secret scan only within weekly interval", calls)
+	}
+	if !strings.Contains(stderr.String(), "govulncheck skipped") {
+		t.Fatalf("stderr = %q; want skipped govulncheck message", stderr.String())
+	}
+}
+
+func TestRunSecurityOptInExecutesVulnerabilityScanAfterWeeklyInterval(t *testing.T) {
+	root, callLog := setupSecurityFixture(t)
+	writeVulncheckState(t, root, time.Now().UTC().Add(-8*24*time.Hour))
+	t.Setenv("XLIB_ENABLE_VULNCHECK", "1")
+	var stdout, stderr bytes.Buffer
+
+	got := run([]string{"security"}, strings.NewReader(""), &stdout, &stderr)
+
+	if got != 0 {
+		t.Fatalf("security exit = %d, stderr %q, stdout %q; want 0", got, stderr.String(), stdout.String())
+	}
+	if calls := readText(t, callLog); calls != "govulncheck ./...\ncheck_secrets.sh\n" {
+		t.Fatalf("security calls = %q; want vulnerability scan after weekly interval", calls)
+	}
+}
+
+func TestRunSecurityForceExecutesVulnerabilityScanWithinWeeklyInterval(t *testing.T) {
+	root, callLog := setupSecurityFixture(t)
+	writeVulncheckState(t, root, time.Now().UTC().Add(-time.Hour))
+	t.Setenv("XLIB_ENABLE_VULNCHECK", "1")
+	t.Setenv("XLIB_FORCE_VULNCHECK", "1")
+	var stdout, stderr bytes.Buffer
+
+	got := run([]string{"security"}, strings.NewReader(""), &stdout, &stderr)
+
+	if got != 0 {
+		t.Fatalf("security exit = %d, stderr %q, stdout %q; want 0", got, stderr.String(), stdout.String())
+	}
+	if calls := readText(t, callLog); calls != "govulncheck ./...\ncheck_secrets.sh\n" {
+		t.Fatalf("security calls = %q; want forced vulnerability scan before secrets", calls)
 	}
 }
 
@@ -1281,7 +1334,7 @@ func TestRunGovernanceCommands(t *testing.T) {
 		}
 		if report.Command != "version" ||
 			report.Status != "passed" ||
-			!slicesContain(report.Details, "xlib-standard release v0.4.7") ||
+			!slicesContain(report.Details, "xlib-standard release v0.4.13") ||
 			!slicesContain(report.Details, "goalcli governance runtime v2.9.3") {
 			t.Fatalf("report = %#v; want version gate report", report)
 		}
@@ -2982,6 +3035,19 @@ exit "${SECRETS_EXIT:-0}"
 	chdir(t, root)
 	t.Setenv("PATH", root+string(os.PathListSeparator)+os.Getenv("PATH"))
 	return root, callLog
+}
+
+func writeVulncheckState(t *testing.T, root string, lastRun time.Time) string {
+	t.Helper()
+	statePath := filepath.Join(root, ".cache", "security", "govulncheck-last-run")
+	if err := os.MkdirAll(filepath.Dir(statePath), 0o755); err != nil {
+		t.Fatalf("create govulncheck state directory: %v", err)
+	}
+	if err := os.WriteFile(statePath, []byte(lastRun.Format(time.RFC3339Nano)+"\n"), 0o644); err != nil {
+		t.Fatalf("write govulncheck state: %v", err)
+	}
+	t.Setenv(vulncheckStateEnv, statePath)
+	return statePath
 }
 
 func setupPRCheckFixture(t *testing.T, branch string) (string, string) {

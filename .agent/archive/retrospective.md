@@ -9,7 +9,7 @@
 ## 失败项记录规则
 
 - 任一 required/final gate 失败不得声明完成。
-- 缺少 `golangci-lint` 或 `goalcli` 必须作为 blocker 记录；启用 `XLIB_ENABLE_VULNCHECK=1` 时缺少 `govulncheck` 也必须作为 blocker 记录。
+- 缺少 `golangci-lint` 或 `goalcli` 必须作为 blocker 记录；漏洞扫描到期/强制执行时缺少 `govulncheck` 也必须作为 blocker 记录。
 - `/home/k8s/secrets/env/*` 内容进入源码、日志、manifest、PR 或 Evidence 时必须回滚并补充规则补丁。
 
 ## 提示补丁

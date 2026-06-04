@@ -7,6 +7,10 @@ import (
 	"io"
 	"os"
 	"os/exec"
+	"path/filepath"
+	"strconv"
+	"strings"
+	"time"
 
 	"github.com/ZoneCNH/xlib-standard/internal/releasequality"
 )
@@ -17,7 +21,14 @@ func main() {
 
 var exit = os.Exit
 
-const enableVulncheckEnv = "XLIB_ENABLE_VULNCHECK"
+const (
+	enableVulncheckEnv        = "XLIB_ENABLE_VULNCHECK"
+	forceVulncheckEnv         = "XLIB_FORCE_VULNCHECK"
+	vulncheckIntervalHoursEnv = "XLIB_VULNCHECK_INTERVAL_HOURS"
+	vulncheckStateEnv         = "XLIB_VULNCHECK_STATE"
+	defaultVulncheckInterval  = 7 * 24 * time.Hour
+	defaultVulncheckStatePath = ".cache/security/govulncheck-last-run"
+)
 
 func run(args []string, stdin io.Reader, stdout io.Writer, stderr io.Writer) int {
 	if len(args) == 0 {
@@ -179,14 +190,87 @@ func run(args []string, stdin io.Reader, stdout io.Writer, stderr io.Writer) int
 }
 
 func runSecurity(stdin io.Reader, stdout io.Writer, stderr io.Writer) int {
-	if os.Getenv(enableVulncheckEnv) == "1" {
-		return runExternalSequence(stdin, stdout, stderr,
-			externalCommand{name: "govulncheck", args: []string{"./..."}},
-			externalCommand{name: "./scripts/check_secrets.sh"},
-		)
+	if os.Getenv(enableVulncheckEnv) != "1" {
+		write(stderr, "security: govulncheck suspended; set %s=1 to run vulnerability scan\n", enableVulncheckEnv)
+		return runExternal(stdin, stdout, stderr, "./scripts/check_secrets.sh")
 	}
-	write(stderr, "security: govulncheck suspended; set %s=1 to run vulnerability scan\n", enableVulncheckEnv)
+
+	now := time.Now().UTC()
+	due, statePath, interval, err := vulncheckDue(now)
+	if err != nil {
+		write(stderr, "ERROR: %v\n", err)
+		return 2
+	}
+	if due {
+		if code := runExternal(stdin, stdout, stderr, "govulncheck", "./..."); code != 0 {
+			return code
+		}
+		if err := recordVulncheckRun(statePath, now); err != nil {
+			write(stderr, "ERROR: %v\n", err)
+			return 1
+		}
+	} else {
+		write(stderr, "security: govulncheck skipped; last successful scan is within %s; set %s=1 to force\n", formatDuration(interval), forceVulncheckEnv)
+	}
+
 	return runExternal(stdin, stdout, stderr, "./scripts/check_secrets.sh")
+}
+
+func vulncheckDue(now time.Time) (bool, string, time.Duration, error) {
+	interval, err := vulncheckInterval()
+	if err != nil {
+		return false, "", 0, err
+	}
+	statePath := os.Getenv(vulncheckStateEnv)
+	if statePath == "" {
+		statePath = defaultVulncheckStatePath
+	}
+	if os.Getenv(forceVulncheckEnv) == "1" {
+		return true, statePath, interval, nil
+	}
+
+	data, err := os.ReadFile(statePath)
+	if errors.Is(err, os.ErrNotExist) {
+		return true, statePath, interval, nil
+	}
+	if err != nil {
+		return false, statePath, interval, fmt.Errorf("read govulncheck state %s: %w", statePath, err)
+	}
+
+	lastRun, parseErr := time.Parse(time.RFC3339Nano, strings.TrimSpace(string(data)))
+	if parseErr == nil {
+		return !now.Before(lastRun.UTC().Add(interval)), statePath, interval, nil
+	}
+	return true, statePath, interval, nil
+}
+
+func vulncheckInterval() (time.Duration, error) {
+	raw := os.Getenv(vulncheckIntervalHoursEnv)
+	if raw == "" {
+		return defaultVulncheckInterval, nil
+	}
+	hours, err := strconv.Atoi(raw)
+	if err != nil || hours <= 0 {
+		return 0, fmt.Errorf("%s must be positive hours", vulncheckIntervalHoursEnv)
+	}
+	return time.Duration(hours) * time.Hour, nil
+}
+
+func recordVulncheckRun(statePath string, now time.Time) error {
+	if err := os.MkdirAll(filepath.Dir(statePath), 0o755); err != nil {
+		return fmt.Errorf("create govulncheck state directory: %w", err)
+	}
+	if err := os.WriteFile(statePath, []byte(now.Format(time.RFC3339Nano)+"\n"), 0o644); err != nil {
+		return fmt.Errorf("write govulncheck state %s: %w", statePath, err)
+	}
+	return nil
+}
+
+func formatDuration(duration time.Duration) string {
+	if duration%time.Hour == 0 {
+		return fmt.Sprintf("%dh", int(duration/time.Hour))
+	}
+	return duration.String()
 }
 
 func runSecretCommand(args []string, stdin io.Reader, stdout io.Writer, stderr io.Writer) int {
@@ -248,20 +332,6 @@ func runExternal(stdin io.Reader, stdout io.Writer, stderr io.Writer, name strin
 		}
 		write(stderr, "ERROR: %v\n", err)
 		return 1
-	}
-	return 0
-}
-
-type externalCommand struct {
-	name string
-	args []string
-}
-
-func runExternalSequence(stdin io.Reader, stdout io.Writer, stderr io.Writer, commands ...externalCommand) int {
-	for _, command := range commands {
-		if code := runExternal(stdin, stdout, stderr, command.name, command.args...); code != 0 {
-			return code
-		}
 	}
 	return 0
 }

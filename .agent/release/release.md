@@ -22,9 +22,9 @@ Full Goal Runtime v3.1 release candidate。
 
 - `golangci-lint`
 - `goalcli`
-- `govulncheck`（仅当 `XLIB_ENABLE_VULNCHECK=1` 启用漏洞扫描时必需）
+- `govulncheck`（仅当 `XLIB_ENABLE_VULNCHECK=1` 且一周窗口到期、状态文件缺失，或 `XLIB_FORCE_VULNCHECK=1` 强制漏洞扫描时必需）
 
-缺少默认必需工具时，相关 gate 必须失败并记录为 blocker；启用 `XLIB_ENABLE_VULNCHECK=1` 后缺少 `govulncheck` 同样必须失败，不能降级为通过。
+缺少默认必需工具时，相关 gate 必须失败并记录为 blocker；漏洞扫描到期/强制执行时缺少 `govulncheck` 同样必须失败，不能降级为通过。
 
 ## 发布规则
 

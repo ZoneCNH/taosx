@@ -18,7 +18,7 @@ GOWORK=off make --warn-undefined-variables governance-check
 
 ## 缺少 `golangci-lint` 或启用漏洞扫描时缺少 `govulncheck`
 
-本地 `make lint` 依赖 `golangci-lint`。`make security` 默认只运行 secret scan；只有设置 `XLIB_ENABLE_VULNCHECK=1` 时才依赖 `govulncheck`。CI 默认不安装或访问漏洞库；启用漏洞扫描时本地可按 CI workflow 中的固定版本安装 `govulncheck`，或记录为未运行的本地工具缺口。
+本地 `make lint` 依赖 `golangci-lint`。`make security` 默认只运行 secret scan；只有设置 `XLIB_ENABLE_VULNCHECK=1` 且一周窗口到期、状态文件缺失，或设置 `XLIB_FORCE_VULNCHECK=1` 时才依赖 `govulncheck`。CI 默认不安装或访问漏洞库；Security workflow 每周定时强制执行漏洞扫描。启用漏洞扫描时本地可按 workflow 中的固定版本安装 `govulncheck`，或记录为未运行的本地工具缺口。
 
 ## release manifest 缺失
 
@@ -36,4 +36,6 @@ Docker 相关失败按以下分类排查：
 - daemon 不可用：启动 Docker daemon 后重跑 `GOWORK=off make docker-toolchain-check`。
 - buildx/BuildKit 缺失：运行 `docker buildx inspect --bootstrap` 或升级 Docker。
 - `GOWORK` 未关闭：使用 `GOWORK=off make docker-ci` 或 `XLIB_CONTEXT=release_verify GOWORK=off make docker-release-check`。
-- 下游模板漂移：确认渲染产物包含 `Dockerfile`、`docker-compose.yml`、`.dockerignore`、`.devcontainer/devcontainer.json`、`scripts/docker/docker_gate.sh`、`make docker-toolchain-check`、`make docker-ci` 和 `make docker-release-check`。
+- Git 报 `dubious ownership`：确认 Docker image 包含 `safe.directory /workspace`，且 `scripts/docker/docker_gate.sh` 与 `docker-shell` 注入 `GIT_CONFIG_KEY_0=safe.directory` / `GIT_CONFIG_VALUE_0=/workspace`；不得把 trust 放宽到宿主根目录。
+- `rules-verify` 报 `ModuleNotFoundError: No module named 'yaml'`：确认 Docker image 安装 `python3-yaml`；该依赖用于 `verify_rules.py` 读取 YAML registry，不应在 gate 运行时临时安装。
+- 下游模板漂移：确认渲染产物包含 `Dockerfile`、`docker-compose.yml`、`.dockerignore`、`.devcontainer/devcontainer.json`、`scripts/docker/docker_gate.sh`，以及 `docker-toolchain-check`、`docker-build`、`docker-build-check`、`docker-shell`、`docker-ci`、`docker-release-check`、`docker-release-final-check`、`docker-goalcli`、`docker-goalcli-image`、`docker-goalcli-version`、`docker-runtime-check`、`docker-drift-check`、`docker-contract`。

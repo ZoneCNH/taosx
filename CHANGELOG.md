@@ -2,7 +2,17 @@
 
 ## 未发布
 
-暂无。
+## v0.4.13 - 2026-06-05
+
+### 治理
+
+- 将 `goalcli security` 的漏洞扫描从“启用即每次运行”改为一周窗口；默认 gate 继续只运行 secret scan，`XLIB_FORCE_VULNCHECK=1` 可强制执行。
+- 将 CI、Release Check、Auto Patch、Docker Contract 与 Security workflow 对齐为默认不访问漏洞库，Security 定时任务每周强制执行固定版本 `govulncheck@v1.1.4`。
+- 新增结构分析报告，记录当前项目评分、结构性问题和下阶段治理建议。
+
+### 兼容性
+
+- 本版本不改变 `pkg/templatex` 公共 API 形状；`Version` 元数据同步到 `v0.4.13`。
 
 ## v0.4.7 - 2026-06-04
 

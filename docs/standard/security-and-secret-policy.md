@@ -23,7 +23,7 @@
 
 ## Secret Gate
 
-`GOWORK=off make security` 必须委托 `goalcli security` 执行密钥扫描。默认模式不得访问漏洞库或要求 `govulncheck`；只有显式设置 `XLIB_ENABLE_VULNCHECK=1` 时，才在密钥扫描前执行 `govulncheck ./...` 漏洞扫描。启用漏洞扫描时，缺少 `govulncheck` 或扫描失败必须阻断；secret scan 发现疑似凭据时必须阻断。
+`GOWORK=off make security` 必须委托 `goalcli security` 执行密钥扫描。默认模式不得访问漏洞库或要求 `govulncheck`；只有显式设置 `XLIB_ENABLE_VULNCHECK=1` 且一周窗口到期、状态文件缺失，或 `XLIB_FORCE_VULNCHECK=1` 时，才在密钥扫描前执行 `govulncheck ./...` 漏洞扫描。漏洞扫描到期/强制执行时，缺少 `govulncheck` 或扫描失败必须阻断；secret scan 发现疑似凭据时必须阻断。
 
 Secret scan 会排除 `.git`、`.omc`、`.omx`、`.worktree` 和 `vendor` 等本地或第三方目录，避免把 Agent 运行态、OMX 兼容状态、OMX/team 临时工作区或 vendored 依赖误判为源码凭据。该排除只用于降低误报，不代表这些目录可以提交真实凭据；任何进入 git 历史、manifest、Issue、PR 或日志的 secret 都必须视为违规。
 
@@ -37,7 +37,7 @@ Secret scan 会排除 `.git`、`.omc`、`.omx`、`.worktree` 和 `vendor` 等本
 ## 依赖安全
 
 - 新依赖必须有明确用途。
-- 依赖变更后运行 `GOWORK=off make security` 和 `GOWORK=off make boundary`；需要漏洞库证据时使用 `XLIB_ENABLE_VULNCHECK=1 GOWORK=off make security`。
+- 依赖变更后运行 `GOWORK=off make security` 和 `GOWORK=off make boundary`；需要漏洞库证据时使用 `XLIB_ENABLE_VULNCHECK=1 XLIB_FORCE_VULNCHECK=1 GOWORK=off make security`，或等待 Security workflow 的每周定时扫描。
 - 发现漏洞时记录影响面、修复版本和验证命令。
 
 ## 例外

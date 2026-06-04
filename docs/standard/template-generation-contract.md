@@ -128,4 +128,4 @@ GOWORK=off make release-check
 
 ## Docker Toolchain Runtime 输出
 
-模板生成契约包含 Docker Toolchain Runtime surface。渲染产物必须包含 `Dockerfile`、`docker-compose.yml`、`.dockerignore`、`.devcontainer/devcontainer.json`、`scripts/docker/check_toolchain.sh`、`scripts/docker/docker_gate.sh`，并在 Makefile 暴露 `docker-toolchain-check`、`docker-ci` 和 `docker-release-check`。`scripts/docker/docker_gate.sh` 只能调用既有 Makefile gate；Docker 不是第二套 gate。`scripts/check_rendered_template.sh` 必须把 Docker 文件和 targets 纳入 scanner。
+模板生成契约包含 Docker Toolchain Runtime surface。渲染产物必须包含 `Dockerfile`、`docker-compose.yml`、`.dockerignore`、`.devcontainer/devcontainer.json`、`scripts/docker/check_toolchain.sh`、`scripts/docker/docker_gate.sh`，并在 Makefile 暴露 `docker-toolchain-check`、`docker-build`、`docker-build-check`、`docker-shell`、`docker-ci`、`docker-release-check`、`docker-release-final-check`、`docker-goalcli`、`docker-goalcli-image`、`docker-goalcli-version`、`docker-runtime-check`、`docker-drift-check`、`docker-contract`。`scripts/docker/docker_gate.sh` 只能调用既有 Makefile gate；Docker 不是第二套 gate。`scripts/check_rendered_template.sh` 必须把 Docker 文件和 targets 纳入 scanner。

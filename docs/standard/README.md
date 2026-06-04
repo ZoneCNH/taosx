@@ -25,7 +25,7 @@
 - [下游同步策略](../downstream-sync-policy.md)：标准变更到 `kernel`、L1/L2 基础库和 `x.go` 的同步规则。
 - [x.go 集成边界](../xgo-integration-boundary.md)：调用方密钥路径和组合边界。
 - [测试策略](../testing.md)：单元、示例 smoke、release quality 和 release manifest fixture 隔离要求。
-- [供应链与 Evidence](../supply-chain.md)：workflow Action SHA pinning、可选 `govulncheck` 固定版本、manifest 校验和 CI artifact 对齐。
+- [供应链与 Evidence](../supply-chain.md)：workflow Action SHA pinning、每周窗口 `govulncheck` 固定版本、manifest 校验和 CI artifact 对齐。
 - [Release Scorecard](../scorecard.md)：`goalcli score --min 9.8` 的评分维度、阈值和语义边界。
 - [独立审计 2026-06-02](../independent-audit-20260602.md)：审计发现、修复状态和剩余远端验证缺口。
 - [迁移指南](../migration/baselib-template-to-xlib-standard.md)：旧名迁移规则。
@@ -46,7 +46,7 @@ GOWORK=off make release-check
 
 完整 release Evidence 还需要 `release/manifest/latest.json`、`release/manifest/latest.json.sha256`、`release/standard-impact/latest.md`、`downstream_sync_required` 结论、manifest 内的 `score` 与 `workflow` 字段、CI artifact 和 `DONE with evidence:` 声明。Fuzz smoke 默认使用 `FUZZ_SMOKE_TIME=10s`，加长时必须记录到 Evidence。
 
-CI、Release Check 和 Security workflow 的第三方 Action 必须 pin 到 40 位 commit SHA，并保留来源 tag 注释。`govulncheck` 仅在 `XLIB_ENABLE_VULNCHECK=1` 时启用，发布门禁固定基线为 `golang.org/x/vuln/cmd/govulncheck@v1.1.4`；release manifest 测试必须在临时 fixture 仓库构造 `.omc` state，不得读取当前工作区的 Agent 运行态。
+CI、Release Check 和 Security workflow 的第三方 Action 必须 pin 到 40 位 commit SHA，并保留来源 tag 注释。`govulncheck` 仅在 `XLIB_ENABLE_VULNCHECK=1` 且一周窗口到期、状态文件缺失或 `XLIB_FORCE_VULNCHECK=1` 时启用，Security workflow 每周定时强制执行漏洞扫描，发布门禁固定基线为 `golang.org/x/vuln/cmd/govulncheck@v1.1.4`；release manifest 测试必须在临时 fixture 仓库构造 `.omc` state，不得读取当前工作区的 Agent 运行态。
 
 ## Docker Toolchain Runtime
 

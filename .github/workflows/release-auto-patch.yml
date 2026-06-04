@@ -15,7 +15,7 @@ jobs:
   release-auto-patch:
     runs-on: ubuntu-latest
     env:
-      XLIB_ENABLE_VULNCHECK: ${{ vars.XLIB_ENABLE_VULNCHECK }}
+      XLIB_ENABLE_VULNCHECK: "0"
 
     steps:
       - name: Checkout
@@ -118,7 +118,7 @@ jobs:
           VERSION: ${{ steps.next-version.outputs.version }}
           WORKFLOW_RUN_ID: ${{ github.run_id }}
           XLIB_CONTEXT: release_verify
-          XLIB_ENABLE_VULNCHECK: ${{ vars.XLIB_ENABLE_VULNCHECK }}
+          XLIB_ENABLE_VULNCHECK: "0"
         run: GOWORK=off make release-final-check
 
       - name: Hash release manifest

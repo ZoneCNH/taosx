@@ -3,4 +3,4 @@ forbidden_reads: [/home/k8s/secrets/env]
 checks: [goalcli secrets]
 optional_checks:
   - name: govulncheck
-    when: "XLIB_ENABLE_VULNCHECK=1"
+    when: "XLIB_ENABLE_VULNCHECK=1 and weekly window is due, or XLIB_FORCE_VULNCHECK=1"

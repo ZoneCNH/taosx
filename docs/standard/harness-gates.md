@@ -14,7 +14,7 @@ Full Goal Runtime v3.1 以 `cmd/goalcli` 作为 Go gate runtime。Makefile targe
 | Unit | `GOWORK=off make test` | 单元和示例 smoke |
 | Race | `GOWORK=off make race` | 并发安全基线 |
 | Boundary | `GOWORK=off make boundary` | 模块边界和模板禁止项 |
-| Security | `GOWORK=off make security` | 默认 secret scan；`XLIB_ENABLE_VULNCHECK=1` 时先运行 `govulncheck` |
+| Security | `GOWORK=off make security` | 默认 secret scan；`XLIB_ENABLE_VULNCHECK=1` 且一周窗口到期，或 `XLIB_FORCE_VULNCHECK=1` 时先运行 `govulncheck` |
 | Contracts | `GOWORK=off make contracts` | schema、metrics 和 manifest contract |
 | Docs Check | `GOWORK=off make docs-check` | 文档、链接、当前命名、下游同步策略、v3.1 runtime 和 release protocol |
 | Integration | `GOWORK=off make integration` | generator 和 downstream smoke |
@@ -88,7 +88,7 @@ Secret scan 会排除 `.git`、`.omc`、`.omx`、`.worktree` 和 `vendor` 等本
 
 ## Workflow Supply Chain Gate
 
-CI、Release Check、Integration 和 Security workflow 引用的第三方 Action 必须固定为 40 位 commit SHA，并保留来源 tag 注释。`govulncheck` 仅在 `XLIB_ENABLE_VULNCHECK=1` 时安装，且必须使用固定版本；当前发布门禁基线是 `golang.org/x/vuln/cmd/govulncheck@v1.1.4`。
+CI、Release Check、Integration 和 Security workflow 引用的第三方 Action 必须固定为 40 位 commit SHA，并保留来源 tag 注释。CI、Release Check、Auto Patch 和 Docker Contract workflow 默认设置 `XLIB_ENABLE_VULNCHECK=0`；Security workflow 每周定时强制执行漏洞扫描。启用或定时运行 `govulncheck` 时必须使用固定版本；当前发布门禁基线是 `golang.org/x/vuln/cmd/govulncheck@v1.1.4`。
 
 ## Context Runtime v4 profile gates 发布门禁
 

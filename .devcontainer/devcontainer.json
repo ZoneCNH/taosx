@@ -1,9 +1,7 @@
 {
   "name": "Go Toolchain Runtime",
   "dockerComposeFile": "../docker-compose.yml",
-  "service": "dev",
-  "runServices": ["dev"],
-  "remoteUser": "xlib",
+  "service": "toolchain",
   "workspaceFolder": "/workspace",
   "remoteEnv": {
     "GOWORK": "off",

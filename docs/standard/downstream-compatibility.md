@@ -24,8 +24,9 @@
 | `make` | 执行 Harness gate | 必须可运行 required targets |
 | `git` | 初始化临时下游、检查 clean diff、计算 commit/tree | integration 和 Evidence 必需 |
 | `golangci-lint` | `make lint` | 缺失时必须失败 |
-| `govulncheck` | `XLIB_ENABLE_VULNCHECK=1 make security` | 仅启用漏洞扫描时必需，缺失时必须失败 |
+| `govulncheck` | `XLIB_ENABLE_VULNCHECK=1 make security` / `XLIB_FORCE_VULNCHECK=1 make security` | 仅漏洞扫描到期或强制执行时必需，缺失时必须失败 |
 | `python3` | docs link checker | `make docs-check` 必需 |
+| `python3-yaml` / PyYAML | YAML registry 校验与 domain rules 渲染 | `rules-verify` 与 `render-domain-rules` 必需 |
 | `sha256sum` | 计算 `latest.json` hash | CI artifact Evidence 必需 |
 | GitHub Actions artifact | 保存 `release/manifest/latest.json` | 远端 release Evidence 必需 |
 

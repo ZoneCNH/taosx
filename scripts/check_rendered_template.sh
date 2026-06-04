@@ -58,7 +58,23 @@ for required_path in "${required_paths[@]}"; do
   fi
 done
 
-for required_target in docker-toolchain-check docker-build docker-build-check docker-shell docker-ci docker-release-check docker-release-final-check docker-goalcli docker-goalcli-image docker-goalcli-version docker-runtime-check docker-drift-check docker-contract; do
+docker_targets=(
+  docker-toolchain-check
+  docker-build
+  docker-build-check
+  docker-shell
+  docker-ci
+  docker-release-check
+  docker-release-final-check
+  docker-goalcli
+  docker-goalcli-image
+  docker-goalcli-version
+  docker-runtime-check
+  docker-drift-check
+  docker-contract
+)
+
+for required_target in "${docker_targets[@]}"; do
   if ! grep -Eq "^\\.PHONY:.*[[:space:]]${required_target}([[:space:]]|$)|^${required_target}:" "$repo_dir/Makefile"; then
     echo "ERROR: rendered Makefile missing Docker contract target: $required_target" >&2
     exit 1

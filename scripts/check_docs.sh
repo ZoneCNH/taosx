@@ -157,6 +157,10 @@ require_text "docs/standard/docker-toolchain-standard.md" "XLIB_CONTEXT"
 require_text "docs/standard/docker-toolchain-standard.md" "VERSION"
 require_text "docs/standard/docker-toolchain-standard.md" "DOWNSTREAM"
 require_text "docs/standard/docker-toolchain-standard.md" "XLIB_ENABLE_VULNCHECK"
+require_text "docs/standard/docker-toolchain-standard.md" "GITHUB_ACTIONS"
+require_text "docs/standard/docker-toolchain-standard.md" "python3-yaml"
+require_text "docs/standard/docker-toolchain-standard.md" "golangci-lint v2.1.6"
+require_text "docs/standard/docker-toolchain-standard.md" "govulncheck v1.1.4"
 require_text "docs/standard/docker-toolchain-standard.md" "BuildKit"
 require_text "docs/standard/docker-toolchain-standard.md" "XLIB_CONTEXT=release_verify GOWORK=off"
 require_text "docs/standard/docker-toolchain-standard.md" "GOWORK=off make integration DOWNSTREAM=kernel"
@@ -182,6 +186,18 @@ require_text ".github/workflows/docker-contract.yml" "make docker-release-check"
 require_text "Makefile" "docker-toolchain-check"
 require_text "Makefile" "docker-ci"
 require_text "Makefile" "docker-release-check"
+require_text "Makefile" 'GITHUB_ACTIONS=$${GITHUB_ACTIONS:-}'
+require_text "Makefile" 'GOLANGCI_LINT_VERSION=$${GOLANGCI_LINT_VERSION:-v2.1.6}'
+require_text "Makefile" "GIT_CONFIG_VALUE_0=/workspace"
+require_text "Dockerfile" "python3-yaml"
+require_text "Dockerfile" "github.com/golangci/golangci-lint/v2/cmd/golangci-lint"
+require_text "Dockerfile" "golang.org/x/vuln/cmd/govulncheck"
+require_text "Dockerfile" "safe.directory /workspace"
+require_text ".agent/policies/toolchain.yaml" "python3-yaml"
+require_text "scripts/docker/docker_gate.sh" 'GITHUB_ACTIONS=${GITHUB_ACTIONS:-}'
+require_text "scripts/docker/docker_gate.sh" 'GOLANGCI_LINT_VERSION:-v2.1.6'
+require_text "scripts/docker/docker_gate.sh" 'GOVULNCHECK_VERSION:-v1.1.4'
+require_text "scripts/docker/docker_gate.sh" "GIT_CONFIG_VALUE_0=/workspace"
 require_text "scripts/check_rendered_template.sh" "Dockerfile"
 require_text "scripts/check_rendered_template.sh" "docker-release-check"
 require_text "docs/standard/README.md" "GOWORK=off make docs-check"
@@ -305,25 +321,29 @@ require_text "Makefile" '$(GOALCLI) release-evidence-checksum-check'
 require_text "scripts/run_fuzz_smoke.sh" 'fuzz_time="${FUZZ_SMOKE_TIME:-10s}"'
 require_text ".github/workflows/ci.yml" "make release-check"
 require_text ".github/workflows/ci.yml" "release/manifest/latest.json.sha256"
-require_text ".github/workflows/ci.yml" 'XLIB_ENABLE_VULNCHECK: ${{ vars.XLIB_ENABLE_VULNCHECK }}'
+require_text ".github/workflows/ci.yml" 'XLIB_ENABLE_VULNCHECK: "0"'
 require_text ".github/workflows/ci.yml" "env.XLIB_ENABLE_VULNCHECK == '1'"
 require_text ".github/workflows/release.yml" "make release-final-check"
 require_text ".github/workflows/release.yml" "release/manifest/latest.json.sha256"
 require_text ".github/workflows/release.yml" "ARTIFACT_URL"
-require_text ".github/workflows/release.yml" 'XLIB_ENABLE_VULNCHECK: ${{ vars.XLIB_ENABLE_VULNCHECK }}'
+require_text ".github/workflows/release.yml" 'XLIB_ENABLE_VULNCHECK: "0"'
 require_text ".github/workflows/release.yml" "env.XLIB_ENABLE_VULNCHECK == '1'"
 require_text ".github/workflows/release.yml" "contents: write"
 require_text ".github/workflows/release.yml" "gh release create"
 require_text ".github/workflows/release.yml" "gh release edit"
 require_text ".github/workflows/release.yml" "gh release view"
 require_text ".github/workflows/release.yml" "--verify-tag"
-require_text ".github/workflows/security.yml" 'XLIB_ENABLE_VULNCHECK: ${{ vars.XLIB_ENABLE_VULNCHECK }}'
+require_text ".github/workflows/security.yml" "schedule:"
+require_text ".github/workflows/security.yml" 'cron: "17 3 * * 1"'
+require_text ".github/workflows/security.yml" "github.event_name == 'schedule'"
+require_text ".github/workflows/security.yml" 'XLIB_FORCE_VULNCHECK: ${{ github.event_name =='
+require_text ".github/workflows/security.yml" 'XLIB_VULNCHECK_INTERVAL_HOURS: "168"'
 require_text ".github/workflows/security.yml" "env.XLIB_ENABLE_VULNCHECK == '1'"
 require_text ".github/workflows/release-auto-patch.yml" "branches: [main]"
 require_text ".github/workflows/release-auto-patch.yml" "contents: write"
 require_text ".github/workflows/release-auto-patch.yml" "fetch-depth: 0"
 require_text ".github/workflows/release-auto-patch.yml" "release-auto-patch-main"
-require_text ".github/workflows/release-auto-patch.yml" 'XLIB_ENABLE_VULNCHECK: ${{ vars.XLIB_ENABLE_VULNCHECK }}'
+require_text ".github/workflows/release-auto-patch.yml" 'XLIB_ENABLE_VULNCHECK: "0"'
 require_text ".github/workflows/release-auto-patch.yml" "env.XLIB_ENABLE_VULNCHECK == '1'"
 require_text ".github/workflows/release-auto-patch.yml" "git tag --points-at"
 require_text ".github/workflows/release-auto-patch.yml" "already_released=true"

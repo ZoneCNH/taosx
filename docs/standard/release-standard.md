@@ -40,8 +40,8 @@ Release manifest 相关测试必须在临时 fixture 仓库构造所需 `.omc` s
 ## 供应链约束
 
 - GitHub Actions workflow 引用的第三方 Action 必须固定为 40 位 commit SHA，并在同一行保留来源 tag 注释。
-- CI、Release Check 和 Security workflow 默认不安装或访问 `govulncheck`；只有设置 `XLIB_ENABLE_VULNCHECK=1` 时才安装，并必须使用固定版本；当前基线是 `golang.org/x/vuln/cmd/govulncheck@v1.1.4`。
-- 本地缺少 `golangci-lint` 时 `make lint` 必须失败；`make security` 默认只要求 secret scan，通过 `XLIB_ENABLE_VULNCHECK=1` 启用漏洞扫描后缺少 `govulncheck` 必须失败，不得把必需 gate 记录为跳过。
+- CI、Release Check、Auto Patch 和 Docker Contract workflow 默认不安装或访问 `govulncheck`；Security workflow 每周定时强制执行漏洞扫描。启用或定时运行时必须使用固定版本；当前基线是 `golang.org/x/vuln/cmd/govulncheck@v1.1.4`。
+- 本地缺少 `golangci-lint` 时 `make lint` 必须失败；`make security` 默认只要求 secret scan，通过 `XLIB_ENABLE_VULNCHECK=1` 启用漏洞扫描后，仅当一周窗口到期、状态文件缺失或 `XLIB_FORCE_VULNCHECK=1` 时要求 `govulncheck`，缺失时必须失败，不得把必需 gate 记录为跳过。
 
 ## 版本
 

@@ -1,89 +1,21 @@
-x-toolchain-build: &toolchain-build
-  context: .
-  args:
-    GO_VERSION: ${GO_VERSION:-1.23}
-    GO_BASE_IMAGE: ${GO_BASE_IMAGE:-golang:${GO_VERSION:-1.23}-bookworm}
-    GO_BASE_IMAGE_DIGEST: ${GO_BASE_IMAGE_DIGEST:-sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855}
-    GOLANGCI_LINT_VERSION: ${GOLANGCI_LINT_VERSION:-v2.1.6}
-    GOVULNCHECK_VERSION: ${GOVULNCHECK_VERSION:-v1.1.4}
-  additional_contexts:
-    tools: .cache/docker-tools
-
-x-toolchain-common: &toolchain-common
-  working_dir: /workspace
-  environment:
-    GOWORK: ${GOWORK:-off}
-    XLIB_CONTEXT: ${XLIB_CONTEXT:-docker_toolchain}
-    VERSION: ${VERSION:-}
-    DOWNSTREAM: ${DOWNSTREAM:-}
-    XLIB_ENABLE_VULNCHECK: ${XLIB_ENABLE_VULNCHECK:-}
-    DOCKER_BASE_IMAGE_DIGEST: ${GO_BASE_IMAGE_DIGEST:-sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855}
-    DOCKER_TOOLCHAIN_IMAGE_DIGEST: ${DOCKER_TOOLCHAIN_IMAGE_DIGEST:-sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855}
-    DOCKER_RUNTIME_IMAGE_DIGEST: ${DOCKER_RUNTIME_IMAGE_DIGEST:-sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855}
-  volumes:
-    - .:/workspace
-    - go-build-cache:/root/.cache/go-build
-    - go-mod-cache:/go/pkg/mod
-
 services:
-  dev:
-    <<: *toolchain-common
+  toolchain:
     build:
-      <<: *toolchain-build
-      target: dev
-    image: ${DOCKER_IMAGE:-xlib-standard-toolchain:local}
-    user: "${USER_UID:-1000}:${USER_GID:-1000}"
-    volumes:
-      - .:/workspace
-      - go-build-cache:/home/xlib/.cache/go-build
-      - go-mod-cache:/go/pkg/mod
-    command: ["bash"]
-
-  gate:
-    <<: *toolchain-common
-    build:
-      <<: *toolchain-build
-      target: gate
-    image: ${DOCKER_IMAGE:-xlib-standard-toolchain:local}
-    command: ["make", "ci"]
-
-  release-check:
-    <<: *toolchain-common
-    build:
-      <<: *toolchain-build
-      target: gate
-    image: ${DOCKER_IMAGE:-xlib-standard-toolchain:local}
+      context: .
+      target: toolchain
+      args:
+        GO_VERSION: ${GO_VERSION:-1.23}
+    working_dir: /workspace
     environment:
       GOWORK: ${GOWORK:-off}
-      XLIB_CONTEXT: ${XLIB_CONTEXT:-release_verify}
+      XLIB_CONTEXT: ${XLIB_CONTEXT:-docker_toolchain}
       VERSION: ${VERSION:-}
       DOWNSTREAM: ${DOWNSTREAM:-}
       XLIB_ENABLE_VULNCHECK: ${XLIB_ENABLE_VULNCHECK:-}
-    command: ["make", "release-check"]
-
-  release-final-check:
-    <<: *toolchain-common
-    build:
-      <<: *toolchain-build
-      target: gate
-    image: ${DOCKER_IMAGE:-xlib-standard-toolchain:local}
-    environment:
-      GOWORK: off
-      XLIB_CONTEXT: release_verify
-      VERSION: ${VERSION:-}
-      DOWNSTREAM: ${DOWNSTREAM:-}
-      XLIB_ENABLE_VULNCHECK: ${XLIB_ENABLE_VULNCHECK:-}
-      DOCKER_BASE_IMAGE_DIGEST: ${GO_BASE_IMAGE_DIGEST:-sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855}
-      DOCKER_TOOLCHAIN_IMAGE_DIGEST: ${DOCKER_TOOLCHAIN_IMAGE_DIGEST:-sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855}
-      DOCKER_RUNTIME_IMAGE_DIGEST: ${DOCKER_RUNTIME_IMAGE_DIGEST:-sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855}
-    command: ["make", "release-final-check"]
-
-  goalcli-runtime:
-    build:
-      <<: *toolchain-build
-      target: goalcli-runtime
-    image: ${DOCKER_RUNTIME_IMAGE:-xlib-standard-goalcli-runtime:local}
-    command: ["version"]
+    volumes:
+      - .:/workspace
+      - go-build-cache:/root/.cache/go-build
+      - go-mod-cache:/go/pkg/mod
 
 volumes:
   go-build-cache:

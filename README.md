@@ -47,18 +47,19 @@
 - [Harness gate](docs/standard/harness-gates.md)：required、extended、generator、docs、score 和 final gate 命令。
 - [Evidence 协议](docs/standard/evidence-protocol.md)：`DONE with evidence:` 和 release manifest 要求。
 - [测试策略](docs/testing.md)：单元、示例 smoke、release quality 和 release manifest fixture 隔离要求。
-- [安全与密钥策略](docs/standard/security-and-secret-policy.md)：secret scan、可选 `govulncheck` 和 Agent runtime 目录排除边界。
-- [供应链与 Evidence](docs/supply-chain.md)：workflow Action SHA pinning、可选 `govulncheck` 固定版本、release manifest 和 CI artifact 对齐。
+- [安全与密钥策略](docs/standard/security-and-secret-policy.md)：secret scan、每周窗口 `govulncheck` 和 Agent runtime 目录排除边界。
+- [供应链与 Evidence](docs/supply-chain.md)：workflow Action SHA pinning、每周窗口 `govulncheck` 固定版本、release manifest 和 CI artifact 对齐。
 - [Release Scorecard](docs/scorecard.md)：`goalcli score --min 9.8` 的评分维度、阈值和语义边界。
 - [发布](docs/release.md)：`release-check`、manifest 字段和 Evidence 规则。
 - [独立审计 2026-06-02](docs/independent-audit-20260602.md)：独立审计发现、修复状态和剩余验证缺口。
 - [项目分析快照 2026-06-02](docs/project-analysis-20260602.md)：`v0.3.7` 发布/分析快照；当前治理主基线仍以 [目标文档](docs/goal/goal.md) v2.9.3 Complete 和 [.agent/traceability/traceability-matrix.md](.agent/traceability/traceability-matrix.md) 为准。
 - [结构性问题清单 2026-06-02](docs/structural-issues-20260602.md)：记录架构、治理和交付风险的结构化问题清单。
+- [项目结构分析报告 2026-06-05](docs/project-structural-analysis-20260605.md)：记录当前评分、结构性问题、已修复的安全门禁频率和后续治理建议。
 - [.agent 真相状态文件](.agent/evidence/truth-state.yaml)：汇总当前治理、命令实现、release gate、Evidence 可用性和下游采纳状态口径。
 
 ## 命令
 
-本地运行完整 gate 前默认需要安装 `golangci-lint`；`make security` 默认只运行 secret scan，不访问漏洞库。只有显式设置 `XLIB_ENABLE_VULNCHECK=1` 时才需要安装 `govulncheck` 并在 security gate 中追加漏洞扫描。缺少默认必需工具或启用漏洞扫描时缺少 `govulncheck`，相关 gate 必须失败，不允许把必需 gate 记录为跳过。
+本地运行完整 gate 前默认需要安装 `golangci-lint`；`make security` 默认只运行 secret scan，不访问漏洞库。只有 `XLIB_ENABLE_VULNCHECK=1` 且一周窗口到期、状态缺失，或 `XLIB_FORCE_VULNCHECK=1` 时才执行 `govulncheck ./...`。状态文件默认 `.cache/security/govulncheck-last-run`，可用 `XLIB_VULNCHECK_INTERVAL_HOURS` / `XLIB_VULNCHECK_STATE` 调整。缺少默认必需工具，或漏洞扫描到期/强制执行时缺少 `govulncheck`，相关 gate 必须失败，不允许把必需 gate 记录为跳过。
 
 ### 首次 clone 必跑
 
@@ -82,13 +83,13 @@ GOWORK=off make standard-impact-check
 GOWORK=off make docs-check
 XLIB_CONTEXT=release_verify GOWORK=off make release-check
 XLIB_CONTEXT=release_verify GOWORK=off make release-final-check
-XLIB_CONTEXT=release_verify GOWORK=off make release-preflight VERSION=v0.4.7
+XLIB_CONTEXT=release_verify GOWORK=off make release-preflight VERSION=v0.4.13
 make evidence
 ```
 
 `release-check` 和 `release-check-extended` 已依赖 `dependency-check`、`standard-impact-check` 和 `docs-check`，用于在生成 Evidence 前确认依赖漂移自动化、标准影响报告、标准文档入口、下游同步策略、链接、模板占位符、当前命名、关键文本和 release manifest 协议没有漂移。`dependency-check` 读取 `renovate.json`、`.github/dependabot.yml` 和 `go.mod`；`standard-impact-check` 生成 `release/standard-impact/latest.md`，并把 `downstream_sync_required`、`downstream_release_decision`（只允许 `required` / `not_required`）和 `repository_rules_release_decision`（只允许 `audit_required` / `not_required`）结论交给 release manifest。`docs-check` 是结构性 gate，不替代人工语义审查。
 
-Release gate 还必须执行 `GOWORK=off go run ./cmd/goalcli score --min 9.8`。GitHub Actions workflow 引用的第三方 Action 必须固定为 40 位 commit SHA 并保留来源 tag 注释；CI、Release Check 和 Security workflow 仅在 `XLIB_ENABLE_VULNCHECK=1` 时安装 `govulncheck`，且必须使用固定基线 `golang.org/x/vuln/cmd/govulncheck@v1.1.4`，不得用 `@latest` 作为发布门禁配置。
+Release gate 还必须执行 `GOWORK=off go run ./cmd/goalcli score --min 9.8`。GitHub Actions workflow 引用的第三方 Action 必须固定为 40 位 commit SHA 并保留来源 tag 注释；CI、Release Check、Auto Patch 和 Docker Contract workflow 默认设置 `XLIB_ENABLE_VULNCHECK=0`，Security workflow 每周一 03:17 UTC 定时强制执行漏洞扫描；启用或定时扫描时必须使用固定基线 `golang.org/x/vuln/cmd/govulncheck@v1.1.4`，不得用 `@latest` 作为发布门禁配置。
 
 生成 `kernel` 示例：
 

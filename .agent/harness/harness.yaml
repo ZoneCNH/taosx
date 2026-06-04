@@ -41,7 +41,7 @@ required_gates:
     purpose: "module boundary, x.go import ban, business-layer ban"
   - id: security
     command: "GOWORK=off make security"
-    purpose: "secret scan by default; govulncheck only when XLIB_ENABLE_VULNCHECK=1; no /home/k8s/secrets/env/* contents"
+    purpose: "secret scan by default; govulncheck only when XLIB_ENABLE_VULNCHECK=1 and weekly window is due or XLIB_FORCE_VULNCHECK=1; no /home/k8s/secrets/env/* contents"
   - id: contracts
     command: "GOWORK=off make contracts"
     purpose: "contracts schema and metrics contract validation"
@@ -171,7 +171,7 @@ final_gates:
   - id: release_final_check
     command: "XLIB_CONTEXT=release_verify GOWORK=off make release-final-check"
   - id: release_preflight
-    command: "XLIB_CONTEXT=release_verify GOWORK=off make release-preflight VERSION=v0.4.7"
+    command: "XLIB_CONTEXT=release_verify GOWORK=off make release-preflight VERSION=v0.4.13"
   - id: score
     command: "goalcli score --min 9.8"
   - id: kernel_downstream
