@@ -1,1089 +1,2542 @@
-# xlib-standard 完整 Goal 可执行方案 v2.9.3 Complete
+# taosx L2 基础设施适配层标准工厂 Goal 可执行方案
 
-> 版本：v2.9.3 Complete
-> 目标仓库：`https://github.com/ZoneCNH/xlib-standard`  
-> 首批下游验证：`github.com/ZoneCNH/kernel`、`github.com/ZoneCNH/configx`
-> 执行标准：Goal Runtime v3.1 + First-Principles + Harness Engineering + Karpathy 四原则 + Self-improving + AutoResearch + Compound Engineering
-> 生成日期：2026-06-02
-> 替代版本：v2.9、v2.9.1、v2.9.2
-
----
-
-## 0. 第三轮审计结论
-
-本版是一个**主文档重编译版本**，不再把 v2.9.1 / v2.9.2 的补丁作为附录，而是把它们合并进主执行流。
-
-第三轮审计发现，v2.9.2 已补齐大量落地缺口，但仍有 3 类风险需要集成进完整版：
-
-1. **补丁附录化风险**：v2.9.2 的新增 Issue、命令、Makefile、验收标准散落在后文，Agent 实施时可能只读取前文 P0/P1/P2 Pack 而漏掉补丁。
-2. **命名与自符合风险**：旧名 `baselib-template` / `foundationx` 缺少明确 guard；且下游 adoption 前应先完成 `xlib-standard` 自身 standard-source profile attestation。
-3. **执行入口漂移风险**：Issue Registry、Command Registry、Makefile Target Registry、Policy Schema、Toolchain、Evidence Path、GitHub Settings、Runtime File Ownership 必须统一进入 SSOT，否则后续多 Agent 实施会漂移。
-
-因此 v2.9.3 的裁决是：
-
-```text
-v2.9.3 Complete = v2.9 主方案
-  + v2.9.1 治理对象与上下文补丁
-  + v2.9.2 执行一致性补丁
-  + v2.9.3 命名一致性、自符合证明、主文档重编译
-```
-
-实际执行应以 **v2.9.3 Complete** 为准。
+> Goal ID: `GOAL-20260604-TAOSX-L2-FACTORY-001`  
+> 目标仓库: `github.com/ZoneCNH/taosx`  
+> 标准源: `github.com/ZoneCNH/xlib-standard`  
+> L0 依赖: `github.com/ZoneCNH/kernel`  
+> L1 运行时契约: `configx` / `observex`，测试契约可消费 `testkitx`  
+> 适配对象: TDengine / taosAdapter / taosWS / SQL / Schemaless / Health / Evidence  
+> 执行协议: Goal Runtime Prompt v3.1  
+> 输出日期: 2026-06-04 Asia/Tokyo  
+> 目标版本建议: `taosx v0.1.0` MVA，`v0.2.0` contracts+integration，`v1.0.0` production-ready adapter
 
 ---
 
-## 1. 最终目标
+## 0. 执行结论
 
-`xlib-standard` 的目标不是做一个普通 Go 模板，而是升级为：
+`taosx` 不应该继续作为“零散 TDengine 工具封装库”。它应该升级为 `xlib-standard` 标准源控制下的 **L2 时序数据库基础设施适配层标准工厂产物**。
+
+最终定位固定为：
 
 ```text
-Standard Source
-  + Go Reference Template
-  + Generator
-  + Harness
-  + Evidence Runtime
-  + Constitution Runtime
-  + Downstream Conformance Runtime
+xlib-standard = 标准源 / 模板 / Generator / Harness / Evidence Runtime
+kernel        = L0 primitive contract
+configx       = L1 显式配置与脱敏 contract
+observex      = L1 日志 / 指标 / tracing / health contract
+testkitx      = L1 测试夹具 / golden / contract helper
+taosx         = L2 TDengine adapter，独立仓库、独立发布、独立 Evidence
+x.go          = L3/L4 消费方，只组合，不反向污染 taosx
 ```
 
-v2.9.3 完成后必须具备：
-
-1. P0 Minimal Kernel：防止 main 开发、无 worktree、无 Evidence DONE、x.go 反向依赖、production secret default、Makefile/CI/manifest 缺失。
-2. P1 Governance Hardening：Agent Team、Scope Lock、PR Contract、Acceptance Matrix、Runtime Health、GitHub Governance、Toolchain、Policy Schema、Evidence Artifact、Self-Healing Skeleton。
-3. P2 Runtime & Conformance Automation：Runtime install/upgrade、release readiness、evidence replay、conformance attestation、Standard/Gate/Evidence Pack、kernel/configx adoption dry-run proof。
-4. Self-improving：失败必须进入 Failure Taxonomy、Root Cause、Regression Memory、Patch Candidate。
-5. Progressive adoption：P3/P4 高级治理在 P0/P1/P2 完成前冻结。
+`taosx` 的目标不是“把 TDengine Go driver 包一层”，而是建立一个可被 `x.go`、market-data、macro-data、regime-engine、其他时序写入服务统一消费的 **TDengine adapter contract**：连接、配置、错误、生命周期、SQL、批量写入、schemaless、健康检查、可观测性、集成测试、Release Evidence 与下游采纳证据全部标准化。
 
 ---
 
-## 2. 第一性原理裁决
+## 1. 当前事实基线
 
-### 2.1 问题本质
+### 1.1 仓库事实
 
-`xlib-standard` 的本质问题不是“模板怎么写”，而是：
-
-> 如何让所有基础库在多 Agent、多 worktree、多仓库、多 release 阶段中，持续遵守同一套可验证工程文明。
-
-### 2.2 不可再拆解的基本真理
+当前 `ZoneCNH/taosx` 已经是独立 public repository，但内容处于早期状态：
 
 ```text
-TRUTH-001  规则不进入 Gate，就不是规则。
-TRUTH-002  Gate 不产生 Evidence，就不能证明完成。
-TRUTH-003  Evidence 不进入 Release Manifest，就不能审计。
-TRUTH-004  Agent 不使用 worktree，就不能安全并发。
-TRUTH-005  Agent 不受 Scope Lock 约束，就会污染无关文件。
-TRUTH-006  标准不能安装到下游，就不是运行时。
-TRUTH-007  下游不能生成 Attestation，就不能声称符合标准。
-TRUTH-008  失败不产生 Patch，就没有 Self-improving。
-TRUTH-009  方法论没有触发条件、输出物、Gate 和退出机制，就是仪式。
-TRUTH-010  标准必须被采用，才有价值。
+repo: github.com/ZoneCNH/taosx
+visibility: public
+default_branch: main
+current README:
+  # taosx
+  taosx 公共基础模块
+go.mod: 当前未发现
 ```
 
-### 2.3 可打破限制
+这意味着本 Goal 不能假设已有完整 Go module、Makefile、`.agent`、contracts、CI、release manifest 或 package API。第一步必须是 **由 xlib-standard 渲染 / 迁移为标准基础库骨架**，再进入 TDengine adapter 实现。
+
+### 1.2 xlib-standard 对 taosx 的标准定位
+
+当前标准源已经把 `taosx` 登记为目标库：
 
 ```text
-LIMIT-001  不必一开始实现完整 v2.9.3；先 P0，再 P1，再 P2。
-LIMIT-002  不必一开始做 Fleet Dashboard；P2 完成后再做。
-LIMIT-003  不必一开始做 Formal Model Checking；Release Readiness Formula 先足够。
-LIMIT-004  不必所有 Article 都变成 Gate；ACTIVE + BLOCKING 才必须 Gate。
-LIMIT-005  不必所有任务 Full Runtime；按 C0-C5 复杂度分级。
-LIMIT-006  不必所有下游同时迁移；先 xlib-standard self，再 kernel，再 configx。
+taosx = github.com/ZoneCNH/taosx
+package = taosx
+layer = L2
+allowed runtime deps = kernel, configx, observex
+forbidden = business metric model, application time-series strategy, x.go reverse dependency
 ```
+
+因此 `taosx` 的实现必须遵循：
+
+```text
+runtime dependency:
+  github.com/ZoneCNH/kernel
+  github.com/ZoneCNH/configx
+  github.com/ZoneCNH/observex
+
+test-only dependency:
+  github.com/ZoneCNH/testkitx
+  docker / testcontainers / local fake driver, only inside tests or integration harness
+
+forbidden:
+  github.com/bytechainx/x.go
+  x.go/internal/*
+  business schema: kline, market_data, macro_data, regime, strategy, orderbook
+  production secret content
+  hidden global TDengine client
+  implicit /home/k8s/secrets/env/* read
+```
+
+### 1.3 TDengine 技术事实
+
+本方案按当前 TDengine 文档将 WebSocket 连接作为默认主路径：
+
+```text
+primary connector mode: WebSocket / taosWS
+native Go mode: legacy / migration-only / disabled by default
+REST mode: limited SQL-only fallback, not primary adapter
+schemaless: supported as dedicated writer contract
+```
+
+重要约束：
+
+1. Go 原生连接存在迁移到 WebSocket 的官方方向，`taosx` 不应把 native 作为默认生产路径。
+2. REST API 能做 SQL 写入和查询，但不覆盖参数绑定、订阅等完整能力，不应作为主 contract。
+3. Schemaless 支持自动创建超级表 / 子表 / 列 / 标签，但多行写入不提供原子性保证，必须在 contract 中明确 partial failure 语义。
+4. TDengine 有 STABLE / subtable / tag / timestamp precision 等特定语义，`taosx` 只能提供基础设施 contract，不得内置业务 metric model。
 
 ---
 
-## 3. 最高执行约束
+## 2. 问题的底层本质
 
-### 3.1 禁止 main 主线开发
+`taosx` 真正要解决的问题不是“如何连接 TDengine”，而是：
 
-`main` 是发布主线、审计主线、Evidence 汇聚点，不是开发工作区。
+> 如何把 TDengine 这种具体基础设施，封装成可版本化、可审计、可测试、可迁移、可复用、可由 Evidence 证明的 L2 adapter contract。
 
-阻断对象：
-
-```text
-local_write on main -> BLOCK
-local_readonly on clean main -> ALLOW
-ci_main_verify on clean main -> ALLOW
-release_verify on clean main/tag -> ALLOW
-```
-
-### 3.2 强制 git worktree
-
-写入型任务必须使用：
-
-```bash
-git fetch origin
-git checkout main
-git pull --ff-only origin main
-
-git worktree add ../.worktrees/xlib-standard/<issue-id>   -b <branch-name> main
-```
-
-### 3.3 强制 Agent Teams
-
-C3+ 任务必须使用 Agent Team Contract。最小角色：
+没有标准化的 `taosx`，每个上层服务都会重复解决：
 
 ```text
-Lead / Implementation / Test / Harness / Evidence / Review
+TDengine DSN 拼接
+连接池参数
+超时与 context 传递
+错误分类
+健康检查
+SQL 执行封装
+批量写入
+schemaless 写入
+STABLE/subtable 约定
+metrics 名称
+trace span
+secret 脱敏
+integration test
+release evidence
+x.go 接入验证
 ```
 
-### 3.4 统一完成声明
+这会导致：
 
 ```text
-DONE with evidence:
-- scope:
-- issues:
-- worktree:
-- branch:
-- changed_files:
-- gates:
-- evidence:
-- review:
-- release_impact:
-- known_gaps:
-- follow_up:
+不同服务连接方式不一致
+错误分类不可统一告警
+健康检查语义漂移
+批量写入失败不可审计
+schemaless partial failure 被误认为事务失败
+secret 可能进入日志 / manifest / PR
+CI 只测本地 fake，不测真实 adapter contract
+release 没有 source digest / contract fingerprint
+下游无法证明采用 taosx 的哪个版本
 ```
+
+`taosx` 的底层价值是把这些 TDengine 相关但非业务的基础设施行为沉淀为 L2 contract，让所有上层服务复用同一套基础设施语义。
 
 ---
 
-## 4. 冻结规则
+## 3. 不可再拆解的基本真理
 
-P0/P1/P2 完成前冻结：
-
-```text
-Fleet Dashboard
-Plugin Sandbox
-Third-party Policy
-Ecosystem Certification
-Formal Model Checking
-Advanced Method Effectiveness
-Full Release Train Automation
-Multi-repo Auto Migration
-Governance Query DSL
-```
-
-允许范围：
-
-```text
-P0: Minimal Kernel
-P1: Governance Hardening
-P2: Runtime & Conformance Automation
-```
+| ID | 基本真理 | 对 taosx 的执行含义 |
+|---|---|---|
+| T-001 | L2 adapter 是基础设施边界，不是业务层 | `taosx` 可理解 STABLE/subtable，但不能内置 Kline、Symbol、Regime、MarketData |
+| T-002 | 独立仓库必须独立 Evidence | `taosx` 必须有自己的 CI、manifest、release tag、checks、contract digest |
+| T-003 | 没有 Evidence 不得声明 DONE | 每个 Task / Issue / Release 都必须产出 `DONE with evidence:` |
+| T-004 | 标准源唯一 | 标准变更先进入 `xlib-standard`，`taosx` 只消费标准，不反向定义标准 |
+| T-005 | L0/L1 契约不可绕开 | 错误、生命周期、配置、可观测、测试必须复用 `kernel/configx/observex/testkitx` |
+| T-006 | TDengine driver 不是 taosx 的公共 API | 公共 API 暴露 adapter contract，不暴露底层 driver 的可变细节 |
+| T-007 | WebSocket 是默认主路径 | `taosWS` profile 为默认；native / REST 只能作为 explicit compatibility mode |
+| T-008 | 所有操作必须 context-first | `Exec/Query/Write/Health/Close` 必须接受或继承 `context.Context` |
+| T-009 | Secret 永远不进入 Evidence | password/token 只能脱敏显示，不能进入 README、日志、manifest、PR、issue |
+| T-010 | Release 是可复现状态，不是口头版本 | tag、commit、tree SHA、contract fingerprint、gate 输出必须一致 |
 
 ---
 
-## 5. Master Goal Runtime v3.1
+## 4. 被误认为真理的常见假设
 
-```yaml
-goal_id: GOAL-20260602-001
-title: xlib-standard v2.9.3 Constitution Runtime & Conformance Automation
-mode: full
-owner: lead
-repository: github.com/ZoneCNH/xlib-standard
-state_machine:
-  - INIT
-  - CONTEXT_READY
-  - GOAL_READY
-  - SPEC_READY
-  - DESIGN_READY
-  - PLAN_READY
-  - TASKS_READY
-  - EXECUTING
-  - VERIFYING
-  - REVIEWING
-  - RELEASING
-  - RETROSPECTING
-  - DONE
-exception_states:
-  - BLOCKED
-  - FAILED
-  - NEEDS_RESEARCH
-  - NEEDS_DECISION
-  - NEEDS_REPLAN
-  - NEEDS_ROLLBACK
-  - NEEDS_HUMAN_APPROVAL
-  - INCONSISTENT_STATE
-success_criteria:
-  - P0 Issues P0-001..P0-016 completed with evidence.
-  - P1 Issues P1-001..P1-021 completed with evidence.
-  - P2 Issues P2-001..P2-015 completed with evidence.
-  - goalcli commands in command registry are implemented or explicitly planned.
-  - Makefile targets in baseline registry exist and fail non-zero on failure.
-  - CI invokes Makefile and does not duplicate Gate logic.
-  - Release Manifest Skeleton can be generated and checksummed.
-  - xlib-standard self-conformance attestation is generated before downstream adoption.
-  - kernel/configx adoption can run in patch-only/dry-run mode.
-```
+| 常见假设 | 为什么危险 | 正确裁决 |
+|---|---|---|
+| `taosx` 只是 `database/sql` 的薄封装 | 无法沉淀错误、health、metrics、contract、evidence | `taosx` 是 TDengine adapter contract |
+| 先能写入数据就完成 | 缺失配置、生命周期、契约、集成测试、release evidence | 写入只是其中一个 requirement |
+| 业务 K 线表结构应该放进 taosx | 业务模型污染 L2 | `taosx` 只提供 generic schema builder / writer contract |
+| native 连接更传统，应默认支持 | Go native 有迁移风险，且 taosc 依赖复杂 | 默认 WebSocket，native 显式开启且标记 legacy |
+| REST 简单，所以默认 REST | REST 能力有限，不适合完整 adapter 主路径 | REST 可作为 SQL-only fallback，不进入默认 profile |
+| 直接读取 `/home/k8s/secrets/env/*` 很方便 | 基础库不应知道部署密钥路径 | 由调用方 / configx 显式注入 |
+| 测试只要 fake driver | fake 不能证明 TDengine contract | fake + golden + optional docker integration + real profile gate |
+| release manifest 可以提交 | generated artifact 不应进入源码历史 | 由 `make evidence` 生成并作为 CI artifact |
+| 下游登记等于采纳 | registry 只是计划态 | 只有下游仓库命令输出和 Evidence 才算 proof-based adoption |
 
 ---
 
-## 6. 标准目录结构目标
+## 5. 可以被打破的限制
+
+### 5.1 不需要一次实现所有 TDengine 能力
+
+可以分阶段：
 
 ```text
-CONSTITUTION.md
-CHANGELOG.md
-.tool-versions
-.agent/
-  minimal-kernel.yaml
-  enforcement-levels.yaml
-  execution-context.yaml
-  issue-registry.yaml
-  command-registry.yaml
-  makefile-target-registry.yaml
-  makefile-baseline.yaml
-  boundary.yaml
-  security.yaml
-  done-assertion.yaml
-  evidence-artifact-policy.yaml
-  runtime-health.yaml
-  conformance-profiles.yaml
-  downstream-registry.yaml
-  runtime-install.yaml
-  runtime-upgrade.yaml
-  runtime-file-ownership.yaml
-  downstream-adoption-modes.yaml
-  downstream-baseline-scan.yaml
-  failure-taxonomy.yaml
-  root-cause.yaml
-  regression-memory.yaml
-  harness-patches.yaml
-  rule-patches.yaml
-  prompt-patches.yaml
-.github/
-  CODEOWNERS
-  ISSUE_TEMPLATE/
-  pull_request_template.md
-  workflows/ci.yml
-cmd/goalcli/main.go
-internal/goalcli/
-  cli/
-  context/
-  report/
-  registry/
-  guards/
-  evidence/
-  boundary/
-  security/
-  manifest/
-  runtime/
-  conformance/
-  pack/
-  downstream/
-  schema/
-  testfixture/
-contracts/
-  goalcli-report.schema.json
-  release-manifest.schema.json
-  conformance-attestation.schema.json
-  agent-policy.schema.json
-  issue-registry.schema.json
-  command-registry.schema.json
-  execution-context.schema.json
-docs/
-  quickstart.md
-  troubleshooting.md
-  standard/
-release/
-  manifest/.gitkeep
-  evidence/.gitkeep
-testkit/governance/fixtures/
+v0.1.0 = adapter skeleton + config + client contract + health + fake tests + evidence
+v0.2.0 = SQL exec/query + batch writer + Docker integration + metrics contract
+v0.3.0 = schemaless writer + partial failure contract + golden tests
+v0.4.0 = migration helpers + STABLE/subtable builder + x.go consumer smoke
+v1.0.0 = production-ready release with downstream adoption proof
+```
+
+### 5.2 不需要把业务 schema 放入 taosx
+
+可提供 schema primitive：
+
+```go
+StableSpec
+ColumnSpec
+TagSpec
+DatabaseSpec
+TableSpec
+InsertBatch
+LineProtocolBatch
+```
+
+但禁止提供：
+
+```go
+KlineTable
+MarketDataWriter
+MacroSeriesWriter
+RegimeStateTable
+OrderBookSnapshotTable
+```
+
+这些应留在 `x.go` 或业务服务中。
+
+### 5.3 不需要把 TDengine client 作为全局单例
+
+正确方式：
+
+```text
+Factory -> Client -> explicit Start/Close
+Lifecycle Manager -> explicit ownership
+No package-level mutable default client
+No hidden goroutine without lifecycle registration
+```
+
+### 5.4 不需要把 x.go 作为测试前提
+
+`taosx` 必须独立验证。`x.go` 只作为 consumer smoke：
+
+```text
+taosx release gate = independent
+x.go consumer gate = optional downstream adoption proof
 ```
 
 ---
 
-## 7. P0 Minimal Kernel Issue Pack
+## 6. 从零设计的新方案
 
-| Issue  | Title                                   | Type               | Complexity | Files                                                                                                                           | Gate                                                                     | Acceptance Summary                                                                                                               |
-| ------ | --------------------------------------- | ------------------ | ---------- | ------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------- |
-| P0-001 | Minimal Constitution                    | constitution       | C2         | CONSTITUTION.md; docs/standard/constitution.md                                                                                  | docs-check                                                               | 最小宪法、Minimal Kernel、禁止 main 开发、worktree、DONE with evidence、no x.go reverse dependency、no production secret default |
-| P0-002 | Minimal Kernel Policy                   | policy             | C2         | .agent/runtime/minimal-kernel.yaml; .agent/policies/enforcement-levels.yaml                                                                      | goalcli minimal-kernel                                                  | P0 invariants 注册；P0 不允许 local override；enforcement level 完整                                                             |
-| P0-003 | goalcli CLI Skeleton                   | runtime            | C2         | cmd/goalcli/main.go; internal/goalcli/cli/\*\*                                                                                | goalcli version; goalcli doctor; go test ./...                         | version/help/doctor 可运行；exit code 稳定；预留 --json/--output/--explain                                                       |
-| P0-004 | main-guard                              | guard              | C2         | internal/goalcli/guards/main_guard.go; testkit/governance/fixtures/main-guard/\*\*                                             | goalcli main-guard                                                      | local_write + main 阻断；release_verify clean main 允许；失败信息提示 worktree                                                   |
-| P0-005 | worktree-guard                          | guard              | C2         | internal/goalcli/guards/worktree_guard.go; testkit/governance/fixtures/worktree-guard/\*\*                                     | goalcli worktree-guard                                                  | local_write 必须 worktree；CI / release verify 不误阻断                                                                          |
-| P0-006 | evidence-check                          | evidence           | C2         | internal/goalcli/evidence/**; .agent/evidence/done-assertion.yaml; fixtures/evidence/**                                                 | goalcli evidence-check                                                  | DONE without evidence 失败；必需 command/commit/worktree/known_gaps                                                              |
-| P0-007 | boundary no-xgo-import check            | boundary           | C2         | internal/goalcli/boundary/**; .agent/policies/boundary.yaml; fixtures/boundary/**                                                       | goalcli boundary                                                        | 禁止 github.com/bytechainx/x.go 与 github.com/ZoneCNH/x.go 反向依赖                                                              |
-| P0-008 | no-secret-default check                 | security           | C2         | internal/goalcli/security/**; .agent/policies/security.yaml; fixtures/security/**                                                       | goalcli security                                                        | 禁止默认读取 /home/k8s/secrets/env/\*；允许作为调用方部署路径说明                                                                |
-| P0-009 | Makefile governance-check               | harness            | C2         | Makefile                                                                                                                        | .make governance-check; make release-check                               | main/worktree/evidence/boundary/security 进入 governance-check；target 失败返回非 0                                              |
-| P0-010 | CI Required Checks Skeleton             | ci                 | C2         | .github/workflows/ci.yml                                                                                                        | goalcli ci-job-matrix                                                   | CI 调用 Makefile；不 continue-on-error；最小权限；上传 evidence artifact                                                         |
-| P0-011 | Release Manifest Skeleton               | release            | C2         | contracts/release-manifest.schema.json; internal/goalcli/manifest/\*\*; release/manifest/.gitkeep; .gitignore                  | goalcli manifest                                                        | manifest 字段完整；checksum 可生成；generated manifest 不提交源码历史                                                            |
-| P0-012 | DONE with evidence Protocol             | evidence           | C1         | docs/standard/evidence-protocol.md; .github/pull_request_template.md; .agent/evidence/done-assertion.yaml                                | goalcli done-assertion; docs-check                                      | PR 模板和文档包含 DONE with evidence 字段                                                                                        |
-| P0-013 | Execution Context Policy                | guard              | C2         | .agent/policies/execution-context.yaml; internal/goalcli/context/**; fixtures/execution-context/**                                      | goalcli main-guard --context ...; goalcli worktree-guard --context ... | local_write/local_readonly/ci_pull_request/ci_main_verify/release_verify 语义完整                                                |
-| P0-014 | goalcli CLI Contract and Report Schema | runtime            | C2         | docs/standard/goalcli-cli-contract.md; contracts/goalcli-report.schema.json; internal/goalcli/report/\*\*                    | goalcli cli-contract; goalcli contracts                                | exit code、JSON report、Finding、remediation、schema 完整                                                                        |
-| P0-015 | Issue Registry and Command Registry     | governance-runtime | C2         | .agent/registries/issue-registry.yaml; .agent/registries/command-registry.yaml; .agent/registries/makefile-target-registry.yaml; internal/goalcli/registry/\*\* | goalcli issue-registry; goalcli command-registry                       | Issue/Command/Makefile target 统一 SSOT，防漂移                                                                                  |
-| P0-016 | Makefile Baseline Target Inventory      | harness            | C2         | .agent/registries/makefile-baseline.yaml; Makefile; internal/goalcli/makefile/\*\*                                                        | goalcli makefile-baseline; make governance-check; make release-check    | fmt/vet/lint/test/race/boundary/security/contracts/docs-check/evidence/release targets 完整                                      |
-
-### 7.1 P0 验收命令
-
-```bash
-XLIB_CONTEXT=local_write GOWORK=off make governance-check
-XLIB_CONTEXT=release_verify GOWORK=off make release-check
-GOWORK=off go test ./...
-GOWORK=off go run ./cmd/goalcli doctor
-GOWORK=off go run ./cmd/goalcli cli-contract
-GOWORK=off go run ./cmd/goalcli issue-registry
-GOWORK=off go run ./cmd/goalcli command-registry
-GOWORK=off go run ./cmd/goalcli makefile-baseline
-```
-
-## 8. P1 Governance Hardening Issue Pack
-
-| Issue  | Title                                       | Type              | Complexity | Files                                                                                                                                                                                                                                             | Gate                                                                       | Acceptance Summary                                                                             |
-| ------ | ------------------------------------------- | ----------------- | ---------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------- |
-| P1-001 | Agent Team Contract                         | agent-runtime     | C3         | .agent/contracts/team-contract.yaml; docs/standard/agent-team-contract.md; internal/goalcli/agent/\*\*                                                                                                                                                     | goalcli agent-team-contract                                               | C3+ 任务声明 team/roles/scope/worktree/gates/evidence；禁止自审                                |
-| P1-002 | Scope Lock Guard                            | governance        | C3         | .agent/contracts/scope-locks.yaml; internal/goalcli/scope/**; fixtures/scope-lock/**                                                                                                                                                                       | goalcli scope-lock                                                        | owned/read_only/forbidden_paths 生效；scope leak 失败                                          |
-| P1-003 | PR Template Contract                        | pr-governance     | C2         | .github/pull_request_template.md; .agent/contracts/pr-template-contract.yaml; internal/goalcli/pr/\*\*                                                                                                                                                     | goalcli pr-template                                                       | PR 包含 issue/scope/worktree/gates/evidence/known gaps/rollback/release impact                 |
-| P1-004 | Acceptance Matrix                           | traceability      | C3         | .agent/contracts/acceptance-matrix.yaml; docs/standard/acceptance-matrix.md; internal/goalcli/traceability/\*\*                                                                                                                                            | goalcli acceptance-matrix                                                 | Requirement → AC → Gate/Test → Evidence → Status 无断链                                        |
-| P1-005 | Runtime HealthCheck                         | runtime           | C2         | .agent/contracts/runtime-health.yaml; internal/goalcli/runtime/health.go; docs/standard/runtime-health.md                                                                                                                                                  | goalcli runtime-health; make runtime-health                               | 检查 Constitution/.agent/goalcli/Makefile/CI/contracts/manifest schema/evidence protocol      |
-| P1-006 | Standard Upgrade Skeleton                   | runtime-upgrade   | C3         | .agent/contracts/upgrade-standard.md; docs/standard/standard-upgrade.md; internal/goalcli/upgrade/\*\*                                                                                                                                           | goalcli upgrade-standard --dry-run                                        | current/target version、diff、rollback note、dry-run report                                    |
-| P1-007 | Conformance Profiles                        | conformance       | C3         | .agent/policies/conformance-profiles.yaml; docs/standard/conformance-profiles.md; internal/goalcli/conformance/\*\*                                                                                                                                       | goalcli conformance-profile                                               | standard-source/l0-kernel/l1-shared/l2-infra/experimental profile 完整                         |
-| P1-008 | Downstream Registry                         | downstream        | C2         | .agent/registries/downstream-registry.yaml; docs/standard/downstream-registry.md; internal/goalcli/downstream/\*\*                                                                                                                                          | goalcli downstream-registry                                               | 登记 kernel/configx/observex/testkitx/postgresx/redisx/kafkax/natsx/taosx/ossx/clickhousex     |
-| P1-009 | Self-Healing Skeleton                       | self-improving    | C3         | .agent/traceability/failure-taxonomy.yaml; .agent/traceability/root-cause.yaml; .agent/traceability/regression-memory.yaml; .agent/harness/harness-patches.yaml; .agent/policies/rule-patches.yaml; .agent/policies/prompt-patches.yaml                                                                            | goalcli self-healing-skeleton                                             | 失败分类、Root Cause、Regression Memory、Patch logs 最小闭环                                   |
-| P1-010 | Documentation Quickstart                    | docs              | C2         | docs/quickstart.md; docs/standard/worktree-protocol.md; docs/standard/evidence-protocol.md; docs/troubleshooting.md                                                                                                                               | docs-check; docs-command-sync-check                                        | 新开发者可按文档创建 worktree、运行 governance-check、处理 failed gate                         |
-| P1-011 | Goal Runtime v3.1 Governance Objects        | goal-runtime      | C3         | .agent/runtime/goal-runtime.md; .agent/traceability/decision-log.md; .agent/runtime/state-machine.md; .agent/traceability/change-propagation-matrix.yaml; .agent/policies/human-approval-gates.yaml; .agent/policies/failure-budget.yaml; .agent/runtime/rollback-protocol.md; .agent/runtime/definition-of-done.yaml | goalcli goal-runtime; goalcli state-machine; goalcli change-propagation | ADR/Decision/State/Propagation/Human Approval/Failure Budget/Rollback/DoD 完整                 |
-| P1-012 | GitHub Governance Controls                  | github-governance | C2         | .github/CODEOWNERS; .github/ISSUE_TEMPLATE/\*.yml; .github/pull_request_template.md; docs/standard/branch-protection.md; .agent/policies/github-governance.yaml                                                                                            | goalcli github-governance; goalcli codeowners                            | CODEOWNERS、Issue/PR 模板、Branch Protection 文档、Admin bypass break-glass                    |
-| P1-013 | Supply Chain Security Baseline              | security          | C3         | .agent/policies/security.yaml; docs/standard/supply-chain-security.md; .github/workflows/ci.yml                                                                                                                                                   | goalcli supply-chain; make security; make lint                            | optional govulncheck/golangci-lint/action pinning/least privilege/go.mod drift                          |
-| P1-014 | Release Versioning and Changelog Protocol   | release           | C2         | CHANGELOG.md; docs/standard/release-versioning.md; docs/standard/migration-note.md; .agent/release/release.md; .gitignore                                                                                                                        | goalcli changelog; goalcli versioning; goalcli generated-artifacts      | 行为变更需 changelog；breaking change 需 migration；tag protocol                               |
-| P1-015 | Governance Test Strategy                    | testing           | C3         | docs/standard/governance-test-strategy.md; testkit/governance/README.md; internal/goalcli/testfixture/\*\*                                                                                                                                       | make governance-fixture-test; go test ./...                                | P0 guard valid/invalid fixture；negative tests 进入 go test                                    |
-| P1-016 | AutoResearch Trigger and Record Protocol    | autoresearch      | C2         | .agent/policies/autoresearch.yaml; docs/standard/autoresearch.md; .agent/traceability/research-record-template.md                                                                                                                                           | goalcli autoresearch                                                      | 外部链接/工具链/依赖/不确定事实触发 research record 和 decision impact                         |
-| P1-017 | Policy Schema Registry and YAML Validation  | contracts         | C3         | contracts/agent-policy.schema.json; contracts/issue-registry.schema.json; contracts/command-registry.schema.json; contracts/execution-context.schema.json; internal/goalcli/schema/\*\*                                                          | goalcli policy-schema; goalcli contracts                                 | 所有关键 .agent/\*.yaml schema validation；invalid config 不静默通过                           |
-| P1-018 | GitHub Settings Apply and Verify Protocol   | github-governance | C3         | .agent/policies/github-settings.yaml; docs/standard/github-settings.md; scripts/github/verify_settings.sh                                                                                                                                                  | goalcli github-settings --verify; goalcli codeowners                     | Required checks/branch protection/rulesets 可验证；apply 不隐式执行                            |
-| P1-019 | Toolchain Pinning Baseline                  | supply-chain      | C2         | .tool-versions; .agent/policies/toolchain.yaml; docs/standard/toolchain.md                                                                                                                                                                                 | goalcli toolchain; make lint; make security                               | 本地/CI 工具版本 SSOT；禁止 required tools 使用 latest                                         |
-| P1-020 | Evidence Artifact Path and Retention Policy | evidence          | C2         | .agent/evidence/evidence-artifact-policy.yaml; docs/standard/evidence-artifacts.md                                                                                                                                                                         | goalcli evidence-artifacts                                                | release/evidence 与 release/manifest 路径、retention、DONE links 规范                          |
-| P1-021 | Naming Consistency and Legacy Name Guard    | docs/governance   | C2         | .agent/policies/naming.yaml; docs/standard/naming.md; internal/goalcli/naming/\*\*                                                                                                                                                               | goalcli naming; docs-check                                                | 默认名称统一 xlib-standard/kernel；旧名 baselib-template/foundationx 仅允许迁移/ADR/兼容上下文 |
-
-### 8.1 P1 验收命令
-
-```bash
-GOWORK=off make p1-governance-check
-GOWORK=off make governance-fixture-test
-GOWORK=off make security
-GOWORK=off make lint
-GOWORK=off go run ./cmd/goalcli policy-schema
-GOWORK=off go run ./cmd/goalcli github-settings --verify
-GOWORK=off go run ./cmd/goalcli toolchain
-GOWORK=off go run ./cmd/goalcli evidence-artifacts
-GOWORK=off make release-check
-```
-
-## 9. P2 Runtime & Conformance Automation Issue Pack
-
-| Issue  | Title                                      | Type                | Complexity | Files                                                                                                                                 | Gate                                                                                                           | Acceptance Summary                                                                                  |
-| ------ | ------------------------------------------ | ------------------- | ---------- | ------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------- |
-| P2-001 | Runtime Install                            | runtime             | C3         | internal/goalcli/runtime/install.go; .agent/contracts/runtime-install.yaml; docs/standard/runtime-install.md                                   | goalcli install-runtime --dry-run; goalcli runtime-health                                                    | 可安装 CONSTITUTION/.agent/Makefile/CI/contracts/docs/release skeleton                              |
-| P2-002 | Runtime Upgrade                            | runtime-upgrade     | C3         | internal/goalcli/runtime/upgrade.go; .agent/contracts/runtime-upgrade.yaml; docs/standard/runtime-upgrade.md                                   | goalcli upgrade-runtime --dry-run                                                                             | dry-run/apply/rollback report；失败不更新 adoption version                                          |
-| P2-003 | Release Readiness Formula                  | release             | C3         | internal/goalcli/release/readiness.go; .agent/release/release-readiness-formula.yaml; docs/standard/release-readiness.md                     | goalcli release-ready                                                                                         | release_ready 公式；failed gate/missing evidence/dirty workspace/P0 blocker 均 not ready            |
-| P2-004 | Evidence Replay                            | evidence            | C3         | internal/goalcli/evidence/replay.go; .agent/evidence/evidence-replay.yaml; docs/standard/evidence-replay.md                                   | goalcli evidence-replay                                                                                       | gate result/release manifest/runtime-health/conformance/security/boundary replay                    |
-| P2-005 | Conformance Attestation                    | conformance         | C3         | internal/goalcli/conformance/attestation.go; contracts/conformance-attestation.schema.json; docs/standard/conformance-attestation.md | goalcli attest-conformance; goalcli contracts                                                                | 生成 attestation；failed gate 不得 passed attestation                                               |
-| P2-006 | Standard Pack                              | pack                | C3         | internal/goalcli/pack/standard.go; .agent/contracts/standard-pack.yaml; docs/standard/standard-pack.md                                         | goalcli pack-standard                                                                                         | 打包 Constitution/policies/docs/contracts，生成 manifest/checksum                                   |
-| P2-007 | Gate Pack                                  | pack                | C3         | internal/goalcli/pack/gate.go; .agent/harness/gate-pack.yaml; docs/standard/gate-pack.md                                                     | goalcli pack-gate                                                                                             | goalcli commands/Makefile/CI snippets/fixtures/remediation/profile gates                           |
-| P2-008 | Evidence Pack                              | pack                | C3         | internal/goalcli/pack/evidence.go; .agent/evidence/evidence-pack.yaml; docs/standard/evidence-pack.md                                         | goalcli pack-evidence                                                                                         | Evidence schema/manifest schema/replay/DONE protocol 打包                                           |
-| P2-009 | kernel Downstream Adoption                 | downstream-adoption | C4         | patch bundle / downstream local path                                                                                                  | goalcli downstream-adoption --mode patch-only --repo kernel; goalcli attest-conformance --profile l0-kernel  | kernel 生成 adoption/runtime/profile/manifest/attestation，且不依赖 x.go                            |
-| P2-010 | configx Downstream Adoption                | downstream-adoption | C4         | patch bundle / downstream local path                                                                                                  | goalcli downstream-adoption --mode patch-only --repo configx; goalcli attest-conformance --profile l1-shared | configx 生成 adoption/runtime/profile/manifest/attestation，符合显式 Config                         |
-| P2-011 | SBOM and License Check Roadmap             | supply-chain        | C2         | .agent/policies/sbom-roadmap.yaml; docs/standard/sbom-license-roadmap.md                                                             | goalcli sbom-roadmap                                                                                          | P2 不必完整实现 SBOM，但必须有 P3/P4 roadmap 和阻断条件                                             |
-| P2-012 | Downstream Adoption Modes                  | downstream-adoption | C4         | .agent/registries/downstream-adoption-modes.yaml; docs/standard/downstream-adoption-modes.md; internal/goalcli/downstream/adoption_modes.go     | goalcli downstream-adoption --mode patch-only --repo kernel/configx                                           | 支持 local_path / patch_only / pr_plan；无授权不跨仓写                                              |
-| P2-013 | Runtime File Ownership and Merge Safety    | runtime-upgrade     | C4         | .agent/policies/runtime-file-ownership.yaml; docs/standard/runtime-file-ownership.md; internal/goalcli/runtime/file_ownership.go              | goalcli runtime-file-ownership; goalcli upgrade-runtime --dry-run                                            | XLIB_OWNED/USER_OWNED/MERGE_REQUIRED/GENERATED；不覆盖用户文件                                      |
-| P2-014 | Downstream Baseline Scan Before Adoption   | downstream-adoption | C4         | .agent/registries/downstream-baseline-scan.yaml; docs/standard/downstream-baseline-scan.md; internal/goalcli/downstream/baseline_scan.go        | goalcli downstream-baseline --repo kernel/configx --mode patch-only                                           | adoption 前扫描 module/package/Makefile/CI/contracts/docs/x.go/secret/release flow，输出 risk score |
-| P2-015 | xlib-standard Self-Conformance Attestation | conformance         | C3         | release/manifest/conformance-attestation.json; docs/reports/self-conformance.md                                                       | goalcli attest-conformance --profile standard-source                                                          | 下游 adoption 前先证明 xlib-standard 自身符合 standard-source profile                               |
-
-### 9.1 P2 验收命令
-
-```bash
-GOWORK=off make p2-runtime-check
-GOWORK=off go run ./cmd/goalcli runtime-file-ownership
-GOWORK=off go run ./cmd/goalcli attest-conformance --profile standard-source
-GOWORK=off go run ./cmd/goalcli downstream-baseline --repo kernel --mode patch-only
-GOWORK=off go run ./cmd/goalcli downstream-baseline --repo configx --mode patch-only
-GOWORK=off go run ./cmd/goalcli downstream-adoption --mode patch-only --repo kernel
-GOWORK=off go run ./cmd/goalcli downstream-adoption --mode patch-only --repo configx
-GOWORK=off go run ./cmd/goalcli attest-conformance --profile l0-kernel
-```
-
-## 10. Execution Context Policy
-
-```yaml
-schema_version: "1.0"
-contexts:
-  local_write:
-    branch_main_allowed: false
-    worktree_required: true
-    dirty_tree_allowed: true
-    allowed_actions: ["edit", "generate", "test", "commit"]
-  local_readonly:
-    branch_main_allowed: true
-    worktree_required: false
-    dirty_tree_allowed: false
-    allowed_actions: ["read", "inspect", "fetch", "pull"]
-  ci_pull_request:
-    branch_main_allowed: false
-    worktree_required: false
-    dirty_tree_allowed: false
-    allowed_actions: ["check", "test", "artifact"]
-  ci_main_verify:
-    branch_main_allowed: true
-    worktree_required: false
-    dirty_tree_allowed: false
-    allowed_actions: ["verify", "test", "artifact"]
-  release_verify:
-    branch_main_allowed: true
-    worktree_required: false
-    dirty_tree_allowed: false
-    allowed_actions: ["verify", "manifest", "attest"]
-```
-
-规则：
+### 6.1 分层位置
 
 ```text
-main-guard:
-  BLOCK when branch == main AND context == local_write
-  ALLOW when branch == main AND context in [local_readonly, ci_main_verify, release_verify] AND workspace clean
-
-worktree-guard:
-  BLOCK when context == local_write AND worktree == false
-  ALLOW when context in [ci_pull_request, ci_main_verify, release_verify]
+L0: kernel
+    errx / timex / lifecycx / context / shutdown / validation primitive
+        ↓
+L1: cross-cutting libraries
+    configx / observex / testkitx / resiliencx / schedulex
+        ↓
+L2: infrastructure adapters
+    redisx / kafkax / postgresx / taosx / ossx / clickhousex / natsx
+        ↓
+L3: platform integration
+    x.go internal/platform, market-data-server, macro-data-server
+        ↓
+L4: business workflows
+    strategy / regime / trading / analytics
 ```
 
-## 11. goalcli Command Registry
+### 6.2 taosx 内部架构
 
-| Command                | Issue                | Domain            | Context                  | Purpose                                                |
-| ---------------------- | -------------------- | ----------------- | ------------------------ | ------------------------------------------------------ |
-| version                | P0-003               | runtime           | local/ci                 | 输出版本与 runtime component versions                  |
-| doctor                 | P0-003               | runtime           | local/ci                 | 检查基础运行环境                                       |
-| main-guard             | P0-004/P0-013        | guard             | local/ci/release         | 上下文感知 main 写入阻断                               |
-| worktree-guard         | P0-005/P0-013        | guard             | local/ci/release         | 上下文感知 worktree 要求                               |
-| evidence-check         | P0-006               | evidence          | local/ci                 | 验证 DONE with evidence / Evidence Bundle              |
-| boundary               | P0-007               | boundary          | local/ci                 | no-xgo-import                                          |
-| security               | P0-008               | security          | local/ci                 | no-secret-default + secret/supply-chain baseline hooks |
-| manifest               | P0-011               | release           | local/ci/release         | 生成/校验 release manifest skeleton                    |
-| cli-contract           | P0-014               | runtime           | local/ci                 | 校验 exit code / report schema                         |
-| issue-registry         | P0-015               | governance        | local/ci                 | Issue SSOT 校验                                        |
-| command-registry       | P0-015               | governance        | local/ci                 | Command/Makefile/CI mapping 校验                       |
-| makefile-baseline      | P0-016               | harness           | local/ci                 | Makefile required targets 校验                         |
-| agent-team-contract    | P1-001               | agent-runtime     | local/ci                 | Team Contract 校验                                     |
-| scope-lock             | P1-002               | governance        | local/ci                 | Scope Lock 校验                                        |
-| pr-template            | P1-003               | pr-governance     | ci_pr                    | PR body/template 校验                                  |
-| acceptance-matrix      | P1-004               | traceability      | local/ci                 | REQ/AC/Gate/Evidence 矩阵校验                          |
-| runtime-health         | P1-005               | runtime           | local/ci/downstream      | Runtime HealthCheck                                    |
-| goal-runtime           | P1-011               | goal-runtime      | local/ci                 | ADR/Decision/State/DoD 对象校验                        |
-| github-settings        | P1-018               | github-governance | manual/ci with token     | GitHub settings verify，不隐式 apply                   |
-| policy-schema          | P1-017               | contracts         | local/ci                 | `.agent/*.yaml` schema validation                      |
-| toolchain              | P1-019               | supply-chain      | local/ci                 | Toolchain pinning 校验                                 |
-| evidence-artifacts     | P1-020               | evidence          | local/ci                 | Evidence path/retention 校验                           |
-| naming                 | P1-021               | governance        | local/ci                 | 旧名/默认名一致性扫描                                  |
-| install-runtime        | P2-001               | runtime           | local/downstream         | 标准安装 dry-run/apply                                 |
-| upgrade-runtime        | P2-002               | runtime-upgrade   | local/downstream         | 标准升级 dry-run/apply/rollback                        |
-| release-ready          | P2-003               | release           | local/ci/release         | Release readiness formula                              |
-| evidence-replay        | P2-004               | evidence          | local/ci/release         | Evidence replay                                        |
-| attest-conformance     | P2-005/P2-015        | conformance       | local/ci/downstream      | 生成符合性证明                                         |
-| pack-standard          | P2-006               | pack              | release                  | Standard Pack                                          |
-| pack-gate              | P2-007               | pack              | release                  | Gate Pack                                              |
-| pack-evidence          | P2-008               | pack              | release                  | Evidence Pack                                          |
-| downstream-baseline    | P2-014               | downstream        | local/patch-only         | 下游 adoption 前扫描                                   |
-| downstream-adoption    | P2-009/P2-010/P2-012 | downstream        | local/patch-only/pr-plan | 下游 adoption patch/pr plan                            |
-| runtime-file-ownership | P2-013               | runtime-upgrade   | local/downstream         | 文件所有权与覆盖安全                                   |
-
----
-
-## 12. Makefile 目标设计
-
-```makefile
-XLIB_CONTEXT ?= local_write
-
-.PHONY: fmt
-fmt:
-	GOWORK=off gofmt -w $$(find . -name '*.go' -not -path './.git/*')
-
-.PHONY: vet
-vet:
-	GOWORK=off go vet ./...
-
-.PHONY: lint
-lint:
-	GOWORK=off golangci-lint run ./...
-
-.PHONY: test
-test:
-	GOWORK=off go test ./...
-
-.PHONY: race
-race:
-	GOWORK=off go test -race ./...
-
-.PHONY: main-guard
-main-guard:
-	GOWORK=off go run ./cmd/goalcli main-guard --context $(XLIB_CONTEXT)
-
-.PHONY: worktree-guard
-worktree-guard:
-	GOWORK=off go run ./cmd/goalcli worktree-guard --context $(XLIB_CONTEXT)
-
-.PHONY: evidence-check
-evidence-check:
-	GOWORK=off go run ./cmd/goalcli evidence-check
-
-.PHONY: boundary
-boundary:
-	GOWORK=off go run ./cmd/goalcli boundary
-
-.PHONY: security
-security:
-	GOWORK=off go run ./cmd/goalcli security
-
-.PHONY: contracts
-contracts:
-	GOWORK=off go run ./cmd/goalcli contracts
-
-.PHONY: docs-check
-docs-check:
-	GOWORK=off go run ./cmd/goalcli docs-check
-
-.PHONY: governance-check
-governance-check: main-guard worktree-guard evidence-check boundary security
-
-.PHONY: p1-governance-check
-p1-governance-check:
-	GOWORK=off go run ./cmd/goalcli agent-team-contract
-	GOWORK=off go run ./cmd/goalcli scope-lock
-	GOWORK=off go run ./cmd/goalcli pr-template
-	GOWORK=off go run ./cmd/goalcli acceptance-matrix
-	GOWORK=off go run ./cmd/goalcli runtime-health
-	GOWORK=off go run ./cmd/goalcli conformance-profile
-	GOWORK=off go run ./cmd/goalcli downstream-registry
-	GOWORK=off go run ./cmd/goalcli self-healing-skeleton
-
-.PHONY: p2-runtime-check
-p2-runtime-check:
-	GOWORK=off go run ./cmd/goalcli install-runtime --dry-run
-	GOWORK=off go run ./cmd/goalcli upgrade-runtime --dry-run
-	GOWORK=off go run ./cmd/goalcli release-ready
-	GOWORK=off go run ./cmd/goalcli evidence-replay
-	GOWORK=off go run ./cmd/goalcli attest-conformance --profile standard-source
-	GOWORK=off go run ./cmd/goalcli pack-standard
-	GOWORK=off go run ./cmd/goalcli pack-gate
-	GOWORK=off go run ./cmd/goalcli pack-evidence
-
-.PHONY: release-check
-release-check: governance-check test contracts docs-check
-
-.PHONY: release-final-check
-release-final-check:
-	XLIB_CONTEXT=release_verify GOWORK=off make governance-check
-	GOWORK=off make p1-governance-check
-	GOWORK=off make p2-runtime-check
-	GOWORK=off make release-check
+```text
+taosx/
+  .agent/
+    runtime/
+    harness/
+    evidence/
+    traceability/
+    release/
+    review/
+    retro/
+  .github/workflows/
+    ci.yml
+    release-check.yml
+    security.yml
+  cmd/
+    taosx-doctor/
+  pkg/taosx/
+    config.go
+    client.go
+    factory.go
+    lifecycle.go
+    health.go
+    errors.go
+    sql.go
+    writer.go
+    batch.go
+    schemaless.go
+    schema.go
+    metrics.go
+    options.go
+  internal/
+    driver/
+      database_sql.go
+      fake.go
+    dsn/
+      dsn.go
+    redact/
+      redact.go
+    testenv/
+      docker.go
+  contracts/
+    config.schema.json
+    health.schema.json
+    metrics.contract.yaml
+    public_api.snapshot
+    schemaless_failure_contract.md
+  docs/
+    README.md
+    api.md
+    config.md
+    health.md
+    errors.md
+    metrics.md
+    tdengine-profile.md
+    schemaless.md
+    testing.md
+    release.md
+    downstream-adoption.md
+  examples/
+    basic-connect/
+    health-check/
+    sql-exec/
+    batch-write/
+    schemaless-write/
+  release/
+    manifest/template.json
+  scripts/
+    check_boundary.sh
+    check_contracts.sh
+    check_docs.sh
+    generate_manifest.sh
+  Makefile
+  go.mod
+  README.md
 ```
 
----
+### 6.3 Runtime dependency policy
 
-## 13. CI 设计
+```text
+Allowed runtime imports:
+  standard library
+  github.com/ZoneCNH/kernel
+  github.com/ZoneCNH/configx
+  github.com/ZoneCNH/observex
+  TDengine Go connector selected by AutoResearch and ADR
 
-CI 必须调用 Makefile，不得重复实现 Gate 逻辑。
+Allowed test-only imports:
+  github.com/ZoneCNH/testkitx
+  testcontainers-go or docker CLI wrapper, only if accepted by ADR
+  golden test helpers
 
-```yaml
-name: ci
-permissions:
-  contents: read
-  pull-requests: read
+Forbidden imports:
+  github.com/bytechainx/x.go
+  github.com/ZoneCNH/x.go
+  x.go/internal/*
+  business service packages
+  prometheus direct SDK in public API
+  OpenTelemetry direct SDK in public API
+  hardcoded secret files
+```
 
-on:
-  pull_request:
-  push:
-    branches: [main]
+### 6.4 Public API shape
 
-jobs:
-  governance:
-    runs-on: ubuntu-latest
-    env:
-      XLIB_CONTEXT: ci_pull_request
-    steps:
-      - uses: actions/checkout@<pinned-version-or-sha>
-      - uses: actions/setup-go@<pinned-version-or-sha>
-      - run: GOWORK=off make governance-check
+`taosx` 的 API 应以 contract 为中心：
 
-  test:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@<pinned-version-or-sha>
-      - uses: actions/setup-go@<pinned-version-or-sha>
-      - run: GOWORK=off make test
+```go
+type Config struct {
+    Driver          DriverMode
+    Endpoint        string
+    Database        string
+    Username        string
+    Password        Secret
+    Timeout         time.Duration
+    ConnectTimeout  time.Duration
+    QueryTimeout    time.Duration
+    WriteTimeout    time.Duration
+    MaxOpenConns    int
+    MaxIdleConns    int
+    ConnMaxLifetime time.Duration
+    TLS             TLSConfig
+    Tags            map[string]string
+}
 
-  contracts:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@<pinned-version-or-sha>
-      - uses: actions/setup-go@<pinned-version-or-sha>
-      - run: GOWORK=off make contracts
+type Client interface {
+    Exec(ctx context.Context, stmt Statement, args ...any) (Result, error)
+    Query(ctx context.Context, query Query, args ...any) (Rows, error)
+    WriteBatch(ctx context.Context, batch Batch) (WriteResult, error)
+    SchemalessWrite(ctx context.Context, batch SchemalessBatch) (WriteResult, error)
+    Health(ctx context.Context) HealthStatus
+    Close(ctx context.Context) error
+}
 
-  release-check:
-    runs-on: ubuntu-latest
-    env:
-      XLIB_CONTEXT: release_verify
-    steps:
-      - uses: actions/checkout@<pinned-version-or-sha>
-      - uses: actions/setup-go@<pinned-version-or-sha>
-      - run: GOWORK=off make release-check
+type Factory interface {
+    New(ctx context.Context, cfg Config, opts ...Option) (Client, error)
+}
 ```
 
 原则：
 
+1. Public API 返回 `kernel/errx` 可识别错误。
+2. Public API 不返回底层 driver 私有类型，除非通过 `Unwrap` 或 `As` 显式取得。
+3. Public API 不直接暴露业务表结构。
+4. `Close` 必须可重复调用且幂等。
+5. `Health` 不得泄露 password / token / DSN 原文。
+6. 所有 SQL 字符串 helper 必须区分 identifier 与 value，避免误导调用方把 string concat 当安全 builder。
+
+---
+
+## 7. taosx 能力边界
+
+### 7.1 必须实现
+
 ```text
-1. P0/P1 required checks 禁止 continue-on-error。
-2. Security / Evidence / Governance 必须独立可见。
-3. CI 不读取生产 secret。
-4. GitHub settings apply 不隐式执行；verify 可以执行。
-5. Artifact 上传只允许脱敏 Evidence。
+配置 contract
+  - WebSocket DSN profile
+  - username/password secret redaction
+  - database/profile validation
+  - timeout / pool / TLS / tags
+
+连接 contract
+  - NewClient / Factory
+  - explicit Start / Close
+  - ping / health
+  - connection error classification
+
+SQL contract
+  - Exec
+  - Query
+  - Result / Rows abstraction
+  - context timeout
+  - row scan helper, but no ORM
+
+Schema contract
+  - CreateDatabase
+  - CreateStable
+  - CreateSubTableUsingStable
+  - Drop / Describe helpers, optional after MVA
+
+Write contract
+  - Batch insert
+  - typed values
+  - timestamp precision
+  - retry classification
+  - partial failure capture
+
+Schemaless contract
+  - Influx line protocol
+  - OpenTSDB telnet protocol
+  - OpenTSDB JSON protocol
+  - precision enum
+  - partial failure contract
+
+Health / observability contract
+  - health JSON schema
+  - metrics names
+  - trace fields
+  - sanitized config fingerprint
+
+Harness / Evidence
+  - fmt/vet/lint/test/race
+  - contracts
+  - boundary
+  - docs
+  - security
+  - integration
+  - release manifest
+  - release evidence check
+```
+
+### 7.2 禁止实现
+
+```text
+禁止业务模型:
+  - Kline
+  - Symbol
+  - Exchange
+  - MarketType
+  - MacroSeries
+  - RegimeState
+  - StrategySignal
+  - OrderBook
+
+禁止应用编排:
+  - x.go service wiring
+  - market-data worker
+  - macro-data pipeline
+  - cron/scheduler business job
+  - business migration plan
+
+禁止隐式运行时:
+  - package-level default client
+  - init() 建连接
+  - 自动读取生产 secrets
+  - hidden goroutine
+  - hidden retry loop without policy
 ```
 
 ---
 
-## 14. Evidence Runtime
-
-### 14.1 Evidence Bundle 最小 schema
+## 8. Goal Runtime v3.1 对象模型
 
 ```yaml
-evidence:
-  command:
-  result:
-  commit:
-  branch:
-  worktree:
-  context:
-  timestamp:
-  artifacts:
-  known_gaps:
-  checksum:
+goal:
+  id: GOAL-20260604-TAOSX-L2-FACTORY-001
+  name: Upgrade taosx to xlib-standard governed L2 TDengine adapter factory
+  mode: Full
+  owner: ZoneCNH
+  repository: github.com/ZoneCNH/taosx
+  standard_source: github.com/ZoneCNH/xlib-standard
+  target_release: v0.1.0
+  state_machine:
+    current: INIT
+    target: DONE
+
+spec:
+  id: SPEC-taosx-l2-adapter-v0.1
+  scope:
+    - independent repo bootstrap
+    - TDengine WebSocket adapter contract
+    - L0/L1 governance adoption
+    - Harness and Evidence runtime
+    - downstream consumer proof protocol
+
+release:
+  id: REL-20260604-taosx-v0.1.0
+  evidence_required: true
+  done_phrase: "DONE with evidence:"
 ```
 
-### 14.2 Artifact path convention
+### 8.1 State Machine
 
 ```text
-release/evidence/<date>/<issue-id>/<artifact>.json
-release/manifest/<version>/manifest.json
-release/manifest/<version>/manifest.json.sha256
-release/manifest/latest.json              # generated, ignored unless release policy explicitly says otherwise
-release/manifest/latest.json.sha256       # generated, ignored unless release policy explicitly says otherwise
+INIT
+  -> CONTEXT_READY
+  -> GOAL_READY
+  -> SPEC_READY
+  -> DESIGN_READY
+  -> PLAN_READY
+  -> TASKS_READY
+  -> EXECUTING
+  -> VERIFYING
+  -> REVIEWING
+  -> RELEASING
+  -> RETROSPECTING
+  -> DONE
 ```
 
-### 14.3 Retention
+异常状态：
+
+```text
+BLOCKED
+FAILED
+NEEDS_RESEARCH
+NEEDS_DECISION
+NEEDS_REPLAN
+NEEDS_ROLLBACK
+NEEDS_HUMAN_APPROVAL
+INCONSISTENT_STATE
+```
+
+### 8.2 Mode 划分
+
+| Mode | 用途 | 允许省略 | 不允许省略 |
+|---|---|---|---|
+| Lite | 快速 bootstrap / MVA | real TDengine integration | go.mod、README、Makefile、boundary、unit test、fake driver |
+| Standard | v0.1.0 release | downstream x.go adoption | release manifest、contracts、docs、CI、health、metrics |
+| Full | v1.0.0 标准工厂 | 无 | real integration、x.go consumer smoke、adoption proof、retrospective patch |
+
+---
+
+## 9. Requirements
+
+### REQ-001 独立仓库标准化
+
+`taosx` 必须成为独立 Go module，并从 `xlib-standard` 渲染或对齐标准骨架。
+
+Acceptance Criteria:
+
+```text
+AC-001-001 go.mod module = github.com/ZoneCNH/taosx
+AC-001-002 README 明确 L2 TDengine adapter 定位
+AC-001-003 Makefile 包含 xlib-standard required gates
+AC-001-004 .agent runtime 存在并能关联 Goal v3.1 对象
+AC-001-005 release/manifest/template.json 存在
+```
+
+### REQ-002 L0/L1 契约依赖
+
+运行时代码必须复用 L0/L1 contract。
+
+Acceptance Criteria:
+
+```text
+AC-002-001 errors 使用 kernel errx 分类或可映射到 errx
+AC-002-002 lifecycle 使用 kernel lifecycle/context/shutdown primitive
+AC-002-003 config 通过 configx contract 加载或映射
+AC-002-004 observability 通过 observex interface 注入
+AC-002-005 tests 可消费 testkitx，但不得把 testkitx 作为必要 runtime dependency
+```
+
+### REQ-003 TDengine WebSocket 主路径
+
+`taosx` 默认以 WebSocket / taosWS profile 作为连接方式。
+
+Acceptance Criteria:
+
+```text
+AC-003-001 DriverMode 包含 WebSocket / NativeLegacy / RESTSQLOnly
+AC-003-002 default DriverMode = WebSocket
+AC-003-003 NativeLegacy 必须显式开启并在 docs 标记迁移风险
+AC-003-004 RESTSQLOnly 标记为 fallback，不参与完整 contract
+AC-003-005 DSN redaction golden test 覆盖 password/token 脱敏
+```
+
+### REQ-004 Config Contract
+
+`taosx` 必须提供配置 schema、校验与脱敏 contract。
+
+Acceptance Criteria:
+
+```text
+AC-004-001 contracts/config.schema.json 覆盖 required fields
+AC-004-002 Config.Validate() 返回 validation error kind
+AC-004-003 Config.Sanitized() 不泄露 secret
+AC-004-004 examples/config 输出 masked password
+AC-004-005 docs/config.md 说明显式注入，不读取生产 secret 路径
+```
+
+### REQ-005 Client Contract
+
+`taosx` 必须提供稳定 Client interface。
+
+Acceptance Criteria:
+
+```text
+AC-005-001 Client interface 覆盖 Exec/Query/WriteBatch/SchemalessWrite/Health/Close
+AC-005-002 所有 I/O 方法接受 context.Context
+AC-005-003 Close 幂等
+AC-005-004 public API snapshot 记录导出符号
+AC-005-005 API diff gate 阻断未声明 breaking change
+```
+
+### REQ-006 Error Contract
+
+TDengine 错误必须映射到统一错误分类。
+
+Acceptance Criteria:
+
+```text
+AC-006-001 连接失败 -> ErrorKindConnection / Unavailable
+AC-006-002 认证失败 -> ErrorKindAuth
+AC-006-003 超时 / context deadline -> ErrorKindTimeout
+AC-006-004 SQL / schema 校验错误 -> ErrorKindValidation 或 Conflict
+AC-006-005 transient network / adapter unavailable -> retryable=true
+AC-006-006 docs/errors.md 包含 mapping table
+```
+
+### REQ-007 SQL Contract
+
+SQL 执行必须提供基础 contract，但不实现 ORM。
+
+Acceptance Criteria:
+
+```text
+AC-007-001 Exec 支持 context timeout
+AC-007-002 Query 支持 rows close 和 error propagation
+AC-007-003 Result 包含 rows affected 或 driver unknown 状态
+AC-007-004 Statement helper 不鼓励拼接 value
+AC-007-005 docs/sql.md 明确 SQL injection 边界由调用方或 prepared/param helper 处理
+```
+
+### REQ-008 Schema Contract
+
+`taosx` 提供 generic STABLE / subtable primitive。
+
+Acceptance Criteria:
+
+```text
+AC-008-001 StableSpec 支持 timestamp column, fields, tags
+AC-008-002 Identifier validation 阻断非法库表列名
+AC-008-003 SQL rendering golden test 覆盖 escaping / quoting
+AC-008-004 不出现 Kline / Market / Macro / Regime 业务词汇
+```
+
+### REQ-009 Batch Write Contract
+
+批量写入必须有可测试语义。
+
+Acceptance Criteria:
+
+```text
+AC-009-001 Batch 包含 database/table/columns/rows/time precision
+AC-009-002 WriteResult 包含 attempted/succeeded/failed/driver_result
+AC-009-003 部分失败必须返回 structured error 或 partial result
+AC-009-004 metrics 记录 rows_total / duration / error_total
+AC-009-005 golden test 覆盖 empty batch、invalid row、large batch boundary
+```
+
+### REQ-010 Schemaless Contract
+
+Schemaless 写入必须明确自动建表与 partial failure 风险。
+
+Acceptance Criteria:
+
+```text
+AC-010-001 Protocol enum: Line / Telnet / JSON
+AC-010-002 Precision enum: hour/min/sec/ms/us/ns
+AC-010-003 docs/schemaless.md 明确自动建表、自动加列、partial failure
+AC-010-004 golden test 覆盖 line escaping / value suffix / timestamp precision
+AC-010-005 contract 明确不保证多行原子性
+```
+
+### REQ-011 Health Contract
+
+健康检查必须结构化并可脱敏。
+
+Acceptance Criteria:
+
+```text
+AC-011-001 HealthStatus JSON schema 存在
+AC-011-002 Health 包含 name/status/latency/message/metadata
+AC-011-003 metadata 不包含 password/token/raw DSN
+AC-011-004 health 可通过 fake driver 和 optional real TDengine integration 测试
+```
+
+### REQ-012 Observability Contract
+
+metrics/log/trace 必须供应商无关。
+
+Acceptance Criteria:
+
+```text
+AC-012-001 observex logger/metrics/tracer 注入
+AC-012-002 不直接依赖 Prometheus/Otel/Zap 具体 SDK 作为 public API
+AC-012-003 metrics.contract.yaml 包含名称、类型、labels、单位
+AC-012-004 logs 默认不输出 SQL values 或 secrets
+AC-012-005 tracing span 包含 operation、driver、database hash、status，不包含 secret
+```
+
+### REQ-013 Test Harness
+
+必须有 fake、contract、golden、race、optional docker integration。
+
+Acceptance Criteria:
+
+```text
+AC-013-001 go test ./... 通过
+AC-013-002 race gate 通过
+AC-013-003 golden tests 覆盖 DSN、SQL render、schemaless line
+AC-013-004 fake driver 可验证 client contract
+AC-013-005 docker integration 可通过环境变量显式启用
+```
+
+### REQ-014 Boundary Gate
+
+必须阻断业务词汇和非法依赖。
+
+Acceptance Criteria:
+
+```text
+AC-014-001 check_boundary.sh 阻断 x.go imports
+AC-014-002 阻断 MarketData/Kline/OrderBook/Regime/Strategy 等业务词汇
+AC-014-003 阻断隐式 secret path 读取
+AC-014-004 boundary gate 进入 make ci 和 release-check
+```
+
+### REQ-015 Release Evidence
+
+每次发布必须生成独立 Evidence。
+
+Acceptance Criteria:
+
+```text
+AC-015-001 make evidence 生成 release/manifest/latest.json
+AC-015-002 release-evidence-check 校验 manifest 与仓库事实一致
+AC-015-003 release-final-check 要求 clean workspace
+AC-015-004 CI 上传 manifest 和 sha256 artifact
+AC-015-005 完成声明包含 DONE with evidence:
+```
+
+### REQ-016 Downstream Adoption
+
+`taosx` 发布后必须形成下游采纳证据协议。
+
+Acceptance Criteria:
+
+```text
+AC-016-001 docs/downstream-adoption.md 定义 x.go consumer smoke
+AC-016-002 adoption proof 区分 registered / baseline_scanned / adopted
+AC-016-003 没有 x.go 当前命令输出不得宣称 adopted
+AC-016-004 downstream proof 包含 source commit、downstream commit、gate outputs、rollback
+```
+
+---
+
+## 10. Traceability Matrix
+
+| Requirement | Acceptance Criteria | Design Section | Tasks | Tests | Evidence |
+|---|---|---|---|---|---|
+| REQ-001 | AC-001-* | Repo Bootstrap | TASK-001 | doctor, go test | manifest, README |
+| REQ-002 | AC-002-* | L0/L1 Contract | TASK-002 | boundary, unit | dependency list |
+| REQ-003 | AC-003-* | TDengine Profile | TASK-003 | config golden | ADR, docs |
+| REQ-004 | AC-004-* | Config | TASK-004 | schema, redaction | config.schema.json |
+| REQ-005 | AC-005-* | Client API | TASK-005 | api snapshot | public_api.snapshot |
+| REQ-006 | AC-006-* | Error Mapping | TASK-006 | error contract | docs/errors.md |
+| REQ-007 | AC-007-* | SQL | TASK-007 | fake + golden | sql test output |
+| REQ-008 | AC-008-* | Schema Builder | TASK-008 | golden SQL | contracts/schema |
+| REQ-009 | AC-009-* | Batch Writer | TASK-009 | batch tests | metrics evidence |
+| REQ-010 | AC-010-* | Schemaless | TASK-010 | line/json/telnet golden | schemaless contract |
+| REQ-011 | AC-011-* | Health | TASK-011 | health schema | health.schema.json |
+| REQ-012 | AC-012-* | Observability | TASK-012 | metrics contract | metrics.contract.yaml |
+| REQ-013 | AC-013-* | Harness | TASK-013 | unit/race/docker | CI logs |
+| REQ-014 | AC-014-* | Boundary | TASK-014 | boundary gate | boundary output |
+| REQ-015 | AC-015-* | Release | TASK-015 | release-final-check | manifest + sha256 |
+| REQ-016 | AC-016-* | Adoption | TASK-016 | consumer smoke | adoption proof |
+
+---
+
+## 11. Task Breakdown
+
+### TASK-001 Repo Bootstrap from xlib-standard
 
 ```yaml
-retention:
-  release_evidence: permanent
-  security_incident: permanent
-  audit_log: 3y
-  ci_artifact: 90d
-  failed_rc: 30d
+task_id: TASK-GOAL-20260604-TAOSX-001
+title: Bootstrap taosx as xlib-standard generated repository
+mode: Standard
+commands:
+  - git clone git@github.com:ZoneCNH/taosx.git
+  - cd taosx
+  - git switch main
+  - git pull --ff-only
+  - git worktree add .worktree/goal-taosx-l2-factory -b goal/taosx-l2-factory
+  - cd .worktree/goal-taosx-l2-factory
+  - render or copy xlib-standard template into empty repo
+  - go mod init github.com/ZoneCNH/taosx
+  - GOWORK=off go mod tidy
+acceptance:
+  - go.mod exists
+  - README updated
+  - Makefile exists
+  - .agent exists
+  - release manifest template exists
+evidence:
+  - git diff summary
+  - GOWORK=off make test
+  - GOWORK=off make docs-check
 ```
 
-### 14.4 DONE with evidence
+### TASK-002 L0/L1 Dependency Contract
+
+```yaml
+task_id: TASK-GOAL-20260604-TAOSX-002
+title: Wire kernel/configx/observex/testkitx contracts
+runtime_allowed:
+  - github.com/ZoneCNH/kernel
+  - github.com/ZoneCNH/configx
+  - github.com/ZoneCNH/observex
+test_allowed:
+  - github.com/ZoneCNH/testkitx
+acceptance:
+  - dependency-check passes
+  - boundary-check passes
+  - no x.go import
+```
+
+### TASK-003 TDengine Connector AutoResearch ADR
+
+```yaml
+task_id: TASK-GOAL-20260604-TAOSX-003
+title: Decide TDengine Go connector mode and driver policy
+autoresearch_questions:
+  - current official Go connector module path
+  - taosWS driver registration name
+  - DSN format
+  - websocket vs native support matrix
+  - schemaless API shape
+  - error code mapping API
+  - docker image and CI service strategy
+outputs:
+  - docs/adr/ADR-20260604-001-tdengine-connector-mode.md
+  - docs/tdengine-profile.md
+acceptance:
+  - WebSocket default documented
+  - native marked legacy / explicit
+  - REST marked SQL-only fallback
+```
+
+### TASK-004 Config and Redaction Contract
+
+```yaml
+task_id: TASK-GOAL-20260604-TAOSX-004
+title: Implement Config, Validate, Sanitized, schema
+files:
+  - pkg/taosx/config.go
+  - contracts/config.schema.json
+  - docs/config.md
+  - examples/config/main.go
+acceptance:
+  - invalid endpoint rejected
+  - empty username rejected if auth required
+  - password redacted in String/JSON/log fields
+  - config schema tests pass
+```
+
+### TASK-005 Client Interface and Factory
+
+```yaml
+task_id: TASK-GOAL-20260604-TAOSX-005
+title: Implement public Client/Factory contract
+files:
+  - pkg/taosx/client.go
+  - pkg/taosx/factory.go
+  - pkg/taosx/options.go
+  - contracts/public_api.snapshot
+acceptance:
+  - API snapshot generated
+  - fake client implements interface
+  - no driver-specific public leakage
+```
+
+### TASK-006 Error Mapping
+
+```yaml
+task_id: TASK-GOAL-20260604-TAOSX-006
+title: Map TDengine and context errors to kernel errx
+files:
+  - pkg/taosx/errors.go
+  - docs/errors.md
+  - contracts/error-golden.json
+acceptance:
+  - timeout maps to Timeout
+  - auth maps to Auth
+  - connection refused maps to Connection/Unavailable
+  - validation maps to Validation
+  - retryable flag documented
+```
+
+### TASK-007 SQL Exec/Query Contract
+
+```yaml
+task_id: TASK-GOAL-20260604-TAOSX-007
+title: Implement SQL Exec/Query primitives
+files:
+  - pkg/taosx/sql.go
+  - internal/driver/database_sql.go
+  - docs/sql.md
+acceptance:
+  - context cancellation propagated
+  - rows close tested
+  - result rows affected represented safely
+  - no ORM semantics
+```
+
+### TASK-008 Schema Primitive
+
+```yaml
+task_id: TASK-GOAL-20260604-TAOSX-008
+title: Implement STABLE/subtable schema builder
+files:
+  - pkg/taosx/schema.go
+  - contracts/schema-golden/*.sql
+  - docs/schema.md
+acceptance:
+  - CreateStable SQL golden pass
+  - identifier validation pass
+  - no business schema included
+```
+
+### TASK-009 Batch Writer
+
+```yaml
+task_id: TASK-GOAL-20260604-TAOSX-009
+title: Implement batch write contract
+files:
+  - pkg/taosx/batch.go
+  - pkg/taosx/writer.go
+  - docs/batch-write.md
+acceptance:
+  - empty batch validation
+  - row length mismatch validation
+  - partial result structure
+  - metrics emitted through observex
+```
+
+### TASK-010 Schemaless Writer
+
+```yaml
+task_id: TASK-GOAL-20260604-TAOSX-010
+title: Implement schemaless write contract
+files:
+  - pkg/taosx/schemaless.go
+  - contracts/schemaless_failure_contract.md
+  - docs/schemaless.md
+acceptance:
+  - line/telnet/json protocol enum
+  - timestamp precision enum
+  - partial failure documented
+  - golden examples pass
+```
+
+### TASK-011 Health and Lifecycle
+
+```yaml
+task_id: TASK-GOAL-20260604-TAOSX-011
+title: Implement health check and lifecycle ownership
+files:
+  - pkg/taosx/health.go
+  - pkg/taosx/lifecycle.go
+  - contracts/health.schema.json
+acceptance:
+  - Health JSON schema pass
+  - Close idempotent
+  - Start/Stop order explicit
+  - no hidden background runtime
+```
+
+### TASK-012 Observability
+
+```yaml
+task_id: TASK-GOAL-20260604-TAOSX-012
+title: Implement vendor-neutral logs/metrics/tracing
+files:
+  - pkg/taosx/metrics.go
+  - contracts/metrics.contract.yaml
+  - docs/metrics.md
+acceptance:
+  - no direct prometheus/otel public API
+  - metrics names documented
+  - secret labels forbidden
+```
+
+### TASK-013 Harness and CI
+
+```yaml
+task_id: TASK-GOAL-20260604-TAOSX-013
+title: Add required and extended gates
+commands:
+  - GOWORK=off make fmt
+  - GOWORK=off make vet
+  - GOWORK=off make lint
+  - GOWORK=off make test
+  - GOWORK=off make race
+  - GOWORK=off make boundary
+  - GOWORK=off make security
+  - GOWORK=off make contracts
+  - GOWORK=off make docs-check
+  - GOWORK=off make integration
+acceptance:
+  - GitHub Actions run gates
+  - local Makefile mirrors CI
+```
+
+### TASK-014 Boundary and Security
+
+```yaml
+task_id: TASK-GOAL-20260604-TAOSX-014
+title: Enforce L2 boundary and secret policy
+acceptance:
+  - x.go import blocked
+  - business terms blocked
+  - raw password not logged
+  - release manifest excludes generated secrets
+  - /home/k8s/secrets/env/* only appears as documentation path, never content
+```
+
+### TASK-015 Release Evidence
+
+```yaml
+task_id: TASK-GOAL-20260604-TAOSX-015
+title: Generate independent release manifest and evidence
+commands:
+  - CHECK_STATUS=passed GOWORK=off make evidence
+  - RELEASE_EVIDENCE_REQUIRE_PASSED=1 GOWORK=off make release-evidence-check
+  - XLIB_CONTEXT=release_verify GOWORK=off make release-final-check
+acceptance:
+  - release/manifest/latest.json generated but not committed
+  - latest.json.sha256 generated
+  - manifest includes module, commit, tree_sha, contracts, dependencies, tools, checks, workflow, score
+```
+
+### TASK-016 Downstream Consumer Proof
+
+```yaml
+task_id: TASK-GOAL-20260604-TAOSX-016
+title: Define x.go and service consumer adoption proof
+files:
+  - docs/downstream-adoption.md
+  - contracts/downstream-adoption-proof.schema.json
+acceptance:
+  - registered != adopted rule preserved
+  - proof requires downstream commit and gate outputs
+  - x.go smoke never becomes taosx release prerequisite unless explicitly scoped
+```
+
+### TASK-017 Retrospective and Self-improving Patch
+
+```yaml
+task_id: TASK-GOAL-20260604-TAOSX-017
+title: Convert lessons into prompt/harness/rule patches
+outputs:
+  - docs/retro/RETRO-20260604-taosx-v0.1.0.md
+  - docs/retro/PATCH-PROMPT-20260604-taosx.md
+  - docs/retro/PATCH-HARNESS-20260604-taosx.md
+  - docs/retro/PATCH-RULE-20260604-taosx.md
+acceptance:
+  - failed gates become future gates or docs
+  - TDengine connector decisions update ADR
+  - downstream adoption gaps logged
+```
+
+---
+
+## 12. PR / Issue 执行波次
+
+### Wave 0: Issue Registry and Goal Intake
+
+```text
+Issue: GOAL-20260604-TAOSX-L2-FACTORY-001
+Labels: goal, taosx, l2-adapter, xlib-standard, evidence-required
+Output: goal.md, spec.md, design.md, plan.md, traceability.md
+Gate: semantic review
+```
+
+### Wave 1: Bootstrap PR
+
+```text
+PR-001: bootstrap taosx standard skeleton
+Scope:
+  - go.mod
+  - README
+  - Makefile
+  - .agent
+  - docs standard links
+  - release manifest template
+  - boundary/security scripts
+Gate:
+  - make test
+  - make docs-check
+  - make boundary
+```
+
+### Wave 2: Contract PR
+
+```text
+PR-002: config/client/error/health public contracts
+Scope:
+  - Config
+  - Client interface
+  - Error mapping
+  - Health status
+  - public API snapshot
+Gate:
+  - contracts
+  - api-check
+  - golden
+```
+
+### Wave 3: Runtime Adapter PR
+
+```text
+PR-003: TDengine WebSocket adapter runtime
+Scope:
+  - taosWS connector ADR
+  - SQL Exec/Query
+  - batch writer
+  - fake driver
+  - optional real driver behind build tag or integration profile
+Gate:
+  - unit
+  - race
+  - fake integration
+  - optional docker integration
+```
+
+### Wave 4: Schemaless and Schema PR
+
+```text
+PR-004: schema builder and schemaless writer
+Scope:
+  - StableSpec
+  - SubTableSpec
+  - SchemalessBatch
+  - partial failure contract
+  - golden examples
+Gate:
+  - golden
+  - docs-check
+  - contract tests
+```
+
+### Wave 5: Release and Adoption PR
+
+```text
+PR-005: release evidence and downstream adoption protocol
+Scope:
+  - release manifest
+  - CI artifact
+  - docs/downstream-adoption.md
+  - x.go smoke plan
+  - retrospective templates
+Gate:
+  - release-final-check
+  - score --min 9.8
+```
+
+---
+
+## 13. Harness Gate 设计
+
+### 13.1 Required Gate
+
+```makefile
+fmt:
+	GOWORK=off go fmt ./...
+
+vet:
+	GOWORK=off go vet ./...
+
+lint:
+	golangci-lint run ./...
+
+test:
+	GOWORK=off go test ./...
+
+race:
+	GOWORK=off go test -race ./...
+
+boundary:
+	./scripts/check_boundary.sh
+
+security:
+	./scripts/check_secrets.sh
+
+contracts:
+	./scripts/check_contracts.sh
+
+docs-check:
+	./scripts/check_docs.sh
+
+integration:
+	./scripts/check_integration.sh
+
+evidence:
+	./scripts/generate_manifest.sh
+
+release-check:
+	$(MAKE) ci
+	$(MAKE) evidence
+	$(MAKE) release-evidence-check
+
+release-final-check:
+	$(MAKE) release-clean-check
+	$(MAKE) release-check
+	$(MAKE) release-clean-check
+```
+
+### 13.2 Extended Gate
+
+```text
+property: schema builder property tests
+fuzz-smoke: DSN/parser/schemaless fuzz smoke
+golden: SQL render / config redaction / metrics contract golden
+integration-real: TDengine docker / taosAdapter optional real contract
+consumer-smoke: x.go or sample app import smoke
+score: goalcli score --min 9.8
+```
+
+### 13.3 Boundary Gate 规则
+
+必须 fail-fast：
+
+```text
+forbidden imports:
+  github.com/bytechainx/x.go
+  github.com/ZoneCNH/x.go
+  x.go/internal
+
+forbidden business terms in runtime packages:
+  BTCUSDT
+  ETHUSDT
+  Kline
+  OrderBook
+  MarketData
+  MacroData
+  Regime
+  Strategy
+  Position
+  TradingSignal
+
+forbidden secret behavior:
+  os.ReadFile("/home/k8s/secrets/env/...") in runtime
+  raw password in README examples
+  raw DSN in manifest
+```
+
+---
+
+## 14. Evidence Protocol
+
+### 14.1 Task 完成声明
+
+每个 Task 必须使用：
 
 ```text
 DONE with evidence:
-- scope:
-- issues:
-- worktree:
-- branch:
-- changed_files:
+- scope: task
+- task_id: TASK-GOAL-20260604-TAOSX-XXX
+- branch: goal/taosx-l2-factory
+- commit: <sha or not committed>
 - gates:
-- evidence:
+  - GOWORK=off make test: passed <summary>
+  - GOWORK=off make boundary: passed <summary>
+- artifacts:
+  - <path>: <purpose>
+- known gaps:
+  - <none or explicit blocker>
+```
+
+### 14.2 Issue 完成声明
+
+```text
+DONE with evidence:
+- scope: issue
+- issue_id: ISSUE-TAOSX-XXX
+- pr: <url or number>
+- commit: <sha>
+- gates:
+  - fmt/vet/lint/test/race: passed
+  - contracts: passed
+  - docs-check: passed
+  - boundary: passed
+- artifacts:
+  - release/manifest/latest.json: local generated, not committed
+  - release/manifest/latest.json.sha256: checksum
 - review:
-- release_impact:
-- known_gaps:
-- follow_up:
+  - reviewer: <name>
+  - result: approved/request-changes
+- known gaps:
+  - <none>
+```
+
+### 14.3 Release 完成声明
+
+```text
+DONE with evidence:
+- scope: release
+- release_id: REL-20260604-taosx-v0.1.0
+- tag: v0.1.0
+- commit: <sha>
+- source_digest: <manifest.source_digest>
+- contract_fingerprint: <manifest.contracts.sha256>
+- dependency_list: <manifest.dependencies>
+- tool_versions: <manifest.tools>
+- workflow_artifact:
+  - release/manifest/latest.json
+  - release/manifest/latest.json.sha256
+- gates:
+  - GOWORK=off make release-final-check: passed
+  - GOWORK=off go run ./cmd/goalcli score --min 9.8: passed
+- downstream:
+  - adoption_status: not_claimed | adopted
+  - proof_based_adoption: false | true
+  - x.go consumer smoke: passed | not_run | blocked
+- known gaps:
+  - <none or explicit blocker>
 ```
 
 ---
 
-## 15. Release Manifest Skeleton
+## 15. Release Manifest 必须字段
 
-```yaml
-module:
-version:
-commit:
-tree_sha:
-source_digest:
-tool_versions:
-workspace_status:
-gate_results:
-evidence_artifacts:
-known_gaps:
-generated_at:
-checksum:
-```
-
-Release Ready 公式：
-
-```text
-release_ready =
-  governance_check_passed
-  AND p1_governance_check_passed
-  AND runtime_health_passed
-  AND required_gates_passed
-  AND evidence_complete
-  AND manifest_valid
-  AND workspace_clean
-  AND no_p0_blocker
-  AND no_open_security_incident
-  AND review_complete
-```
-
----
-
-## 16. Runtime File Ownership
-
-```yaml
-file_classes:
-  XLIB_OWNED:
-    description: xlib-standard may generate and update
-  USER_OWNED:
-    description: never overwrite
-  MERGE_REQUIRED:
-    description: generate patch / three-way merge plan
-  GENERATED:
-    description: can be rebuilt; follow generated artifact policy
-```
-
-Runtime install/upgrade 必须：
-
-```text
-1. 先 classify target files。
-2. 默认 dry-run。
-3. USER_OWNED 不覆盖。
-4. MERGE_REQUIRED 只生成 patch plan。
-5. --apply 需要显式传入。
-6. destructive write 需要 backup 和 rollback note。
+```json
+{
+  "module": "github.com/ZoneCNH/taosx",
+  "version": "v0.1.0",
+  "commit": "<HEAD>",
+  "tree_sha": "<tree>",
+  "source_digest": "sha256:<...>",
+  "tracked_file_count": 0,
+  "go_version": "<go version>",
+  "generated_at": "<timestamp>",
+  "generated_by": "taosx release manifest generator",
+  "tree_state": "clean|dirty",
+  "checks": {
+    "fmt": "passed",
+    "vet": "passed",
+    "lint": "passed",
+    "test": "passed",
+    "race": "passed",
+    "boundary": "passed",
+    "security": "passed",
+    "contracts": "passed",
+    "docs": "passed",
+    "integration": "passed|blocked"
+  },
+  "contracts": {
+    "config_schema_sha256": "<sha>",
+    "health_schema_sha256": "<sha>",
+    "metrics_contract_sha256": "<sha>",
+    "public_api_snapshot_sha256": "<sha>"
+  },
+  "dependencies": [],
+  "tools": {},
+  "standard_source": {
+    "repo": "github.com/ZoneCNH/xlib-standard",
+    "commit": "<source commit or recorded version>",
+    "downstream_sync_required": false
+  },
+  "workflow": {
+    "workflow_run_id": "local or CI id",
+    "artifact_name": "taosx-release-manifest",
+    "artifact_url": "local:<path> or CI artifact URL"
+  },
+  "score": {
+    "threshold": 9.8,
+    "actual": 0,
+    "status": "passed|failed|blocked"
+  }
+}
 ```
 
 ---
 
-## 17. Downstream Adoption Modes
+## 16. API / Contract 设计细节
 
-```text
-local_path:   用户本地已有 clone，goalcli 对路径执行 dry-run/apply。
-patch_only:   只生成 patch bundle，不写下游仓库。
-pr_plan:      生成 PR plan，不直接创建 PR，除非权限明确。
+### 16.1 Config
+
+```go
+type DriverMode string
+
+const (
+    DriverWebSocket DriverMode = "websocket"
+    DriverNativeLegacy DriverMode = "native_legacy"
+    DriverRESTSQLOnly DriverMode = "rest_sql_only"
+)
+
+type Config struct {
+    Driver          DriverMode
+    Endpoint        string
+    Database        string
+    Username        string
+    Password        Secret
+    ConnectTimeout  time.Duration
+    QueryTimeout    time.Duration
+    WriteTimeout    time.Duration
+    MaxOpenConns    int
+    MaxIdleConns    int
+    ConnMaxLifetime time.Duration
+    TLS             TLSConfig
+    Metadata        map[string]string
+}
 ```
 
-下游 adoption 前必须运行 baseline scan：
+Validation rules:
 
 ```text
-module path
-package layout
-Makefile
-CI
-contracts
-docs
-x.go reverse dependency
-secret default usage
-existing release flow
-adoption risk score
+Driver required, default websocket
+Endpoint required
+Username required unless auth disabled explicitly for test fake
+Password secret must sanitize
+Database optional for admin operations, required for database-bound writer
+Timeouts must be >0 or defaulted
+MaxOpenConns >= 0
+MaxIdleConns >= 0
+MaxIdleConns <= MaxOpenConns when MaxOpenConns > 0
 ```
 
-首批顺序：
+### 16.2 Error
 
 ```text
-1. xlib-standard self-conformance -> standard-source
-2. kernel -> l0-kernel
-3. configx -> l1-shared
+ErrInvalidConfig      -> Validation
+ErrInvalidIdentifier  -> Validation
+ErrConnect            -> Connection / Unavailable
+ErrAuth               -> Auth
+ErrTimeout            -> Timeout
+ErrCanceled           -> Canceled
+ErrSQL                -> Internal or Validation depending SQL state
+ErrPartialWrite       -> Conflict or Internal with partial result
+ErrUnsupportedDriver  -> Validation
 ```
 
----
+### 16.3 Health
 
-## 18. GitHub Governance
+Health output：
 
-必须提供但不能隐式 apply：
-
-```text
-.github/CODEOWNERS
-.github/ISSUE_TEMPLATE/goal.yml
-.github/ISSUE_TEMPLATE/bugfix.yml
-.github/pull_request_template.md
-.agent/policies/github-settings.yaml
-docs/standard/branch-protection.md
-scripts/github/verify_settings.sh
-```
-
-规则：
-
-```text
-1. CODEOWNERS 覆盖 CONSTITUTION.md、.agent/**、.github/**、Makefile、cmd/goalcli/**、contracts/**、release/**。
-2. Branch protection / required checks 必须 verify。
-3. Admin bypass 必须 break-glass + human approval。
-4. Apply scripts 只可手动显式执行。
-```
-
----
-
-## 19. Supply Chain Security
-
-P1 最小基线：
-
-```text
-govulncheck (XLIB_ENABLE_VULNCHECK=1 only)
-golangci-lint
-secret scan / gitleaks equivalent
-optional govulncheck when XLIB_ENABLE_VULNCHECK=1
-actions pinning policy
-permissions least privilege
-go.mod / go.sum drift check
-.tool-versions
-.agent/policies/toolchain.yaml
-```
-
-P2/P3 roadmap：
-
-```text
-SBOM
-License check
-Dependency risk report
-Third-party policy admission
-```
-
----
-
-## 20. 命名策略
-
-默认名称：
-
-```text
-standard repo: xlib-standard
-L0 downstream: kernel
-old template name: baselib-template only allowed in migration docs context
-old downstream example: foundationx only allowed in migration docs context
+```json
+{
+  "name": "taosx",
+  "status": "healthy|degraded|unhealthy",
+  "message": "ok",
+  "checked_at": "2026-06-04T00:00:00Z",
+  "latency_ms": 12,
+  "metadata": {
+    "driver": "websocket",
+    "endpoint_hash": "sha256:...",
+    "database": "market_ts"
+  }
+}
 ```
 
 禁止：
 
 ```text
-1. README 主叙事使用 baselib-template。
-2. Generator 默认输出 foundationx。
-3. Release manifest 使用旧名作为当前事实。
-4. 下游 adoption manifest 使用旧名。
+password
+raw DSN
+token
+full endpoint with credentials
+```
+
+### 16.4 Metrics Contract
+
+```yaml
+metrics:
+  - name: taosx_client_connect_total
+    type: counter
+    labels: [driver, status]
+  - name: taosx_client_connection_errors_total
+    type: counter
+    labels: [driver, error_kind]
+  - name: taosx_query_duration_seconds
+    type: histogram
+    labels: [operation, driver, status]
+  - name: taosx_write_rows_total
+    type: counter
+    labels: [operation, driver, status]
+  - name: taosx_write_batches_total
+    type: counter
+    labels: [operation, driver, status]
+  - name: taosx_health_status
+    type: gauge
+    labels: [driver, status]
+```
+
+禁止 labels：
+
+```text
+password
+raw_dsn
+sql_text
+raw_query
+raw_table_name if business-sensitive
+token
+secret_path
+```
+
+### 16.5 Schemaless partial failure
+
+Contract 必须明确：
+
+```text
+Input batch has N records.
+TDengine schemaless may succeed partially.
+WriteResult must record attempted=N.
+If driver exposes affected rows or failed row index, taosx records it.
+If driver only returns generic error, taosx returns ErrPartialWrite with unknown succeeded count.
+Retry policy must not blindly retry non-idempotent unknown partial batch unless caller opts in.
 ```
 
 ---
 
-## 21. Risk Register
+## 17. AutoResearch Protocol
 
-| Risk ID  | Risk                                       | Level | Mitigation                               |
-| -------- | ------------------------------------------ | ----: | ---------------------------------------- |
-| RISK-001 | 宪法过重导致难以采用                       |    P0 | P0/P1/P2 分阶段，P3/P4 冻结              |
-| RISK-002 | Agent 在 main 上开发                       |    P0 | context-aware main-guard                 |
-| RISK-003 | worktree-guard 误伤 CI/release             |    P0 | execution-context policy                 |
-| RISK-004 | 无 Evidence 声称完成                       |    P0 | evidence-check + DONE parser             |
-| RISK-005 | 反向依赖 x.go                              |    P0 | boundary no-xgo-import check             |
-| RISK-006 | 生产 secret 路径污染模板                   |    P0 | no-secret-default check                  |
-| RISK-007 | Gate 无 fixture                            |    P1 | fixture-first + governance test strategy |
-| RISK-008 | .agent YAML 字段错误但静默通过             |    P1 | policy schema validation                 |
-| RISK-009 | GitHub settings 未真正生效                 |    P1 | verify settings protocol                 |
-| RISK-010 | Runtime install 覆盖下游手写内容           |    P1 | runtime file ownership + dry-run         |
-| RISK-011 | 下游 adoption 未扫描 baseline              |    P1 | downstream baseline scan                 |
-| RISK-012 | 旧名污染生成库                             |    P1 | naming guard                             |
-| RISK-013 | xlib-standard 自身未证明符合就要求下游符合 |    P1 | self-conformance attestation             |
+### 17.1 触发条件
+
+以下问题必须进入 AutoResearch，不得凭记忆硬编码：
+
+```text
+TDengine Go connector 当前 module path / latest supported mode
+WebSocket driver name and DSN syntax
+Native Go connector deprecation status
+REST capability limitations
+Schemaless API shape
+TDengine error code API
+Docker image / test environment startup
+License compatibility
+Connection pool behavior under database/sql
+Cloud vs self-hosted WebSocket endpoint differences
+```
+
+### 17.2 AutoResearch 输出
+
+```text
+docs/research/RESEARCH-20260604-tdengine-go-connector.md
+  - source links
+  - connector versions
+  - driver names
+  - API snippets
+  - decisions
+  - unresolved questions
+
+docs/adr/ADR-20260604-001-tdengine-driver-mode.md
+  - decision: WebSocket default
+  - alternatives: native, REST
+  - consequences
+  - migration policy
+```
+
+### 17.3 决策门禁
+
+未完成 AutoResearch 前，禁止：
+
+```text
+固定 Go connector import path
+固定 driver name
+固定 native/REST 支持等级
+宣称 real integration passed
+发布 v1.0.0
+```
 
 ---
 
-## 22. Traceability Matrix
+## 18. Risk Register
 
-| Requirement           | AC                                                 | Design                       | Task                 | Gate                                                  | Evidence               |
-| --------------------- | -------------------------------------------------- | ---------------------------- | -------------------- | ----------------------------------------------------- | ---------------------- |
-| 禁止 main 写入开发    | local_write on main fails                          | execution-context main-guard | P0-004/P0-013        | goalcli main-guard --context local_write             | fixture output         |
-| CI/release 不误阻断   | ci/release contexts pass when clean                | execution-context            | P0-013               | goalcli worktree-guard --context ci_pull_request     | fixture output         |
-| 强制 worktree         | local_write outside worktree fails                 | worktree-guard               | P0-005/P0-013        | goalcli worktree-guard                               | fixture output         |
-| 无 Evidence 不得 DONE | DONE no evidence fails                             | evidence-check               | P0-006/P0-012        | goalcli evidence-check                               | parser output          |
-| 禁止 x.go 反向依赖    | x.go import fails                                  | boundary                     | P0-007               | goalcli boundary                                     | boundary report        |
-| 禁止 secret default   | default secret path fails                          | security                     | P0-008               | goalcli security                                     | security report        |
-| 命令 SSOT             | command registry has all required commands         | command registry             | P0-015               | goalcli command-registry                             | registry report        |
-| Makefile baseline     | required targets exist                             | makefile baseline            | P0-016               | goalcli makefile-baseline                            | makefile report        |
-| PR 合规               | PR fields complete                                 | PR contract                  | P1-003               | goalcli pr-template                                  | PR report              |
-| Runtime 自检          | runtime-health passes                              | runtime health               | P1-005               | goalcli runtime-health                               | health report          |
-| Policy schema         | invalid yaml fails                                 | schema validation            | P1-017               | goalcli policy-schema                                | schema report          |
-| GitHub settings       | required settings verify                           | github governance            | P1-018               | goalcli github-settings --verify                     | verify report          |
-| Evidence path         | artifact roots declared                            | evidence artifacts           | P1-020               | goalcli evidence-artifacts                           | artifact policy report |
-| 命名一致              | stale default names blocked                        | naming policy                | P1-021               | goalcli naming                                       | naming report          |
-| Release Ready         | formula returns ready only if all constraints pass | release readiness            | P2-003               | goalcli release-ready                                | readiness report       |
-| 自符合证明            | standard-source attestation generated              | conformance                  | P2-015               | goalcli attest-conformance --profile standard-source | attestation            |
-| 下游 baseline         | kernel/configx scanned before adoption             | downstream baseline          | P2-014               | goalcli downstream-baseline                          | scan report            |
-| 下游 adoption         | patch-only adoption generated                      | adoption modes               | P2-009/P2-010/P2-012 | goalcli downstream-adoption --mode patch-only        | patch report           |
+| Risk ID | 风险 | 严重级别 | 缓解 |
+|---|---|---|---|
+| RISK-001 | 当前 taosx 仓库几乎为空 | High | 先 bootstrap skeleton，再做 runtime |
+| RISK-002 | TDengine driver API 变化 | High | AutoResearch + ADR + api compatibility guard |
+| RISK-003 | native 连接废弃导致迁移风险 | High | WebSocket default，native legacy explicit |
+| RISK-004 | secret 泄露到日志 / manifest | Critical | SecretString + redaction golden + security gate |
+| RISK-005 | 业务 schema 下沉到 L2 | High | boundary terms + review gate |
+| RISK-006 | fake tests 通过但真实 TDengine 不可用 | Medium | optional docker integration + separate evidence state |
+| RISK-007 | partial write 被误重试 | High | WriteResult + ErrPartialWrite + retry policy docs |
+| RISK-008 | public API 过早稳定 | Medium | maturity map: experimental -> candidate -> stable |
+| RISK-009 | x.go 反向污染标准 | High | no x.go import + consumer-only docs |
+| RISK-010 | release evidence 被提交 | Medium | .gitignore + release-evidence-check |
 
 ---
 
-## 23. Definition of Done
+## 19. Decision Log
+
+| Decision ID | 决策 | 状态 | 理由 |
+|---|---|---|---|
+| DEC-20260604-001 | `taosx` 定位为 L2 TDengine adapter | Accepted | xlib-standard downstream matrix 已定义 |
+| DEC-20260604-002 | 默认 WebSocket / taosWS | Accepted | 当前官方方向更适合兼容性 |
+| DEC-20260604-003 | Native 仅 legacy explicit | Accepted | 降低未来迁移风险 |
+| DEC-20260604-004 | REST 仅 SQL-only fallback | Accepted | REST 能力边界较窄 |
+| DEC-20260604-005 | 不内置业务 schema | Accepted | 保持 L2 边界 |
+| DEC-20260604-006 | fake + optional real integration 双层测试 | Accepted | MVA 低成本启动，Full 模式增强可信度 |
+| DEC-20260604-007 | 下游采纳不得由 registry 推断 | Accepted | 必须 proof-based adoption |
+
+---
+
+## 20. Rollback Protocol
+
+### 20.1 Task Rollback
+
+```text
+如果单个 Task 引入错误：
+1. revert task commit
+2. 保留 failed evidence
+3. 更新 risk register
+4. 重新执行对应 gates
+5. 不删除失败记录
+```
+
+### 20.2 Release Rollback
+
+```text
+如果 v0.1.0 release 后发现 contract 错误：
+1. 标记 release notes known issue
+2. 创建 patch issue
+3. 发布 v0.1.1 修复
+4. 若为 breaking public API，撤回 stable 级别，标记 candidate/experimental
+5. 通知 downstream adoption owners
+```
+
+### 20.3 Downstream Rollback
+
+```text
+如果 x.go 或服务接入 taosx 失败：
+1. 下游回滚 go.mod 到前一版本
+2. taosx 保留 compatibility issue
+3. adoption proof 标记 failed / rolled_back
+4. 不把 failed adoption 改写为 not_run
+```
+
+---
+
+## 21. DoD 分层
 
 ### Task DoD
 
 ```text
-1. Scope matches issue.
-2. Worktree and branch recorded.
-3. Required gates run.
-4. Evidence bundle generated.
-5. Known gaps declared.
+- Task scope 完成
+- 对应测试通过
+- 对应文档更新
+- Evidence 输出存在
+- known gaps 明确
 ```
 
 ### Issue DoD
 
 ```text
-1. All AC passed.
-2. All required gates passed.
-3. Traceability updated.
-4. Evidence linked.
-5. Review done.
+- 所有关联 Task 完成
+- Traceability Matrix 更新
+- PR review 完成
+- required gates passed
+- failed/blocked evidence 保留
 ```
 
-### P0 DoD
+### Goal DoD
 
 ```text
-1. P0-001..P0-016 done.
-2. governance-check passes in local_write context.
-3. release-check passes in release_verify context.
-4. goalcli doctor/cli-contract/issue-registry/command-registry/makefile-baseline pass.
-5. Release manifest skeleton generated.
+- taosx 独立 Go module 可编译
+- L0/L1 contract 对齐
+- TDengine WebSocket default contract 完成
+- fake + contract + golden tests 完成
+- optional real integration 有明确状态
+- release manifest 可生成和校验
+- downstream adoption protocol 完成
 ```
 
-### P1 DoD
+### Release DoD
 
 ```text
-1. P1-001..P1-021 done.
-2. p1-governance-check passes.
-3. policy-schema, github-settings verify, toolchain, evidence-artifacts, naming pass.
-4. Self-healing skeleton exists.
+- tag 创建
+- release-final-check passed
+- manifest + sha256 artifact
+- public API snapshot
+- contract fingerprint
+- source digest
+- dependency list
+- tool versions
+- release notes
+- DONE with evidence:
 ```
 
-### P2 DoD
+### Retrospective DoD
 
 ```text
-1. P2-001..P2-015 done.
-2. p2-runtime-check passes.
-3. xlib-standard self-conformance attestation exists.
-4. kernel/configx baseline scan reports exist.
-5. kernel/configx patch-only adoption reports exist.
+- 记录哪些 gate 发现问题
+- 记录 TDengine connector 决策是否仍有效
+- 输出 Prompt Patch
+- 输出 Harness Patch
+- 输出 Rule Patch
+- 输出下一轮 Issue candidates
 ```
 
 ---
 
-## 24. 1 天 / 7 天 / 30 天行动计划
+## 22. 可复利增长的系统架构
 
-### 1 天：冻结范围 + 生成 SSOT
-
-```text
-1. 创建 CONSTITUTION.md 最小版。
-2. 创建 .agent/runtime/minimal-kernel.yaml。
-3. 创建 .agent/policies/enforcement-levels.yaml。
-4. 创建 .agent/policies/execution-context.yaml。
-5. 创建 .agent/registries/issue-registry.yaml。
-6. 创建 .agent/registries/command-registry.yaml。
-7. 创建 .agent/registries/makefile-baseline.yaml。
-8. 明确 P0-001..P0-016 owner/gate/fixture/evidence。
-```
-
-验收：
-
-```bash
-GOWORK=off go run ./cmd/goalcli issue-registry
-GOWORK=off go run ./cmd/goalcli command-registry
-```
-
-### 7 天：完成 P0 Minimal Kernel
+`taosx` 的复利不是来自多写功能，而是来自以下可迁移资产：
 
 ```text
-1. goalcli CLI skeleton。
-2. execution-context-aware main/worktree guard。
-3. evidence-check。
-4. boundary no-xgo-import。
-5. no-secret-default。
-6. Makefile governance-check/release-check。
-7. CI required skeleton。
-8. release manifest skeleton。
-9. DONE with evidence protocol。
-10. CLI contract/report schema。
+1. TDengine adapter contract
+   -> 复用于 market-data / macro-data / metrics ingestion
+
+2. Config schema + redaction
+   -> 复用于所有 L2 infra adapters
+
+3. Error mapping table
+   -> 复用于 alert / retry / circuit breaker
+
+4. Health schema
+   -> 复用于 dashboard / deployment check
+
+5. Metrics contract
+   -> 复用于 observex provider adapters
+
+6. Golden SQL/schema tests
+   -> 复用于 future migration and compatibility
+
+7. Release Evidence
+   -> 复用于 downstream adoption and audit
+
+8. AutoResearch ADR
+   -> 复用于 driver upgrade decisions
+
+9. Retrospective patches
+   -> 反哺 xlib-standard / Harness / Rule registry
 ```
 
-验收：
-
-```bash
-XLIB_CONTEXT=local_write GOWORK=off make governance-check
-XLIB_CONTEXT=release_verify GOWORK=off make release-check
-GOWORK=off go test ./...
-GOWORK=off go run ./cmd/goalcli cli-contract
-```
-
-### 30 天：完成 P1 + P2 到 v2.9.3
+复利闭环：
 
 ```text
-1. P1 Governance Hardening 全部完成。
-2. P2 Runtime & Conformance Automation 全部完成。
-3. xlib-standard self-conformance attestation 生成。
-4. kernel/configx baseline scan 生成。
-5. kernel/configx patch-only adoption reports 生成。
-```
-
-验收：
-
-```bash
-GOWORK=off make governance-check
-GOWORK=off make p1-governance-check
-GOWORK=off make p2-runtime-check
-GOWORK=off make release-check
-GOWORK=off go test ./...
+taosx implementation
+  -> gates find drift
+  -> evidence records drift
+  -> retro converts drift to rule
+  -> xlib-standard updates standard/harness
+  -> future L2 adapters inherit stronger gate
+  -> downstream adoption becomes cheaper and safer
 ```
 
 ---
 
-## 25. Agent Team 可执行 Prompt
+## 23. AI / 自动化 / 研究增强介入点
+
+### 23.1 gstack
 
 ```text
-You are executing GOAL-20260602-001 for github.com/ZoneCNH/xlib-standard.
+Goal Stack:
+G0: taosx standard factory target
+G1: repo bootstrap
+G2: L0/L1 contract adoption
+G3: TDengine adapter runtime
+G4: Harness/Evidence
+G5: downstream adoption
+G6: self-improving
+```
 
-Hard constraints:
-- Do not develop on main.
-- Use git worktree for any local write task.
-- Respect .agent/policies/execution-context.yaml.
-- Do not claim DONE without evidence.
-- Do not import github.com/bytechainx/x.go or github.com/ZoneCNH/x.go.
-- Do not default-read /home/k8s/secrets/env/*.
-- Do not implement P3/P4 features before P0/P1/P2 are done.
+### 23.2 superpowers
 
-Execution order:
-1. P0-001..P0-016
-2. P1-001..P1-021
-3. P2-001..P2-015
+```text
+- Deep repository diff analysis
+- Driver API research
+- Contract generation
+- Boundary rule generation
+- Golden test generation
+- Release manifest verification
+- PR review checklist generation
+```
 
-For every issue:
-- Read issue-registry and command-registry.
-- Create or use assigned worktree.
-- Modify only declared paths.
-- Add valid and invalid fixtures for any guard.
-- Run required gates.
-- Produce evidence bundle under declared artifact roots.
-- Update traceability matrix.
-- Finish only with DONE with evidence.
+### 23.3 Harness
+
+```text
+- Required gates as machine judge
+- Extended gates for confidence
+- Release gates for evidence
+- Boundary gates for layer purity
+- Secret gates for safety
+```
+
+### 23.4 Compound Engineering
+
+```text
+每次实现不只交付代码，还交付：
+- contract
+- test
+- evidence
+- docs
+- rule patch
+- future generator improvement
+```
+
+### 23.5 Self-improving
+
+```text
+失败模式 -> Retrospective -> Prompt Patch / Harness Patch / Rule Patch -> xlib-standard standard update
+```
+
+### 23.6 AutoResearch
+
+```text
+TDengine version / driver / DSN / schemaless / error mapping / Docker integration 一律 research-first
+```
+
+### 23.7 Goal-Oriented Thinking
+
+```text
+所有 PR 都反查：
+- 是否推进 Goal?
+- 是否有 Evidence?
+- 是否可 rollback?
+- 是否防止未来漂移?
 ```
 
 ---
 
-## 26. 最终推荐路径
+## 24. 最小可行行动 MVA
+
+### MVA 目标
+
+在最短路径内把 `taosx` 从早期仓库变为 **可执行、可验证、可发布的 L2 adapter skeleton**。
+
+### MVA 范围
+
+必须做：
 
 ```text
-P0 Minimal Kernel
-  = 防止灾难，保证底线。
-
-P1 Governance Hardening
-  = 支撑多人 / Agent Teams / PR / Review / GitHub / Toolchain / Evidence 管理。
-
-P2 Runtime & Conformance Automation
-  = 让标准能安装、升级、打包、证明符合，并验证 kernel/configx。
-
-P3/P4
-  = 暂时冻结，等 P2 DONE with evidence 后再启动。
+1. go.mod: github.com/ZoneCNH/taosx
+2. README: L2 TDengine adapter 定位
+3. Makefile: fmt/vet/test/boundary/contracts/docs/evidence/release-check
+4. .agent: Goal v3.1 最小工件
+5. pkg/taosx:
+   - Config
+   - Client interface
+   - FakeClient
+   - Health
+   - Error mapping skeleton
+   - Secret redaction
+6. contracts:
+   - config.schema.json
+   - health.schema.json
+   - public_api.snapshot
+7. docs:
+   - api.md
+   - config.md
+   - health.md
+   - errors.md
+   - release.md
+8. scripts:
+   - boundary
+   - contracts
+   - docs-check
+   - generate_manifest
+9. tests:
+   - config validation
+   - redaction golden
+   - fake health
+   - public API snapshot
+10. release evidence:
+   - make evidence
+   - release-evidence-check
 ```
 
-最终裁决：
+暂不做：
 
 ```text
-xlib-standard v2.9.3 Complete 的核心目标，
-是把前面所有宪法、方法论、Harness、Agent Teams、Self-improving、AutoResearch、Compound Engineering
-收敛成一个可执行工程内核：
-P0 先防灾难，
-P1 再硬化协作治理，
-P2 再完成运行时安装/升级/符合性证明；
-任何高级治理功能必须等 P2 DONE with evidence 后再解锁。
+- 真实 TDengine Docker integration as required gate
+- x.go adoption claim
+- full schemaless writer
+- full migration helper
+- v1.0 stable compatibility guarantee
+```
+
+MVA 完成声明：
+
+```text
+DONE with evidence:
+- scope: release-mva
+- version: v0.1.0
+- gates: fmt/vet/test/boundary/contracts/docs/evidence/release-evidence-check
+- known gaps:
+  - real TDengine integration optional/not_run
+  - x.go adoption not_claimed
+```
+
+---
+
+## 25. 1 天行动计划
+
+### Day 1 目标
+
+完成标准骨架和 MVA contract。
+
+```text
+Hour 1-2:
+  - 创建 worktree
+  - bootstrap xlib-standard skeleton
+  - go.mod / README / Makefile
+
+Hour 3-4:
+  - Config / Secret / Validate
+  - Client interface / FakeClient
+  - HealthStatus
+
+Hour 5-6:
+  - contracts/config.schema.json
+  - contracts/health.schema.json
+  - public API snapshot
+  - docs/api.md docs/config.md docs/health.md
+
+Hour 7-8:
+  - boundary/security/docs scripts
+  - tests + golden
+  - make test / boundary / contracts / docs-check
+
+End of Day:
+  - generate local evidence
+  - open PR-001 bootstrap
+  - known gaps: real TDengine integration not_run
+```
+
+Day 1 成功标准：
+
+```text
+GOWORK=off make test: passed
+GOWORK=off make boundary: passed
+GOWORK=off make contracts: passed
+GOWORK=off make docs-check: passed
+CHECK_STATUS=passed GOWORK=off make evidence: passed
+```
+
+---
+
+## 26. 7 天行动计划
+
+### Day 1: Bootstrap
+
+```text
+完成 MVA skeleton + fake client + evidence
+```
+
+### Day 2: TDengine AutoResearch + ADR
+
+```text
+确认 Go connector module path
+确认 taosWS DSN
+确认 schemaless API
+确认 docker integration approach
+输出 ADR
+```
+
+### Day 3: Real SQL Adapter
+
+```text
+实现 database/sql adapter
+Exec / Query / Rows / Result
+context timeout
+error mapping first version
+```
+
+### Day 4: Schema + Batch Writer
+
+```text
+StableSpec
+SubTableSpec
+Batch
+WriteResult
+SQL render golden
+```
+
+### Day 5: Schemaless Writer
+
+```text
+Line/Telnet/JSON enum
+Precision enum
+Partial failure contract
+Golden tests
+```
+
+### Day 6: Integration + Observability
+
+```text
+optional docker TDengine gate
+metrics contract
+observex integration
+health check against real/fake
+```
+
+### Day 7: Release Candidate
+
+```text
+release-final-check
+score --min 9.8
+release notes
+v0.1.0 or v0.2.0 tag
+retrospective patches
+```
+
+7 天成功标准：
+
+```text
+- taosx independent repo standards complete
+- WebSocket adapter candidate implemented
+- fake + golden + optional real integration state explicit
+- release manifest generated and verified
+- no x.go adoption overclaim
+```
+
+---
+
+## 27. 30 天行动计划
+
+### Week 1: v0.1.0 MVA
+
+```text
+- standard skeleton
+- Config/Client/Health/Error
+- fake tests
+- release evidence
+```
+
+### Week 2: v0.2.0 Adapter Candidate
+
+```text
+- real WebSocket SQL adapter
+- batch writer
+- schema builder
+- metrics contract
+- docker integration optional gate
+```
+
+### Week 3: v0.3.0 Schemaless + Compatibility
+
+```text
+- schemaless writer
+- partial failure contract
+- connector upgrade ADR
+- API diff gate
+- fuzz/golden expansion
+```
+
+### Week 4: v1.0.0 Readiness
+
+```text
+- x.go consumer smoke branch
+- downstream adoption proof schema
+- performance baseline
+- release-final-check clean
+- score >= 9.8
+- retrospective patches submitted to xlib-standard if reusable
+```
+
+30 天成功标准：
+
+```text
+taosx 可以作为 x.go / market-data / macro-data 的 TDengine adapter foundation，且每个 release 都能用独立 Evidence 证明。
+```
+
+---
+
+## 28. 衡量指标
+
+### Engineering Metrics
+
+```text
+required_gates_pass_rate >= 100%
+release_final_check_pass = true
+boundary_violations = 0
+secret_findings = 0
+public_api_undocumented_changes = 0
+contract_coverage >= 95%
+```
+
+### Adapter Metrics
+
+```text
+connect_success_rate
+query_latency_p50/p95/p99
+write_batch_latency_p50/p95/p99
+rows_written_per_second
+partial_write_error_rate
+health_check_latency
+connection_error_rate
+retryable_error_rate
+```
+
+### Governance Metrics
+
+```text
+evidence_completeness_score >= 9.8
+traceability_coverage = 100%
+requirements_without_tests = 0
+requirements_without_evidence = 0
+adoption_claims_without_proof = 0
+retro_patch_created_per_release >= 1
+```
+
+### Downstream Metrics
+
+```text
+x.go consumer smoke status: not_run | blocked | passed
+number_of_consumers_using_tagged_release
+downstream rollback count
+downstream integration time
+breaking change count
+```
+
+---
+
+## 29. 迭代优化机制
+
+### 29.1 每次 PR 后
+
+```text
+- 检查 failed gate
+- 分类是 code bug / contract gap / harness gap / doc gap / research gap
+- 更新 risk register
+- 必要时生成 Patch-Harness 或 Patch-Rule
+```
+
+### 29.2 每次 Release 后
+
+```text
+- 生成 retrospective
+- 记录 TDengine connector API 是否变化
+- 记录 release evidence 是否完整
+- 记录 downstream adoption 是否真实发生
+- 输出下一轮 issues
+```
+
+### 29.3 每次 xlib-standard 更新后
+
+```text
+- 运行 downstream sync impact check
+- 判断 taosx 是否需要同步
+- 如需同步，开独立 issue/PR
+- 不直接把 xlib-standard 变化混入业务功能 PR
+```
+
+### 29.4 每次 TDengine 版本更新后
+
+```text
+- AutoResearch connector release note
+- 更新 compatibility matrix
+- 跑 docker integration
+- 更新 ADR if driver mode changes
+- 若 breaking，发布 taosx patch/minor
+```
+
+---
+
+## 30. x.go / 下游采纳协议
+
+`taosx` 可以被 `x.go` 消费，但不能被 `x.go` 反向污染。
+
+### 30.1 Consumer Smoke 范围
+
+```text
+x.go branch:
+  goal/adopt-taosx-v0.1.0
+
+allowed changes:
+  go.mod require github.com/ZoneCNH/taosx v0.1.0
+  internal/platform/taos adapter wiring
+  config injection from application layer
+  health smoke
+  no business schema moved into taosx
+```
+
+### 30.2 Adoption Proof 必需字段
+
+```yaml
+source_repo: github.com/ZoneCNH/taosx
+source_version: v0.1.0
+source_commit: <sha>
+downstream_repo: github.com/bytechainx/x.go
+downstream_commit: <sha>
+mode: consumer_smoke
+gate_outputs:
+  - command: GOWORK=off go test ./...
+    status: passed|failed|blocked
+    artifact_path: <path>
+    sha256: <sha>
+rollback:
+  command: go get github.com/ZoneCNH/taosx@<previous>
+  owner: <owner>
+adoption_status: adopted|not_adopted|blocked
+```
+
+禁止声明：
+
+```text
+registered == adopted
+PR opened == adopted
+go.mod changed == adopted
+dry-run passed == production adopted
+```
+
+---
+
+## 31. 安全与密钥策略
+
+`taosx` 必须把密钥视为调用方责任，只接受显式注入。
+
+允许：
+
+```text
+Config.Password = SecretString from caller
+Config.Sanitized() output masked
+Docs mention /home/k8s/secrets/env/* as deployment convention only
+Examples use placeholder: ${TAOS_PASSWORD}
+```
+
+禁止：
+
+```text
+runtime 自动读取 /home/k8s/secrets/env/*
+README 写真实密码
+tests 输出真实 DSN
+manifest 写 password/token
+PR 描述粘贴生产配置
+logs 输出 raw query containing secrets
+```
+
+Gate：
+
+```text
+make security
+check_secrets.sh
+redaction golden tests
+manifest secret scan
+PR template secret checklist
+```
+
+---
+
+## 32. 完整执行命令骨架
+
+```bash
+# 0. 准备
+cd ~/code
+git clone git@github.com:ZoneCNH/taosx.git
+cd taosx
+git switch main
+git pull --ff-only
+
+# 1. worktree-only 开发
+git worktree add .worktree/goal-taosx-l2-factory -b goal/taosx-l2-factory
+cd .worktree/goal-taosx-l2-factory
+
+# 2. 从 xlib-standard 渲染或迁移骨架
+# 方式 A：如果 taosx 为空，直接 render 到临时目录后同步
+# 方式 B：保留 README 历史，迁移模板文件
+
+# 3. 初始化 module
+GOWORK=off go mod init github.com/ZoneCNH/taosx || true
+GOWORK=off go mod tidy
+
+# 4. 本地验证
+GOWORK=off make fmt
+GOWORK=off make vet
+GOWORK=off make test
+GOWORK=off make boundary
+GOWORK=off make contracts
+GOWORK=off make docs-check
+
+# 5. 生成 Evidence
+CHECK_STATUS=passed GOWORK=off make evidence
+RELEASE_EVIDENCE_REQUIRE_PASSED=1 GOWORK=off make release-evidence-check
+
+# 6. Release final
+XLIB_CONTEXT=release_verify GOWORK=off make release-final-check
+
+# 7. 完成声明
+# DONE with evidence: ...
+```
+
+---
+
+## 33. 验收清单
+
+### Repo Checklist
+
+```text
+[ ] go.mod module path correct
+[ ] README role correct
+[ ] Makefile gates present
+[ ] .agent runtime present
+[ ] docs standard links present
+[ ] release manifest template present
+[ ] .gitignore excludes generated latest.json
+```
+
+### Runtime Checklist
+
+```text
+[ ] Config validate
+[ ] Secret redaction
+[ ] Client interface
+[ ] Fake client
+[ ] SQL exec/query
+[ ] Batch writer
+[ ] Schemaless writer
+[ ] Health check
+[ ] Error mapping
+[ ] Observability injection
+[ ] Close idempotency
+[ ] Context propagation
+```
+
+### Contract Checklist
+
+```text
+[ ] config schema
+[ ] health schema
+[ ] metrics contract
+[ ] public API snapshot
+[ ] error mapping docs
+[ ] schemaless partial failure contract
+[ ] SQL render golden
+[ ] redaction golden
+```
+
+### Harness Checklist
+
+```text
+[ ] fmt
+[ ] vet
+[ ] lint
+[ ] test
+[ ] race
+[ ] boundary
+[ ] security
+[ ] contracts
+[ ] docs-check
+[ ] integration
+[ ] evidence
+[ ] release-evidence-check
+[ ] release-final-check
+[ ] score >= 9.8
+```
+
+### Evidence Checklist
+
+```text
+[ ] manifest generated
+[ ] manifest not committed
+[ ] sha256 generated
+[ ] CI artifact uploaded
+[ ] source digest exists
+[ ] contract fingerprint exists
+[ ] dependency list exists
+[ ] tool versions exist
+[ ] workflow metadata exists
+[ ] known gaps explicit
+```
+
+### Downstream Checklist
+
+```text
+[ ] x.go not imported by taosx
+[ ] downstream adoption not overclaimed
+[ ] consumer smoke defined
+[ ] rollback defined
+[ ] adoption proof schema exists
+```
+
+---
+
+## 34. 最终推荐路径
+
+最佳路径不是“先手写 TDengine 封装”，而是：
+
+```text
+Step 1: 先把 taosx 变成 xlib-standard 标准骨架仓库
+Step 2: 建立 L0/L1 contract dependency 和 boundary gate
+Step 3: 实现 Config / Client / Health / Error / FakeClient MVA
+Step 4: 通过 release Evidence 发布 v0.1.0
+Step 5: AutoResearch TDengine Go connector，冻结 WebSocket ADR
+Step 6: 实现 SQL / batch / schema / schemaless candidate
+Step 7: 加入 optional real TDengine integration gate
+Step 8: 发布 v0.2.0 / v0.3.0
+Step 9: x.go consumer smoke 形成 proof-based adoption
+Step 10: 每次失败和迁移经验反哺 xlib-standard Harness / Rule / Prompt
+```
+
+最终结果：
+
+```text
+taosx 不再是一个孤立 TDengine 封装库，
+而是一个可被标准源生成、被 Harness 裁判、被 Evidence 证明、被下游安全采纳、能持续自我强化的 L2 TDengine adapter 工厂产物。
+```
+
+---
+
+## 35. 附录：最小文件交付清单
+
+```text
+README.md
+go.mod
+Makefile
+.agent/goal.md
+.agent/runtime/goal-runtime.md
+.agent/traceability/traceability-matrix.md
+.agent/harness/harness.yaml
+.agent/evidence/evidence-protocol.md
+pkg/taosx/config.go
+pkg/taosx/client.go
+pkg/taosx/factory.go
+pkg/taosx/errors.go
+pkg/taosx/health.go
+pkg/taosx/sql.go
+pkg/taosx/schema.go
+pkg/taosx/batch.go
+pkg/taosx/schemaless.go
+pkg/taosx/metrics.go
+internal/driver/fake.go
+internal/driver/database_sql.go
+internal/dsn/dsn.go
+contracts/config.schema.json
+contracts/health.schema.json
+contracts/metrics.contract.yaml
+contracts/public_api.snapshot
+contracts/schemaless_failure_contract.md
+docs/api.md
+docs/config.md
+docs/errors.md
+docs/health.md
+docs/metrics.md
+docs/schema.md
+docs/schemaless.md
+docs/testing.md
+docs/release.md
+docs/downstream-adoption.md
+docs/adr/ADR-20260604-001-tdengine-driver-mode.md
+examples/basic-connect/main.go
+examples/health-check/main.go
+examples/sql-exec/main.go
+examples/batch-write/main.go
+examples/schemaless-write/main.go
+scripts/check_boundary.sh
+scripts/check_contracts.sh
+scripts/check_docs.sh
+scripts/check_secrets.sh
+scripts/generate_manifest.sh
+release/manifest/template.json
+.github/workflows/ci.yml
+.github/workflows/release-check.yml
+.github/workflows/security.yml
+```
+
+---
+
+## 36. 附录：完成声明模板
+
+```text
+DONE with evidence:
+- scope: goal
+- goal_id: GOAL-20260604-TAOSX-L2-FACTORY-001
+- repo: github.com/ZoneCNH/taosx
+- branch: goal/taosx-l2-factory
+- commit: <sha>
+- tag: v0.1.0
+- gates:
+  - GOWORK=off make fmt: passed
+  - GOWORK=off make vet: passed
+  - GOWORK=off make lint: passed
+  - GOWORK=off make test: passed
+  - GOWORK=off make race: passed
+  - GOWORK=off make boundary: passed
+  - GOWORK=off make security: passed
+  - GOWORK=off make contracts: passed
+  - GOWORK=off make docs-check: passed
+  - GOWORK=off make integration: passed|blocked
+  - CHECK_STATUS=passed GOWORK=off make evidence: passed
+  - RELEASE_EVIDENCE_REQUIRE_PASSED=1 GOWORK=off make release-evidence-check: passed
+  - XLIB_CONTEXT=release_verify GOWORK=off make release-final-check: passed
+- artifacts:
+  - release/manifest/latest.json: generated evidence, not committed
+  - release/manifest/latest.json.sha256: checksum
+  - contracts/public_api.snapshot: API contract
+  - contracts/config.schema.json: config contract
+  - contracts/health.schema.json: health contract
+  - contracts/metrics.contract.yaml: metrics contract
+- downstream:
+  - x.go consumer smoke: not_run|blocked|passed
+  - proof_based_adoption: false|true
+  - adoption_claim: not_claimed|adopted
+- known gaps:
+  - <none or explicit blocker>
 ```

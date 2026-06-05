@@ -108,3 +108,11 @@ release/debt/latest.json
 release/debt/latest.md
 release/debt/latest.json.sha256
 /goalcli
+.codex/*
+!.codex/agents/
+!.codex/agents/**
+!.codex/skills/
+!.codex/skills/**
+.codex/skills/.system/**
+!.codex/prompts/
+!.codex/prompts/**
