@@ -1,41 +1,35 @@
-# 可观测性模板
+# taosx 可观测性
 
-## 占位符
+`taosx` 只定义可选观测注入 contract，不绑定具体 SDK。生产项目可以在 `Metrics` 中桥接 Prometheus、OpenTelemetry 或内部 metrics 设施。
 
-- `{{MODULE_NAME}}`
-- `{{PACKAGE_NAME}}`
+## Metrics
 
-## 指标
+`WithMetrics(Metrics)` 注入指标记录器。默认 no-op，未注入时不会产生后台 goroutine 或全局状态。
 
-使用 `contracts/metrics.md` 中的 metrics contract。模板内置的最小指标包括：
+推荐指标名见 [contracts/metrics.md](../contracts/metrics.md)：
 
-- `client_created_total`
-- `client_closed_total`
-- `client_errors_total`
-- `client_health_status`
-- `client_health_latency_ms`
-- `client_requests_total`
-- `client_request_duration_seconds`
-- `client_retries_total`
-- `client_inflight`
-
-生命周期指标由 `New`、`Close` 和 `HealthCheck` 直接记录；请求、耗时、重试和 inflight 指标作为生成具体库后的扩展 contract。
+- `taosx_client_created_total`
+- `taosx_client_closed_total`
+- `taosx_client_errors_total`
+- `taosx_client_health_status`
+- `taosx_client_health_latency_ms`
+- `taosx_client_requests_total`
+- `taosx_client_request_duration_seconds`
+- `taosx_client_retries_total`
+- `taosx_client_inflight`
+- `taosx_client_batch_rows_total`
+- `taosx_client_schemaless_lines_total`
 
 ## 健康检查
 
-持有资源的客户端必须暴露 `HealthCheck(context.Context)`。返回值必须使用 `contracts/health.schema.json` 中的字段名：
+`Health(ctx)` 返回 `HealthStatus`：
 
-- `name`
-- `status`
-- `message`
-- `checked_at`
-- `latency_ms`
-- `metadata`
+- `healthy`：driver health 成功。
+- `degraded`：未注入真实 driver、能力不可用或依赖暂时降级。
+- `unhealthy`：配置无效、client 已关闭、context 失败或 driver 明确失败。
 
-`status` 只能是 `healthy`、`degraded` 或 `unhealthy`。未初始化、已关闭、`nil` context、canceled context 都必须返回 `unhealthy`。已初始化且未关闭的 client 如果本次检查的 context deadline 预算短于 `Config.Timeout`，必须返回 `degraded`，并继续记录 `client_health_status` 和 `client_health_latency_ms`，其中 `status` label 为 `degraded`。
+健康结果可以进入 Evidence，但 metadata 只能包含脱敏配置和非敏感运行信息。
 
 ## 日志
 
-只能记录脱敏配置。不得记录原始凭据或生产连接材料。
-
-本模板不得依赖 `x.go`。
+日志和 tracing attribute 只能记录 `SanitizedConfig`、脱敏 DSN、DriverMode、status、latency 和 retry 分类。不得记录原始密码、token、生产连接串或业务时序数据。

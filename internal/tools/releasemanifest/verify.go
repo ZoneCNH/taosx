@@ -10,7 +10,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/ZoneCNH/xlib-standard/internal/releasequality"
+	"github.com/ZoneCNH/taosx/internal/releasequality"
 )
 
 // verifyManifest 验证已有的发布清单。

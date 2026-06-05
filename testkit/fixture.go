@@ -3,7 +3,7 @@ package testkit
 import (
 	"time"
 
-	"github.com/ZoneCNH/xlib-standard/pkg/templatex"
+	"github.com/ZoneCNH/taosx/pkg/templatex"
 )
 
 func Config(name string) templatex.Config {

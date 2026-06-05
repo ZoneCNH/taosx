@@ -17,7 +17,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/ZoneCNH/xlib-standard/internal/releasequality"
+	"github.com/ZoneCNH/taosx/internal/releasequality"
 )
 
 // sourceDigest 计算所有跟踪文件的源码摘要。

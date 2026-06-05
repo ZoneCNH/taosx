@@ -16,6 +16,7 @@ func TestRenderTemplateExcludesGeneratedReleaseArtifacts(t *testing.T) {
 
 	script := string(contents)
 	for _, required := range []string{
+		"--exclude='./.codex'",
 		"--exclude='./.omc'",
 		"--exclude='./.omx'",
 		"--exclude='./.worktree'",
@@ -26,6 +27,7 @@ func TestRenderTemplateExcludesGeneratedReleaseArtifacts(t *testing.T) {
 		"--exclude='./release/debt/latest.json'",
 		"--exclude='./release/debt/latest.md'",
 		"--exclude='./release/debt/latest.json.sha256'",
+		`rm -rf "$out_dir/.codex"`,
 		`rm -rf "$out_dir/.omc"`,
 		`rm -rf "$out_dir/.omx"`,
 		`rm -rf "$out_dir/.worktree"`,

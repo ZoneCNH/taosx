@@ -1,20 +1,35 @@
-# 配置模板
+# taosx 配置
 
-## 占位符
+`taosx.Config` 由调用方显式构造或由上层配置库装配后传入。本包不读取环境变量、配置文件或 `/home/k8s/secrets/env/*`。
 
-- `{{MODULE_NAME}}`
-- `{{MODULE_PATH}}`
-- `{{PACKAGE_NAME}}`
+## 字段
 
-## 规则
+| 字段 | 说明 | 默认值 | 校验 |
+| --- | --- | --- | --- |
+| `Name` | 客户端名称，用于 health 和 metrics label。 | `taosx` | 非空 |
+| `DriverMode` | TDengine driver 模式。 | `websocket` | 必须是允许值 |
+| `Endpoint` | TDengine endpoint，允许 `host:port` 或带 scheme 的地址。 | 无 | 非空 |
+| `Database` | 默认数据库。 | 无 | 非空 |
+| `Username` | 连接用户名。 | 空 | 可空 |
+| `Password` | 连接密码。 | 空 | 可空，输出必须脱敏 |
+| `Timeout` | 单次操作默认超时。 | `5s` | 不得为负 |
+| `MaxRetries` | driver 可使用的最大重试次数。 | `0` | 不得为负 |
+| `TLS` | 是否使用 TLS scheme。 | `false` | 布尔值 |
 
-- 配置必须由调用方显式传入。
-- 不得隐式读取生产密钥目录。
-- `Config` 必须支持 `Validate` 和 `Sanitize`。
-- `Validate` 必须对空配置名和负数 timeout 返回 `ErrorKindValidation`。
-- `contracts/config.schema.json` 的 `name`、`timeout_ms` 和 `secret` 必须与 `Config.Name`、`Config.Timeout` 和 `Config.Secret` 保持映射一致。
-- 脱敏后的配置可以安全用于日志、Evidence 和发布说明。
+## DriverMode
 
-生成的库可以在文档中说明由调用方拥有的配置层执行显式加载，然后只接收生成后的 `Config`。
+- `websocket`：默认模式，生成 `taosws` / `taoswss` DSN。
+- `native_legacy`：保留给旧 native driver adapter，DSN 仍按 TDengine WebSocket 兼容格式脱敏表达。
+- `rest_sql_only`：REST SQL fallback，生成 `http` / `https` DSN；只承诺 SQL 执行语义，不承诺批量写入和 schemaless 能力等价。
 
-本模板不得依赖 `x.go`。
+## 校验与脱敏
+
+`Validate()` 会在归一化默认值后检查必填字段和数值边界。配置错误返回 `ErrorKindValidation`，错误消息不得包含原始密码。
+
+`Sanitized()` / `Sanitize()` 返回 `SanitizedConfig`：
+
+- `Password` 固定为 `***`，空密码保持空。
+- `RedactedDSN` 中 userinfo 密码固定为 `***`。
+- 可安全写入日志、Evidence、health metadata 和发布说明。
+
+`contracts/config.schema.json` 与 `Config` 字段保持同步，schema required 字段为 `endpoint` 和 `database`。

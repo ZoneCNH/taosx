@@ -9,7 +9,7 @@ import (
 	"os"
 	"strings"
 
-	"github.com/ZoneCNH/xlib-standard/internal/debtcheck"
+	"github.com/ZoneCNH/taosx/internal/debtcheck"
 )
 
 // PlaceholderImageDigest 是未构建镜像时的默认 digest（空字符串的 SHA256）。

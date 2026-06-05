@@ -16,7 +16,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/ZoneCNH/xlib-standard/internal/validation"
+	"github.com/ZoneCNH/taosx/internal/validation"
 )
 
 const (

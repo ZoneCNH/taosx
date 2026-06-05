@@ -4,15 +4,17 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/ZoneCNH/xlib-standard/pkg/templatex"
+	"github.com/ZoneCNH/taosx/pkg/taosx"
 )
 
 func main() {
-	cfg := templatex.Config{
-		Name:    "templatex",
-		Timeout: time.Second,
-		Secret:  "example",
+	cfg := taosx.Config{
+		Endpoint: "localhost:6041",
+		Database: "metrics",
+		Username: "root",
+		Password: "taosdata",
+		Timeout:  time.Second,
 	}
 
-	fmt.Println(cfg.Sanitize().Secret)
+	fmt.Println(cfg.Sanitized().Password)
 }

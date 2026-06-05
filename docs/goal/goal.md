@@ -1518,24 +1518,33 @@ full endpoint with credentials
 
 ```yaml
 metrics:
-  - name: taosx_client_connect_total
+  - name: taosx_client_created_total
     type: counter
-    labels: [driver, status]
-  - name: taosx_client_connection_errors_total
+    labels: [name, driver_mode]
+  - name: taosx_client_closed_total
     type: counter
-    labels: [driver, error_kind]
-  - name: taosx_query_duration_seconds
+    labels: [name]
+  - name: taosx_client_errors_total
+    type: counter
+    labels: [op, kind]
+  - name: taosx_client_requests_total
+    type: counter
+    labels: [op, driver_mode]
+  - name: taosx_client_request_duration_seconds
     type: histogram
-    labels: [operation, driver, status]
-  - name: taosx_write_rows_total
+    labels: [op, driver_mode]
+  - name: taosx_client_batch_rows_total
     type: counter
-    labels: [operation, driver, status]
-  - name: taosx_write_batches_total
+    labels: [database]
+  - name: taosx_client_schemaless_lines_total
     type: counter
-    labels: [operation, driver, status]
-  - name: taosx_health_status
+    labels: [protocol]
+  - name: taosx_client_health_status
     type: gauge
-    labels: [driver, status]
+    labels: [name, driver_mode]
+  - name: taosx_client_health_latency_ms
+    type: histogram
+    labels: [name]
 ```
 
 禁止 labels：
@@ -2450,7 +2459,7 @@ taosx 不再是一个孤立 TDengine 封装库，
 README.md
 go.mod
 Makefile
-.agent/goal.md
+.agent/runtime/goal.md
 .agent/runtime/goal-runtime.md
 .agent/traceability/traceability-matrix.md
 .agent/harness/harness.yaml

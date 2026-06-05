@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "title": "Base Library Error",
+  "title": "taosx Error",
   "type": "object",
   "required": ["kind", "op", "message", "retryable"],
   "properties": {
@@ -14,6 +14,9 @@
         "auth",
         "conflict",
         "rate_limit",
+        "sql",
+        "schema",
+        "write",
         "internal"
       ]
     },

@@ -4,8 +4,8 @@ import (
 	"errors"
 	"time"
 
-	"github.com/ZoneCNH/xlib-standard/internal/sanitize"
-	"github.com/ZoneCNH/xlib-standard/internal/validation"
+	"github.com/ZoneCNH/taosx/internal/sanitize"
+	"github.com/ZoneCNH/taosx/internal/validation"
 )
 
 type Config struct {

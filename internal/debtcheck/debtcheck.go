@@ -702,7 +702,7 @@ func digestFile(root, path string) string {
 
 func skipDir(name string) bool {
 	switch name {
-	case ".git", ".omx", ".worktree", "vendor", "node_modules", "release", "tmp", ".cache":
+	case ".git", ".codex", ".omc", ".omx", ".worktree", "vendor", "node_modules", "release", "tmp", ".cache":
 		return true
 	default:
 		return false

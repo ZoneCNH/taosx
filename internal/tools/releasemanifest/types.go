@@ -2,7 +2,7 @@
 package main
 
 import (
-	"github.com/ZoneCNH/xlib-standard/internal/releasequality"
+	"github.com/ZoneCNH/taosx/internal/releasequality"
 )
 
 // Manifest 是发布清单的顶层结构。

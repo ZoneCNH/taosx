@@ -1,26 +1,59 @@
-# API 模板
+# taosx API
 
-## 占位符
+公共包路径为 `github.com/ZoneCNH/taosx/pkg/taosx`。API 目标是稳定表达 TDengine adapter contract，而不是绑定某一个第三方 driver。
 
-- `{{MODULE_NAME}}`：生成的仓库名称。
-- `{{MODULE_PATH}}`：生成的 Go module 路径。
-- `{{PACKAGE_NAME}}`：生成的包名。
+## 创建客户端
 
-## 公共 API
+```go
+cfg := taosx.Config{
+	Name:     "metrics",
+	Endpoint: "taos.example.internal:6041",
+	Database: "meters",
+	Username: "root",
+	Password: "secret",
+}
 
-- `Config`：由用户显式提供的配置。
-- `Validate`：拒绝无效配置，并返回 `ErrorKindValidation`。
-- `Sanitize`：在日志或 Evidence 采集前屏蔽敏感值。
-- `New`：基于显式配置创建客户端；拒绝 `nil`、canceled 和 expired context；成功时记录 `client_created_total`。
-- `Close`：释放资源，并且必须幂等；成功首次关闭时记录 `client_closed_total`。
-- `HealthCheck`：报告客户端健康状态，JSON 字段必须匹配 `contracts/health.schema.json`；当本次检查的 context deadline 预算短于 `Config.Timeout` 时返回 `degraded`。
-- `Error`：稳定 error contract，支持 `errors.Is` / `errors.As` 和 `IsKind`。
-- `NewError` / `WrapError`：创建或包装稳定错误，包装时必须保留 cause。
-- `Metrics`：注入式指标钩子；指标名必须匹配 `contracts/metrics.md`。
-- `Version`：发布版本。
+client, err := taosx.New(ctx, cfg, taosx.WithDriver(driver), taosx.WithMetrics(metrics))
+```
 
-生成的基础库不得依赖 `x.go`。
+`New` 会检查 `nil`、canceled 和 expired context，并对配置执行 `Validate()`。未注入 `Driver` 时使用 unavailable driver：执行类方法返回 `ErrorKindUnavailable` retryable 错误，`Health` 返回 `degraded`，便于离线测试和文档示例不触达真实基础设施。
 
-## 生成对齐
+## Client contract
 
-使用 `scripts/render_template.sh` 生成具体基础库时，公共包目录会从 `pkg/templatex` 移动到 `pkg/{{PACKAGE_NAME}}`，代码 imports、文档占位符和 module path 会同步替换。
+`Client` interface 暴露：
+
+- `Exec(ctx, Statement) (ExecResult, error)`
+- `Query(ctx, Query) (Rows, error)`
+- `WriteBatch(ctx, Batch) (WriteResult, error)`
+- `SchemalessWrite(ctx, SchemalessPayload) (WriteResult, error)`
+- `Health(ctx) HealthStatus`
+- `Close(ctx) error`
+
+所有方法都必须尊重 context。`Close` 必须幂等；第一次成功关闭后，后续 `Close` 返回 nil。
+
+## SQL 与查询
+
+调用方应使用 `Statement`、`Query` 和 schema helper 表达 SQL。禁止把用户输入直接拼接进 SQL 字符串。
+
+```go
+sql, err := taosx.RenderCreateStable(taosx.StableSpec{
+	Name: "meters",
+	Columns: []taosx.ColumnSpec{
+		{Name: "ts", Type: "TIMESTAMP"},
+		{Name: "current", Type: "DOUBLE"},
+	},
+	Tags: []taosx.ColumnSpec{
+		{Name: "location", Type: "BINARY(32)"},
+	},
+})
+```
+
+schema helper 对库表列名使用 allowlist：首字符为字母或 `_`，后续字符只能是字母、数字或 `_`，最大 64 字符。稳定 SQL helper 的输出顺序由输入 slice 决定，测试使用 exact string 锁定。
+
+## 写入
+
+`Batch` 表达结构化批量写入，`SchemalessPayload` 表达 TDengine schemaless 写入。driver adapter 必须决定当前 DriverMode 是否支持对应能力；不支持时返回 `ErrorKindUnavailable` 或 `ErrorKindWrite`，并保留 retry 语义。
+
+## 可观测性
+
+`WithMetrics(Metrics)` 是可选注入点。本包不依赖 Prometheus、OpenTelemetry 或任何具体可观测性 SDK。

@@ -89,6 +89,7 @@ copy_from_live_tree() {
     cd "$repo_root"
     tar \
     --exclude='./.git' \
+    --exclude='./.codex' \
     --exclude='./.omc' \
     --exclude='./.omx' \
     --exclude='./.worktree' \
@@ -117,6 +118,7 @@ copy_from_live_tree() {
 }
 
 prune_render_omissions() {
+  rm -rf "$out_dir/.codex"
   rm -rf "$out_dir/.omc"
   rm -rf "$out_dir/.omx"
   rm -rf "$out_dir/.worktree"

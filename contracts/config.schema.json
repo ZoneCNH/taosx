@@ -1,18 +1,38 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "title": "Base Library Config",
+  "title": "taosx TDengine Adapter Config",
   "type": "object",
-  "required": ["name"],
+  "required": ["endpoint", "database"],
   "properties": {
     "name": {
+      "type": "string"
+    },
+    "driver_mode": {
+      "type": "string",
+      "enum": ["websocket", "native_legacy", "rest_sql_only"]
+    },
+    "endpoint": {
+      "type": "string"
+    },
+    "database": {
+      "type": "string"
+    },
+    "username": {
+      "type": "string"
+    },
+    "password": {
       "type": "string"
     },
     "timeout_ms": {
       "type": "integer",
       "minimum": 0
     },
-    "secret": {
-      "type": "string"
+    "max_retries": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "tls": {
+      "type": "boolean"
     }
   },
   "additionalProperties": true

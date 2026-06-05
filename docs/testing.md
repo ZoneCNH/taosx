@@ -1,40 +1,35 @@
-# 测试策略
+# taosx 测试策略
 
-`xlib-standard` 的测试策略同时约束标准仓库、Go 参考模板、generator、Harness、Evidence Runtime 和所有生成基础库。
+`taosx` 的测试目标是锁定 TDengine adapter contract、标准运行时 gate 和 Evidence 生成边界。
 
 ## 必需覆盖范围
 
-- `go test ./...` 必须覆盖公共包、`internal/`、`contracts/`、`testkit/` 和 `examples/`。
-- 配置校验、脱敏、typed error kind、wrapped cause。
-- 客户端创建、取消 context、过期 context、幂等关闭和 zero-value client。
-- 健康检查 JSON 字段 contract。
-- 生命周期 metrics 和健康 metrics。
-- `contracts/` 与公共常量同步。
-- `contracts/config.schema.json` 与 `Config` 字段映射同步。
-- `scripts/render_template.sh` 生成的临时 `kernel` 可以通过 `GOWORK=off go test ./...`。
-- `Config.Sanitize` 的 secret 不变量必须由 property test 覆盖。
-- `Config` 边界输入必须由 fuzz-smoke 覆盖。
-- `HealthStatus` JSON 公共输出必须由 golden test 锁定。
-- `internal/releasequality` 必须覆盖 `Compute`、`Verify` 和 `Marshal` 的正常与失败路径。
+- `go test ./pkg/taosx` 覆盖配置、脱敏、driver mode、client lifecycle、context、错误、SQL helper、batch、schemaless 和 health。
+- `go test ./contracts` 覆盖 JSON schema 与公共常量映射。
+- `go test ./examples/...` 覆盖 README 和 docs 中的最小示例。
+- `go test ./scripts` 覆盖 render_template 运行态目录排除和下游控制面文件继承。
+- `go test ./cmd/goalcli` 覆盖治理 gate、迁移 guard、debt evidence 和 release manifest fixture。
 - Release manifest 测试必须在临时 fixture 仓库构造所需 `.omc` state，不得依赖当前工作区的 Agent 运行态文件。
 
-## 示例与 testkit Smoke
+## taosx contract
 
-- `examples/basic` 必须输出当前 module name。
-- `examples/config` 必须输出脱敏后的 secret 值。
-- `examples/health` 必须输出 `healthy`。
-- `testkit` 必须验证 `Config("fixture")` 生成可通过 `Validate` 的测试配置。
+- `Config.Validate` 必须拒绝空 endpoint、空 database、非法 DriverMode、负 timeout 和负 retry。
+- `Config.Sanitized` 与 `RedactedDSN` 必须屏蔽密码。
+- `Close` 必须幂等。
+- 未注入 driver 时执行方法必须返回 retryable `ErrorKindUnavailable`。
+- context deadline exceeded 必须映射为 `ErrorKindTimeout`。
+- schema helper 必须拒绝非法 identifier，并生成稳定 SQL。
+- `Health` 在未注入真实 driver 时返回 `degraded`。
 
-生成的基础库必须保持测试独立于 `x.go`，且不得读取 `/home/k8s/secrets/env/*`。
-
-## Docker Toolchain Runtime 测试
-
-Docker Toolchain Runtime 只把既有测试 gate 放入统一容器边界，不新增第二套断言。下游和 release 语境必须继续使用 `GOWORK=off`：
+## Gate 命令
 
 ```bash
+go test ./...
+./scripts/check_boundary.sh
+./scripts/check_contracts.sh
 GOWORK=off make docker-toolchain-check
-GOWORK=off make docker-ci
 GOWORK=off make integration DOWNSTREAM=kernel
+GOWORK=off go run ./cmd/goalcli score --min 9.8
 ```
 
-`make docker-ci` 在容器中运行既有 `make ci`；若 `goalcli doctor` 或 `goalcli score --min 9.8` 失败，应修复对应 doctor details 或 score 维度，不能用 Docker 成功替代测试 Evidence。
+生成的库必须保持测试独立于 `x.go`，且不得读取 `/home/k8s/secrets/env/*`。

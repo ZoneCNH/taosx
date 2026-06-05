@@ -9,7 +9,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/ZoneCNH/xlib-standard/pkg/templatex"
+	"github.com/ZoneCNH/taosx/pkg/taosx"
 )
 
 type schemaProperty struct {
@@ -27,15 +27,18 @@ func TestErrorKindContractMatchesPublicConstants(t *testing.T) {
 	schema := readSchema(t, "error.schema.json")
 
 	expected := sortedStrings(
-		string(templatex.ErrorKindConfig),
-		string(templatex.ErrorKindValidation),
-		string(templatex.ErrorKindConnection),
-		string(templatex.ErrorKindUnavailable),
-		string(templatex.ErrorKindTimeout),
-		string(templatex.ErrorKindAuth),
-		string(templatex.ErrorKindConflict),
-		string(templatex.ErrorKindRateLimit),
-		string(templatex.ErrorKindInternal),
+		string(taosx.ErrorKindConfig),
+		string(taosx.ErrorKindValidation),
+		string(taosx.ErrorKindConnection),
+		string(taosx.ErrorKindUnavailable),
+		string(taosx.ErrorKindTimeout),
+		string(taosx.ErrorKindAuth),
+		string(taosx.ErrorKindConflict),
+		string(taosx.ErrorKindRateLimit),
+		string(taosx.ErrorKindSQL),
+		string(taosx.ErrorKindSchema),
+		string(taosx.ErrorKindWrite),
+		string(taosx.ErrorKindInternal),
 	)
 	actual := sortedStrings(schema.Properties["kind"].Enum...)
 	if !reflect.DeepEqual(actual, expected) {
@@ -48,9 +51,9 @@ func TestHealthStatusContractMatchesPublicConstants(t *testing.T) {
 	schema := readSchema(t, "health.schema.json")
 
 	expected := sortedStrings(
-		string(templatex.HealthHealthy),
-		string(templatex.HealthDegraded),
-		string(templatex.HealthUnhealthy),
+		string(taosx.HealthHealthy),
+		string(taosx.HealthDegraded),
+		string(taosx.HealthUnhealthy),
 	)
 	actual := sortedStrings(schema.Properties["status"].Enum...)
 	if !reflect.DeepEqual(actual, expected) {
@@ -61,12 +64,18 @@ func TestHealthStatusContractMatchesPublicConstants(t *testing.T) {
 
 func TestConfigContractMatchesPublicConfig(t *testing.T) {
 	schema := readSchema(t, "config.schema.json")
-	requireFields(t, schema.Required, "name")
+	requireFields(t, schema.Required, "endpoint", "database")
 
-	configType := reflect.TypeOf(templatex.Config{})
+	configType := reflect.TypeOf(taosx.Config{})
 	requireSchemaFieldMapsToStructField(t, schema, configType, "name", "Name", "string")
+	requireSchemaFieldMapsToStructField(t, schema, configType, "driver_mode", "DriverMode", "string")
+	requireSchemaFieldMapsToStructField(t, schema, configType, "endpoint", "Endpoint", "string")
+	requireSchemaFieldMapsToStructField(t, schema, configType, "database", "Database", "string")
+	requireSchemaFieldMapsToStructField(t, schema, configType, "username", "Username", "string")
+	requireSchemaFieldMapsToStructField(t, schema, configType, "password", "Password", "string")
 	requireSchemaFieldMapsToStructField(t, schema, configType, "timeout_ms", "Timeout", "integer")
-	requireSchemaFieldMapsToStructField(t, schema, configType, "secret", "Secret", "string")
+	requireSchemaFieldMapsToStructField(t, schema, configType, "max_retries", "MaxRetries", "integer")
+	requireSchemaFieldMapsToStructField(t, schema, configType, "tls", "TLS", "boolean")
 
 	if timeoutField, ok := configType.FieldByName("Timeout"); !ok || timeoutField.Type != reflect.TypeOf(time.Duration(0)) {
 		t.Fatalf("Config.Timeout must remain time.Duration, got %v", timeoutField.Type)
@@ -81,17 +90,23 @@ func TestMetricsContractDocumentsPublicConstants(t *testing.T) {
 	if err != nil {
 		t.Fatalf("read metrics contract: %v", err)
 	}
-	text := string(content)
+	yaml, err := os.ReadFile("metrics.contract.yaml")
+	if err != nil {
+		t.Fatalf("read metrics yaml contract: %v", err)
+	}
+	text := string(content) + "\n" + string(yaml)
 	for _, metric := range []string{
-		templatex.MetricClientCreatedTotal,
-		templatex.MetricClientClosedTotal,
-		templatex.MetricClientErrorsTotal,
-		templatex.MetricClientHealthStatus,
-		templatex.MetricClientHealthLatencyMS,
-		templatex.MetricClientRequestsTotal,
-		templatex.MetricClientRequestDurationSeconds,
-		templatex.MetricClientRetriesTotal,
-		templatex.MetricClientInflight,
+		taosx.MetricClientCreatedTotal,
+		taosx.MetricClientClosedTotal,
+		taosx.MetricClientErrorsTotal,
+		taosx.MetricClientHealthStatus,
+		taosx.MetricClientHealthLatencyMS,
+		taosx.MetricClientRequestsTotal,
+		taosx.MetricClientRequestDurationSeconds,
+		taosx.MetricClientRetriesTotal,
+		taosx.MetricClientInflight,
+		taosx.MetricClientBatchRowsTotal,
+		taosx.MetricClientSchemalessLinesTotal,
 	} {
 		if !strings.Contains(text, "`"+metric+"`") {
 			t.Fatalf("metrics contract does not document %q", metric)

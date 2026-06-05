@@ -12,7 +12,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/ZoneCNH/xlib-standard/internal/releasequality"
+	"github.com/ZoneCNH/taosx/internal/releasequality"
 )
 
 func main() {
