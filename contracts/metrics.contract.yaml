@@ -1,0 +1,51 @@
+schema_version: v1
+package: github.com/ZoneCNH/taosx/pkg/taosx
+labels:
+  allowed:
+    - name
+    - driver_mode
+    - op
+    - kind
+    - database
+    - protocol
+  forbidden:
+    - endpoint
+    - username
+    - password
+    - dsn
+metrics:
+  - name: taosx_client_created_total
+    type: counter
+    labels: [name, driver_mode]
+  - name: taosx_client_closed_total
+    type: counter
+    labels: [name]
+  - name: taosx_client_errors_total
+    type: counter
+    labels: [op, kind]
+  - name: taosx_client_health_status
+    type: gauge
+    labels: [name, driver_mode]
+  - name: taosx_client_health_latency_ms
+    type: histogram
+    unit: milliseconds
+    labels: [name]
+  - name: taosx_client_requests_total
+    type: counter
+    labels: [op, driver_mode]
+  - name: taosx_client_request_duration_seconds
+    type: histogram
+    unit: seconds
+    labels: [op, driver_mode]
+  - name: taosx_client_retries_total
+    type: counter
+    labels: [op, kind]
+  - name: taosx_client_inflight
+    type: gauge
+    labels: [op]
+  - name: taosx_client_batch_rows_total
+    type: counter
+    labels: [database]
+  - name: taosx_client_schemaless_lines_total
+    type: counter
+    labels: [protocol]
