@@ -1,35 +1,41 @@
 # taosx 测试策略
 
-`taosx` 的测试目标是锁定 TDengine adapter contract、标准运行时 gate 和 Evidence 生成边界。
+## 必跑检查
 
-## 必需覆盖范围
-
-- `go test ./pkg/taosx` 覆盖配置、脱敏、driver mode、client lifecycle、context、错误、SQL helper、batch、schemaless 和 health。
-- `go test ./contracts` 覆盖 JSON schema 与公共常量映射。
-- `go test ./examples/...` 覆盖 README 和 docs 中的最小示例。
-- `go test ./scripts` 覆盖 render_template 运行态目录排除和下游控制面文件继承。
-- `go test ./cmd/goalcli` 覆盖治理 gate、迁移 guard、debt evidence 和 release manifest fixture。
-- Release manifest 测试必须在临时 fixture 仓库构造所需 `.omc` state，不得依赖当前工作区的 Agent 运行态文件。
-
-## taosx contract
-
-- `Config.Validate` 必须拒绝空 endpoint、空 database、非法 DriverMode、负 timeout 和负 retry。
-- `Config.Sanitized` 与 `RedactedDSN` 必须屏蔽密码。
-- `Close` 必须幂等。
-- 未注入 driver 时执行方法必须返回 retryable `ErrorKindUnavailable`。
-- context deadline exceeded 必须映射为 `ErrorKindTimeout`。
-- schema helper 必须拒绝非法 identifier，并生成稳定 SQL。
-- `Health` 在未注入真实 driver 时返回 `degraded`。
-
-## Gate 命令
+发布或合入前应优先运行：
 
 ```bash
+go test ./pkg/taosx
+go test ./contracts
+go test ./examples/...
 go test ./...
+git diff --check
 ./scripts/check_boundary.sh
 ./scripts/check_contracts.sh
-GOWORK=off make docker-toolchain-check
-GOWORK=off make integration DOWNSTREAM=kernel
-GOWORK=off go run ./cmd/goalcli score --min 9.8
 ```
 
-生成的库必须保持测试独立于 `x.go`，且不得读取 `/home/k8s/secrets/env/*`。
+如果某个脚本在当前环境不可用，记录具体原因和替代验证，不要把未运行检查写成已通过。
+
+## 单元测试重点
+
+- `Config.Normalize`、`Validate`、`Sanitized`、`RedactedDSN`。
+- 默认 unavailable driver 行为。
+- `Exec`、`Query`、`WriteBatch`、`SchemalessWrite` 的边界校验。
+- `Rows` 扫描、列信息和关闭行为。
+- metrics 注入与 no-op 默认实现。
+- 错误分类、操作名和敏感信息脱敏。
+- `Close` 幂等和关闭后操作。
+
+## 契约测试重点
+
+`contracts/` 用来锁定下游可依赖行为：
+
+- 默认 client 不会假装连接真实 TDengine。
+- 注入 driver 后所有操作按接口委托。
+- 空 batch 是 validation error。
+- schemaless payload 必须有 lines 和合法协议。
+- 健康状态和错误分类稳定。
+
+## 集成测试边界
+
+当前仓库没有内置真实 TDengine 集成环境。真实 TDengine driver、容器化集成测试和性能压测属于后续适配器或发布管线扩展范围。新增这些能力前必须同步更新规格、设计、追溯矩阵和 CI 证据。
