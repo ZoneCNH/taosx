@@ -107,7 +107,9 @@ func (c *client) WriteBatch(ctx context.Context, batch Batch) (WriteResult, erro
 		return WriteResult{}, err
 	}
 	c.metrics.IncCounter(MetricClientRequestsTotal, map[string]string{"op": "write_batch", "driver_mode": string(c.cfg.DriverMode)})
-	c.metrics.IncCounter(MetricClientBatchRowsTotal, map[string]string{"database": batch.Database})
+	for range batch.Points {
+		c.metrics.IncCounter(MetricClientBatchRowsTotal, map[string]string{"database": batch.Database})
+	}
 	result, err := c.driver.WriteBatch(ctx, batch)
 	if err != nil {
 		wrapped := normalizeDriverError(ErrorKindWrite, op, err)
@@ -128,7 +130,9 @@ func (c *client) SchemalessWrite(ctx context.Context, payload SchemalessPayload)
 		return WriteResult{}, err
 	}
 	c.metrics.IncCounter(MetricClientRequestsTotal, map[string]string{"op": "schemaless_write", "driver_mode": string(c.cfg.DriverMode)})
-	c.metrics.IncCounter(MetricClientSchemalessLinesTotal, map[string]string{"protocol": string(payload.Protocol)})
+	for range payload.Lines {
+		c.metrics.IncCounter(MetricClientSchemalessLinesTotal, map[string]string{"protocol": string(payload.Protocol)})
+	}
 	result, err := c.driver.SchemalessWrite(ctx, payload)
 	if err != nil {
 		wrapped := normalizeDriverError(ErrorKindWrite, op, err)

@@ -60,9 +60,6 @@ func (c Config) Normalize() Config {
 func (c Config) Validate() error {
 	const op = "Config.Validate"
 	c = c.Normalize()
-	if err := validation.RequireNonEmpty("name", c.Name); err != nil {
-		return validationError(op, err.Error(), err)
-	}
 	if err := validation.RequireNonEmpty("endpoint", c.Endpoint); err != nil {
 		return validationError(op, err.Error(), err)
 	}
