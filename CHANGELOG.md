@@ -2,6 +2,24 @@
 
 ## 未发布
 
+## v1.0.0 - 2026-06-13
+
+### 新增
+
+- 发布 `pkg/taosx` 作为当前公共 TDengine adapter 契约入口，锁定 client、driver port、配置脱敏、错误分类、SQL 构造、写入、查询和健康检查 API。
+- 新增 `integration` build tag 下的真实 TDengine WebSocket 集成测试，使用官方 `github.com/taosdata/driver-go/v3` 通过 `database/sql` 验证连接、健康检查和查询路径。
+
+### 测试
+
+- 新增精确 API snapshot 测试，防止 `pkg/taosx` 公共契约意外漂移。
+- 补齐 `pkg/taosx` 高覆盖率回归测试，覆盖配置、错误、默认 driver、metrics、Rows、SQL builder、关闭语义和 driver 注入路径。
+- 记录真实集成测试环境变量边界；凭据只从本地受控环境注入，不写入源码、文档或测试输出。
+
+### 兼容性
+
+- `pkg/templatex` 保留为 xlib-standard 脚手架、治理和迁移扫描历史上下文，不作为当前 taosx runtime 公共入口；版本元数据同步到 `v1.0.0`。
+- 版本锚点同步到 README、AGENTS、release manifest、release 文档、Harness 和 `goalcli` release 常量。
+
 ## v0.4.13 - 2026-06-05
 
 ### 治理

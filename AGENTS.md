@@ -29,7 +29,7 @@
 
 ## 发布版本锚点
 
-当前发布文档锚点为 `v0.4.13`，必须与 `CHANGELOG.md` 最新版本、release manifest 和模板版本常量保持一致。
+当前发布文档锚点为 `v1.0.0`，必须与 `CHANGELOG.md` 最新版本、release manifest 和模板版本常量保持一致。
 
 ## 代码与边界规则
 

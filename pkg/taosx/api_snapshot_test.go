@@ -2,6 +2,7 @@ package taosx
 
 import (
 	"os"
+	"reflect"
 	"strings"
 	"testing"
 )
@@ -11,27 +12,70 @@ func TestPublicAPISnapshotFile(t *testing.T) {
 	if err != nil {
 		t.Fatalf("read public api snapshot: %v", err)
 	}
-	text := string(content)
-	for _, needle := range []string{
+	got := strings.Split(strings.TrimSpace(string(content)), "\n")
+	want := []string{
+		"package taosx",
+		"",
+		"const DriverModeWebSocket DriverMode = \"websocket\"",
+		"const DriverModeNativeLegacy DriverMode = \"native_legacy\"",
+		"const DriverModeRESTSQLOnly DriverMode = \"rest_sql_only\"",
+		"const ErrorKindWrite ErrorKind = \"write\"",
+		"const HealthHealthy HealthState = \"healthy\"",
+		"const SchemalessLineProtocol SchemalessProtocol = \"line\"",
+		"const SchemalessPrecisionNanosecond SchemalessPrecision = \"ns\"",
+		"",
 		"func New(context.Context, Config, ...Option) (Client, error)",
 		"func NewFakeClient() *FakeClient",
 		"func NewFakeDriver() *FakeDriver",
+		"func NewQuery(string, ...any) Query",
+		"func NewStatement(string, ...any) Statement",
 		"func RenderCreateStable(StableSpec) (string, error)",
-		"const SchemalessPrecisionNanosecond SchemalessPrecision = \"ns\"",
+		"func WithDriver(Driver) Option",
+		"func WithMetrics(Metrics) Option",
+		"",
+		"type Batch struct",
+		"  Database string",
+		"  Points []Point",
+		"",
 		"type Client interface",
+		"  Exec(context.Context, Statement) (ExecResult, error)",
+		"  Query(context.Context, Query) (Rows, error)",
+		"  WriteBatch(context.Context, Batch) (WriteResult, error)",
+		"  SchemalessWrite(context.Context, SchemalessPayload) (WriteResult, error)",
+		"  Health(context.Context) HealthStatus",
+		"  Close(context.Context) error",
+		"",
 		"type Config struct",
+		"  Name string",
+		"  DriverMode DriverMode",
+		"  Endpoint string",
+		"  Database string",
+		"  Username string",
+		"  Password string",
+		"  Timeout time.Duration",
+		"  MaxRetries int",
+		"  TLS bool",
+		"",
 		"type FakeClient struct",
 		"type FakeDriver struct",
 		"type HealthStatus struct",
 		"type ColumnSpec struct",
+		"  Name string",
+		"  Type string",
 		"type StableSpec struct",
+		"  Name string",
+		"  Columns []ColumnSpec",
+		"  Tags []ColumnSpec",
 		"type SchemalessPayload struct",
-		"Precision SchemalessPrecision",
+		"  Protocol SchemalessProtocol",
+		"  Precision SchemalessPrecision",
+		"  Lines []string",
 		"type WriteResult struct",
-		"RowsAttempted int64",
-	} {
-		if !strings.Contains(text, needle) {
-			t.Fatalf("public api snapshot missing %q", needle)
-		}
+		"  RowsWritten int64",
+		"  RowsAttempted int64",
+		"  Partial bool",
+	}
+	if !reflect.DeepEqual(got, want) {
+		t.Fatalf("public api snapshot drift\nwant: %#v\n got: %#v", want, got)
 	}
 }

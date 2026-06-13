@@ -1,8 +1,8 @@
 # taosx
 
-`taosx` 是 `github.com/ZoneCNH/taosx` 的 L2 TDengine adapter 基础库，当前交付目标为 `v0.1.0` MVA。它提供 TDengine 客户端工厂、配置校验、脱敏、错误分类、SQL 构造、批量写入、schemaless 写入、健康检查和可选可观测性注入，不承载业务时序模型或应用编排。
+`taosx` 是 `github.com/ZoneCNH/taosx` 的 L2 TDengine adapter 基础库，当前发布版本为 `v1.0.0`。它提供 TDengine 客户端工厂、配置校验、脱敏、错误分类、SQL 构造、批量写入、schemaless 写入、健康检查和可选可观测性注入，不承载业务时序模型或应用编排。
 
-本仓库保留 xlib-standard 标准运行时、Harness 和 Evidence gate；标准运行时基线版本为 `v0.4.13`。旧标准源叙事仅作为治理和生成器历史上下文存在，当前公共使用入口是 `pkg/taosx`。
+本仓库保留 xlib-standard 标准运行时、Harness 和 Evidence gate；标准运行时基线版本为 `v1.0.0`。旧标准源叙事、`pkg/templatex` 和生成器测试仅作为治理、脚手架和迁移扫描历史上下文存在，当前公共使用入口是 `pkg/taosx`。
 标准源历史地址为 `https://github.com/ZoneCNH/xlib-standard`，仅用于治理契约、迁移扫描和下游同步溯源。
 
 ## 能力边界
@@ -79,10 +79,13 @@ GOWORK=off make standard-impact-check
 GOWORK=off make release-check
 go test ./pkg/taosx ./contracts ./examples/...
 go test ./...
+TAOSX_INTEGRATION=1 go test -tags=integration ./pkg/taosx -run TestTDengineWebSocketIntegration -count=1
 ./scripts/check_boundary.sh
 ./scripts/check_contracts.sh
 GOWORK=off go run ./cmd/goalcli score --min 9.8
 ```
+
+真实 TDengine 集成测试必须从本地受控环境注入 `TAOSX_TDENGINE_ENDPOINT`、`TAOSX_TDENGINE_USER`、`TAOSX_TDENGINE_PASSWORD` 和 `TAOSX_TDENGINE_DATABASE`，或注入完整 `TAOSX_TDENGINE_DSN`。测试和文档不得输出原始密码或完整 DSN。
 
 发布、Evidence 和 release 语境下的命令必须显式使用 `GOWORK=off`，避免本地 `go.work` 改写 module 解析。
 

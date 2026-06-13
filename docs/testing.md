@@ -38,4 +38,15 @@ git diff --check
 
 ## 集成测试边界
 
-当前仓库没有内置真实 TDengine 集成环境。真实 TDengine driver、容器化集成测试和性能压测属于后续适配器或发布管线扩展范围。新增这些能力前必须同步更新规格、设计、追溯矩阵和 CI 证据。
+真实 TDengine WebSocket 集成测试通过 build tag 隔离，默认测试不会访问网络或读取本地凭据：
+
+```bash
+TAOSX_INTEGRATION=1 go test -tags=integration ./pkg/taosx -run TestTDengineWebSocketIntegration -count=1
+```
+
+测试只支持官方 `github.com/taosdata/driver-go/v3/taosWS` 路径。运行前必须注入以下环境变量之一：
+
+- `TAOSX_TDENGINE_DSN`：完整 WebSocket DSN。
+- `TAOSX_TDENGINE_ENDPOINT`、`TAOSX_TDENGINE_USER`、`TAOSX_TDENGINE_PASSWORD`、`TAOSX_TDENGINE_DATABASE`：由测试组装 DSN。
+
+凭据必须来自本地受控 secret 文件或 CI secret store；测试失败信息不得输出原始密码或完整 DSN。容器化集成环境、性能压测、连接池、STMT 和生产级重试策略仍属于后续发布范围。
