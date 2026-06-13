@@ -1,24 +1,72 @@
-# 规格
+# taosx 实现规格
 
-## 目标
+## 范围
 
-对齐独立标准仓库 [`xlib-standard`](https://github.com/ZoneCNH/xlib-standard)，并在同一仓库中提供 Go 参考模板、generator、Harness 和 Evidence Runtime。
+本规格描述当前 `pkg/taosx` 的可验证行为。模块提供 TDengine L2 adapter contract，不承诺默认连接真实 TDengine。
 
-## 需求
+## 配置
 
-- 提供可编译 Go 模板、contracts、examples、CI workflow、Harness Gate、Evidence artifact、release 和复盘模板。
-- `scripts/render_template.sh` 可以生成 `kernel` 形态并通过 `GOWORK=off go test ./...`。
-- 持久同步默认下游为 `kernel`；默认 integration 代表集覆盖 `kernel`、`configx` 和 `redisx`。`corekit` 仅作为中性路径专项 smoke / registry 目标保留，不作为持久下游同步目标。
-- 旧 `baselib-template` / `foundationx` 只保留在迁移文档语境中。
-- 禁止隐式读取 `/home/k8s/secrets/env/*`；该路径只属于调用方部署配置。
+`Config` 字段：
+
+- `Name`
+- `DriverMode`
+- `Endpoint`
+- `Database`
+- `Username`
+- `Password`
+- `Timeout`
+- `MaxRetries`
+- `TLS`
+
+`Normalize` 补齐默认名称、驱动模式和超时时间。`Validate` 拒绝缺失 endpoint/database、非法驱动模式、负超时和负重试次数。`Sanitized` 与 `RedactedDSN` 不得暴露密码。
+
+## Client 契约
+
+```go
+type Client interface {
+	Exec(context.Context, Statement) (ExecResult, error)
+	Query(context.Context, Query) (Rows, error)
+	WriteBatch(context.Context, Batch) (WriteResult, error)
+	SchemalessWrite(context.Context, SchemalessPayload) (WriteResult, error)
+	Health(context.Context) HealthStatus
+	Close(context.Context) error
+}
+```
+
+`New(ctx, cfg, opts...)` 必须校验 context、配置和 options。未注入 driver 时构造可以成功，但运行操作返回 unavailable 错误。
+
+## Driver 契约
+
+`Driver` 与 `Client` 方法集一致，表示真实 TDengine I/O 的注入端口。测试 fake、HTTP/WebSocket driver 或其他 SDK wrapper 都应实现此接口。
+
+## 操作行为
+
+- `Exec`：拒绝空 SQL statement，委托 driver。
+- `Query`：拒绝空 SQL query，返回 driver 的 `Rows`。
+- `WriteBatch`：拒绝空 database、table 或 points；driver 错误时保留 partial result。
+- `SchemalessWrite`：拒绝空 lines 或非法协议。
+- `Health`：返回 driver 健康状态；默认 unavailable driver 返回 degraded。
+- `Close`：幂等；关闭后操作返回 closed 错误。
+
+## 指标
+
+metrics 通过接口注入，默认 no-op。当前核心指标包括：
+
+- `taosx_client_created_total`
+- `taosx_client_closed_total`
+- `taosx_client_errors_total`
+- `taosx_client_health_status`
+- `taosx_client_health_latency_ms`
+- `taosx_client_requests_total`
+- `taosx_client_request_duration_seconds`
+- `taosx_client_retries_total`
+- `taosx_client_inflight`
+- `taosx_client_batch_rows_total`
+- `taosx_client_schemaless_lines_total`
 
 ## 非目标
 
-- 不依赖 `x.go`。
-- 不包含 `x.go` 业务模型。
-- 不把生成库真实 runtime 塞回标准仓库。
-
-## 目标编号
-
-- 目标：`GOAL-20260602-001`
-- 当前基线：`docs/goal/goal.md` v2.9.3 Complete；实现与风险基线参考 `docs/project-analysis-20260602.md` 的 P0/P1/P2 与 52 项问题清单。
+- 真实 TDengine driver。
+- 连接池、STMT 和自动重试。
+- 自动建表和 schema migration。
+- 配置中心读取或观测系统硬依赖。
