@@ -2,6 +2,23 @@
 
 ## 未发布
 
+## v1.0.1 - 2026-06-13
+
+### 修复
+
+- 将 `taosx_client_batch_rows_total` 从每次批量写入计数修正为按 `Batch.Points` 行计数。
+- 将 `taosx_client_schemaless_lines_total` 从每次 schemaless 请求计数修正为按 payload lines 计数。
+- 移除 `Config.Validate()` 中不可达的缺失 name 分支；`Normalize()` 仍补齐默认包名，公共配置语义保持稳定。
+
+### 测试
+
+- 将 `pkg/taosx` 单包覆盖率提升到 100.0%，并保留 metrics 行数与行文本计数回归。
+- 使用本地受控 dev 环境执行官方 `taosWS` WebSocket 真实集成测试，测试输出不包含原始密码或完整 DSN。
+
+### 兼容性
+
+- `pkg/taosx` 公共 API 无破坏性变更；默认 driver 注入边界、脱敏和错误分类保持兼容。
+
 ## v1.0.0 - 2026-06-13
 
 ### 新增

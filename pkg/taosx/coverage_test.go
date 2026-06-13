@@ -25,6 +25,29 @@ func TestNewRejectsCanceledContext(t *testing.T) {
 	}
 }
 
+func TestNewRejectsInvalidConfig(t *testing.T) {
+	_, err := New(context.Background(), Config{Database: "metrics"})
+	if !IsKind(err, ErrorKindValidation) {
+		t.Fatalf("expected validation error, got %v", err)
+	}
+}
+
+func TestExecRejectsBlankSQL(t *testing.T) {
+	driver := &recordingDriver{}
+	client, err := New(context.Background(), validConfig(), WithDriver(driver))
+	if err != nil {
+		t.Fatalf("new client: %v", err)
+	}
+
+	_, err = client.Exec(context.Background(), NewStatement(" \t\n "))
+	if !IsKind(err, ErrorKindValidation) {
+		t.Fatalf("expected validation error, got %v", err)
+	}
+	if driver.execCalls != 0 {
+		t.Fatalf("driver was called for invalid statement")
+	}
+}
+
 func TestQueryDelegatesToDriver(t *testing.T) {
 	rows := &stubRows{columns: []string{"ts", "value"}}
 	driver := NewFakeDriver()
@@ -80,6 +103,46 @@ func TestQueryRejectsBlankSQL(t *testing.T) {
 	}
 }
 
+func TestQueryWriteAndSchemalessRejectClosedClient(t *testing.T) {
+	client, err := New(context.Background(), validConfig(), WithDriver(&recordingDriver{}))
+	if err != nil {
+		t.Fatalf("new client: %v", err)
+	}
+	if err := client.Close(context.Background()); err != nil {
+		t.Fatalf("close: %v", err)
+	}
+
+	_, queryErr := client.Query(context.Background(), NewQuery("SELECT * FROM meters"))
+	_, batchErr := client.WriteBatch(context.Background(), validBatch())
+	_, schemalessErr := client.SchemalessWrite(context.Background(), validSchemalessPayload())
+	for name, err := range map[string]error{
+		"query":            queryErr,
+		"write_batch":      batchErr,
+		"schemaless_write": schemalessErr,
+	} {
+		if !IsKind(err, ErrorKindConnection) || IsRetryable(err) {
+			t.Fatalf("%s expected non-retryable connection error, got %v", name, err)
+		}
+	}
+}
+
+func TestClientMethodsRejectNilReceiverAndNilContext(t *testing.T) {
+	var nilClient *client
+	_, err := nilClient.Exec(context.Background(), NewStatement("SELECT 1"))
+	if !IsKind(err, ErrorKindValidation) {
+		t.Fatalf("expected nil client validation error, got %v", err)
+	}
+
+	c, err := New(context.Background(), validConfig(), WithDriver(&recordingDriver{}))
+	if err != nil {
+		t.Fatalf("new client: %v", err)
+	}
+	_, err = c.(*client).Exec(nil, NewStatement("SELECT 1"))
+	if !IsKind(err, ErrorKindValidation) {
+		t.Fatalf("expected nil context validation error, got %v", err)
+	}
+}
+
 func TestSchemalessWriteMarksPartialResultOnDriverError(t *testing.T) {
 	driver := NewFakeDriver()
 	driver.WriteResult = WriteResult{RowsWritten: 1}
@@ -107,6 +170,38 @@ func TestSchemalessWriteMarksPartialResultOnDriverError(t *testing.T) {
 	}
 }
 
+func TestBatchAndSchemalessMetricsCountRowsAndLines(t *testing.T) {
+	driver := &recordingDriver{writeResult: WriteResult{RowsWritten: 2, RowsAttempted: 2}}
+	metrics := &recordingMetrics{}
+	client, err := New(context.Background(), validConfig(), WithDriver(driver), WithMetrics(metrics))
+	if err != nil {
+		t.Fatalf("new client: %v", err)
+	}
+
+	batch := validBatch()
+	batch.Points = append(batch.Points, Point{
+		Table:     "meters",
+		Timestamp: time.Unix(1700000001, 0),
+		Fields:    map[string]any{"value": 2.4},
+	})
+	if _, err := client.WriteBatch(context.Background(), batch); err != nil {
+		t.Fatalf("write batch: %v", err)
+	}
+
+	payload := validSchemalessPayload()
+	payload.Lines = append(payload.Lines, "meters,location=lab value=2.4 1700000000000000001")
+	if _, err := client.SchemalessWrite(context.Background(), payload); err != nil {
+		t.Fatalf("schemaless write: %v", err)
+	}
+
+	if got := metrics.counterCount(MetricClientBatchRowsTotal); got != 2 {
+		t.Fatalf("batch row metric count = %d, want 2", got)
+	}
+	if got := metrics.counterCount(MetricClientSchemalessLinesTotal); got != 2 {
+		t.Fatalf("schemaless line metric count = %d, want 2", got)
+	}
+}
+
 func TestCloseRejectsNilContext(t *testing.T) {
 	client, err := New(context.Background(), validConfig(), WithDriver(NewFakeDriver()))
 	if err != nil {
@@ -116,6 +211,25 @@ func TestCloseRejectsNilContext(t *testing.T) {
 	err = client.Close(nil)
 	if !IsKind(err, ErrorKindValidation) {
 		t.Fatalf("expected validation error, got %v", err)
+	}
+}
+
+func TestCloseRejectsNilReceiverAndCanceledContext(t *testing.T) {
+	var nilClient *client
+	err := nilClient.Close(context.Background())
+	if !IsKind(err, ErrorKindValidation) {
+		t.Fatalf("expected nil client validation error, got %v", err)
+	}
+
+	client, err := New(context.Background(), validConfig(), WithDriver(&recordingDriver{}))
+	if err != nil {
+		t.Fatalf("new client: %v", err)
+	}
+	ctx, cancel := context.WithCancel(context.Background())
+	cancel()
+	err = client.Close(ctx)
+	if !IsKind(err, ErrorKindUnavailable) || IsRetryable(err) {
+		t.Fatalf("expected non-retryable unavailable error, got %v", err)
 	}
 }
 
@@ -136,6 +250,10 @@ func TestCloseWrapsDriverError(t *testing.T) {
 	}
 }
 
+func TestRecordErrorMetricAllowsNilMetrics(t *testing.T) {
+	recordErrorMetric(nil, "query", errors.New("plain"))
+}
+
 func TestExecAfterCloseReturnsConnectionError(t *testing.T) {
 	client, err := New(context.Background(), validConfig(), WithDriver(NewFakeDriver()))
 	if err != nil {
@@ -148,6 +266,23 @@ func TestExecAfterCloseReturnsConnectionError(t *testing.T) {
 	_, err = client.Exec(context.Background(), NewStatement("SELECT 1"))
 	if !IsKind(err, ErrorKindConnection) || IsRetryable(err) {
 		t.Fatalf("expected non-retryable connection error, got %v", err)
+	}
+}
+
+func TestHealthRejectsCanceledContextAndUnknownValue(t *testing.T) {
+	client, err := New(context.Background(), validConfig(), WithDriver(NewFakeDriver()))
+	if err != nil {
+		t.Fatalf("new client: %v", err)
+	}
+
+	ctx, cancel := context.WithCancel(context.Background())
+	cancel()
+	status := client.Health(ctx)
+	if status.Status != HealthUnhealthy || status.Message != context.Canceled.Error() {
+		t.Fatalf("unexpected canceled health status: %#v", status)
+	}
+	if healthValue("unknown") != 0 {
+		t.Fatalf("unknown health state should map to 0")
 	}
 }
 
@@ -410,6 +545,37 @@ func TestRenderCreateStableAllowsNoTags(t *testing.T) {
 	}
 }
 
+func TestRenderCreateStableRejectsInvalidStableName(t *testing.T) {
+	_, err := RenderCreateStable(StableSpec{
+		Name:    "bad-name",
+		Columns: []ColumnSpec{{Name: "ts", Type: "timestamp"}},
+	})
+	if !IsKind(err, ErrorKindSchema) {
+		t.Fatalf("expected schema error, got %v", err)
+	}
+}
+
+func TestRenderCreateStableRejectsInvalidColumnName(t *testing.T) {
+	_, err := RenderCreateStable(StableSpec{
+		Name:    "meters",
+		Columns: []ColumnSpec{{Name: "bad-name", Type: "timestamp"}},
+	})
+	if !IsKind(err, ErrorKindSchema) {
+		t.Fatalf("expected schema error, got %v", err)
+	}
+}
+
+func TestRenderCreateStableRejectsInvalidTagName(t *testing.T) {
+	_, err := RenderCreateStable(StableSpec{
+		Name:    "meters",
+		Columns: []ColumnSpec{{Name: "ts", Type: "timestamp"}},
+		Tags:    []ColumnSpec{{Name: "bad-name", Type: "binary(16)"}},
+	})
+	if !IsKind(err, ErrorKindSchema) {
+		t.Fatalf("expected schema error, got %v", err)
+	}
+}
+
 func TestRenderCreateStableRejectsMissingColumns(t *testing.T) {
 	_, err := RenderCreateStable(StableSpec{Name: "meters"})
 	if !IsKind(err, ErrorKindSchema) {
@@ -424,6 +590,40 @@ func TestRenderCreateStableRejectsMissingColumnType(t *testing.T) {
 	})
 	if !IsKind(err, ErrorKindSchema) {
 		t.Fatalf("expected schema error, got %v", err)
+	}
+}
+
+func TestErrorHelpersHandlePlainAndConfigErrors(t *testing.T) {
+	plain := errors.New("plain")
+	if IsRetryable(plain) {
+		t.Fatalf("plain errors must not be retryable")
+	}
+	if IsKind(plain, ErrorKindSQL) {
+		t.Fatalf("plain errors must not match taosx kinds")
+	}
+
+	cause := errors.New("bad token=hidden")
+	cfgErr := configError("load", cause.Error(), cause)
+	if !IsKind(cfgErr, ErrorKindConfig) || !errors.Is(cfgErr, cause) {
+		t.Fatalf("unexpected config error: %v", cfgErr)
+	}
+	if strings.Contains(cfgErr.Error(), "hidden") {
+		t.Fatalf("config error was not redacted: %v", cfgErr)
+	}
+
+	ctxErr := contextError("op", nil)
+	if !IsKind(ctxErr, ErrorKindValidation) || ctxErr.Message != "context is required" {
+		t.Fatalf("unexpected nil context error: %v", ctxErr)
+	}
+}
+
+func TestRedactHandlesDelimiterAndMultipleMarkers(t *testing.T) {
+	got := redact("token=abc123&password=def456 status=failed")
+	if strings.Contains(got, "abc123") || strings.Contains(got, "def456") {
+		t.Fatalf("redaction leaked secret values: %q", got)
+	}
+	if got != "token=***&password=*** status=failed" {
+		t.Fatalf("unexpected redaction: %q", got)
 	}
 }
 
