@@ -1,6 +1,6 @@
 # 仓库贡献指南
 
-Release version: v0.4.13
+Release version: v1.0.1
 
 ## 项目概述
 
@@ -39,6 +39,8 @@ go test ./... -run 'Test.*Property|Test.*Invariant'   # 属性测试
 go test ./... -run 'Test.*Golden|Test.*Snapshot'       # golden 测试
 ```
 
+当前发布文档锚点为 `v1.0.1`，必须与 `CHANGELOG.md` 最新版本、release manifest 和模板版本常量保持一致。
+
 ### CI 与 Gate
 
 - `make ci`：fmt + vet + lint + test + race + boundary + security + contracts + governance-check + score。
@@ -60,7 +62,7 @@ go test ./... -run 'Test.*Golden|Test.*Snapshot'       # golden 测试
 ```bash
 GOWORK=off make release-check
 XLIB_CONTEXT=release_verify GOWORK=off make release-final-check
-XLIB_CONTEXT=release_verify GOWORK=off make release-preflight VERSION=v0.4.13
+XLIB_CONTEXT=release_verify GOWORK=off make release-preflight VERSION=v1.0.1
 make evidence                                    # 生成 release/manifest/latest.json
 ```
 

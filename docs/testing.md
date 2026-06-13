@@ -33,3 +33,26 @@ GOWORK=off go run ./cmd/goalcli score --min 9.8
 ```
 
 生成的库必须保持测试独立于 `x.go`，且不得读取 `/home/k8s/secrets/env/*`。
+
+## TDengine WebSocket integration
+
+真实 TDengine 连接测试使用 `integration` build tag，默认不运行。执行前必须显式导出环境变量，不要 `source` Markdown 格式的密钥说明文件，也不要在日志中打印 DSN 或密码。
+
+```bash
+export TAOSX_INTEGRATION=1
+export TAOSX_TDENGINE_ENDPOINT=localhost:6041
+export TAOSX_TDENGINE_USER=<user>
+export TAOSX_TDENGINE_PASSWORD=<password>
+export TAOSX_TDENGINE_DATABASE=<database>
+GOWORK=off go test -tags=integration ./pkg/taosx -run TestTDengineWebSocketIntegration -count=1 -v
+```
+
+可选地使用完整 DSN：
+
+```bash
+export TAOSX_INTEGRATION=1
+export TAOSX_TDENGINE_DSN='root:taosdata@ws(localhost:6041)/db'
+GOWORK=off go test -tags=integration ./pkg/taosx -run TestTDengineWebSocketIntegration -count=1 -v
+```
+
+该测试通过 `database/sql` 加载官方 `github.com/taosdata/driver-go/v3/taosWS` driver，验证 `taosx.New(..., WithDriver(...))` 的 `Health` 和真实 `SHOW TABLES` 查询路径。

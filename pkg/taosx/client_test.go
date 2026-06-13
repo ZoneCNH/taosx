@@ -141,9 +141,14 @@ func validConfig() Config {
 
 type recordingDriver struct {
 	execResult      ExecResult
+	execErr         error
 	queryRows       Rows
+	queryErr        error
 	writeResult     WriteResult
+	writeErr        error
+	schemalessErr   error
 	healthErr       error
+	closeErr        error
 	execCalls       int
 	queryCalls      int
 	writeCalls      int
@@ -153,22 +158,22 @@ type recordingDriver struct {
 
 func (d *recordingDriver) Exec(context.Context, Statement) (ExecResult, error) {
 	d.execCalls++
-	return d.execResult, nil
+	return d.execResult, d.execErr
 }
 
 func (d *recordingDriver) Query(context.Context, Query) (Rows, error) {
 	d.queryCalls++
-	return d.queryRows, nil
+	return d.queryRows, d.queryErr
 }
 
 func (d *recordingDriver) WriteBatch(context.Context, Batch) (WriteResult, error) {
 	d.writeCalls++
-	return d.writeResult, nil
+	return d.writeResult, d.writeErr
 }
 
 func (d *recordingDriver) SchemalessWrite(context.Context, SchemalessPayload) (WriteResult, error) {
 	d.schemalessCalls++
-	return d.writeResult, nil
+	return d.writeResult, d.schemalessErr
 }
 
 func (d *recordingDriver) Health(context.Context) error {
@@ -177,7 +182,7 @@ func (d *recordingDriver) Health(context.Context) error {
 
 func (d *recordingDriver) Close(context.Context) error {
 	d.closeCalls++
-	return nil
+	return d.closeErr
 }
 
 type recordingMetrics struct {
@@ -202,6 +207,16 @@ func (m *recordingMetrics) hasCounter(name string) bool {
 		}
 	}
 	return false
+}
+
+func (m *recordingMetrics) counterCount(name string) int {
+	count := 0
+	for _, candidate := range m.counters {
+		if candidate == name {
+			count++
+		}
+	}
+	return count
 }
 
 var errDriverHealth = errors.New("connect failed password=taosdata")
