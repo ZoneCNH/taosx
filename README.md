@@ -2,9 +2,6 @@
 
 `taosx` 是 `github.com/ZoneCNH/taosx` 的 L2 TDengine adapter 基础库，当前发布版本为 `v1.0.1`。它提供 TDengine 客户端工厂、配置校验、脱敏、错误分类、SQL 构造、批量写入、schemaless 写入、健康检查和可选可观测性注入，不承载业务时序模型或应用编排。
 
-本仓库保留 xlib-standard 标准运行时、Harness 和 Evidence gate；标准运行时基线版本为 `v1.0.0`。旧标准源叙事、`pkg/templatex` 和生成器测试仅作为治理、脚手架和迁移扫描历史上下文存在，当前公共使用入口是 `pkg/taosx`。
-标准源历史地址为 `https://github.com/ZoneCNH/xlib-standard`，仅用于治理契约、迁移扫描和下游同步溯源。
-
 ## 能力边界
 
 - 默认 DriverMode 为 `websocket`，面向 TDengine WebSocket 连接。
