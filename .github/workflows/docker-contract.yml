@@ -5,6 +5,7 @@ on:
   push:
     branches:
       - main
+      - taosx
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -12,13 +13,14 @@ concurrency:
 
 jobs:
   docker-contract:
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, Linux, X64, sre/storage-heavy]
     env:
       DOCKER_BUILDKIT: "1"
       COMPOSE_DOCKER_CLI_BUILD: "1"
       GOWORK: off
       XLIB_CONTEXT: ci_pull_request
-      XLIB_ENABLE_VULNCHECK: "0"
+      XLIB_ENABLE_VULNCHECK: "1"
+      XLIB_FORCE_VULNCHECK: "1"
 
     steps:
       - name: Checkout

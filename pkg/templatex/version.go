@@ -2,5 +2,5 @@ package templatex
 
 const (
 	ModuleName = "github.com/ZoneCNH/taosx"
-	Version    = "v1.0.1"
+	Version    = "v1.0.5"
 )

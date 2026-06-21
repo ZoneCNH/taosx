@@ -321,13 +321,15 @@ require_text "Makefile" '$(GOALCLI) release-evidence-checksum-check'
 require_text "scripts/run_fuzz_smoke.sh" 'fuzz_time="${FUZZ_SMOKE_TIME:-10s}"'
 require_text ".github/workflows/ci.yml" "make release-check"
 require_text ".github/workflows/ci.yml" "release/manifest/latest.json.sha256"
-require_text ".github/workflows/ci.yml" 'XLIB_ENABLE_VULNCHECK: "0"'
-require_text ".github/workflows/ci.yml" "env.XLIB_ENABLE_VULNCHECK == '1'"
+require_text ".github/workflows/ci.yml" 'XLIB_ENABLE_VULNCHECK: "1"'
+require_text ".github/workflows/ci.yml" 'XLIB_FORCE_VULNCHECK: "1"'
+require_text ".github/workflows/ci.yml" "govulncheck@v1.1.4"
 require_text ".github/workflows/release.yml" "make release-final-check"
 require_text ".github/workflows/release.yml" "release/manifest/latest.json.sha256"
 require_text ".github/workflows/release.yml" "ARTIFACT_URL"
-require_text ".github/workflows/release.yml" 'XLIB_ENABLE_VULNCHECK: "0"'
-require_text ".github/workflows/release.yml" "env.XLIB_ENABLE_VULNCHECK == '1'"
+require_text ".github/workflows/release.yml" 'XLIB_ENABLE_VULNCHECK: "1"'
+require_text ".github/workflows/release.yml" 'XLIB_FORCE_VULNCHECK: "1"'
+require_text ".github/workflows/release.yml" "govulncheck@v1.1.4"
 require_text ".github/workflows/release.yml" "contents: write"
 require_text ".github/workflows/release.yml" "gh release create"
 require_text ".github/workflows/release.yml" "gh release edit"
@@ -335,16 +337,16 @@ require_text ".github/workflows/release.yml" "gh release view"
 require_text ".github/workflows/release.yml" "--verify-tag"
 require_text ".github/workflows/security.yml" "schedule:"
 require_text ".github/workflows/security.yml" 'cron: "17 3 * * 1"'
-require_text ".github/workflows/security.yml" "github.event_name == 'schedule'"
-require_text ".github/workflows/security.yml" 'XLIB_FORCE_VULNCHECK: ${{ github.event_name =='
+require_text ".github/workflows/security.yml" 'XLIB_ENABLE_VULNCHECK: "1"'
+require_text ".github/workflows/security.yml" 'XLIB_FORCE_VULNCHECK: "1"'
 require_text ".github/workflows/security.yml" 'XLIB_VULNCHECK_INTERVAL_HOURS: "168"'
-require_text ".github/workflows/security.yml" "env.XLIB_ENABLE_VULNCHECK == '1'"
+require_text ".github/workflows/security.yml" "govulncheck@v1.1.4"
 require_text ".github/workflows/release-auto-patch.yml" "branches: [main]"
 require_text ".github/workflows/release-auto-patch.yml" "contents: write"
 require_text ".github/workflows/release-auto-patch.yml" "fetch-depth: 0"
 require_text ".github/workflows/release-auto-patch.yml" "release-auto-patch-main"
-require_text ".github/workflows/release-auto-patch.yml" 'XLIB_ENABLE_VULNCHECK: "0"'
-require_text ".github/workflows/release-auto-patch.yml" "env.XLIB_ENABLE_VULNCHECK == '1'"
+require_text ".github/workflows/release-auto-patch.yml" 'XLIB_ENABLE_VULNCHECK: "1"'
+require_text ".github/workflows/release-auto-patch.yml" 'XLIB_FORCE_VULNCHECK: "1"'
 require_text ".github/workflows/release-auto-patch.yml" "git tag --points-at"
 require_text ".github/workflows/release-auto-patch.yml" "already_released=true"
 require_text ".github/workflows/release-auto-patch.yml" "git tag -l 'v[0-9]*.[0-9]*.[0-9]*' --sort=-v:refname"
@@ -358,6 +360,18 @@ require_text ".github/workflows/release-auto-patch.yml" "gh release view"
 require_text ".github/workflows/release-auto-patch.yml" "--verify-tag"
 require_text ".github/workflows/release-auto-patch.yml" ".url | length > 0"
 require_text ".github/workflows/release-auto-patch.yml" "govulncheck@v1.1.4"
+require_text ".github/workflows/goal-gates.yml" "pull_request:"
+require_text ".github/workflows/goal-gates.yml" "push:"
+require_text ".github/workflows/goal-gates.yml" "make worktree-guard"
+require_text ".github/workflows/goal-gates.yml" "make release-check"
+require_text ".github/workflows/goal-gates.yml" "make evidence-check"
+require_text ".github/workflows/goal-gates.yml" 'XLIB_FORCE_VULNCHECK: "1"'
+require_text ".github/workflows/goal-gates.yml" "govulncheck@v1.1.4"
+require_text ".github/workflows/integration.yml" "push:"
+require_text ".github/workflows/worktree-guard.yml" "github.event_name == 'pull_request'"
+require_text ".github/workflows/worktree-guard.yml" "github.event_name == 'push'"
+require_text ".github/workflows/worktree-guard.yml" "git merge-base --is-ancestor origin/main HEAD"
+require_text ".github/workflows/worktree-guard.yml" "make worktree-guard"
 require_text "docs/release.md" ".github/workflows/release-auto-patch.yml"
 require_text "docs/release.md" "vX.Y.(Z+1)"
 require_text "docs/release.md" "GOWORK=off make release-final-check"

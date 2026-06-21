@@ -37,7 +37,7 @@ Secret scan 会排除 `.git`、`.omc`、`.omx`、`.worktree` 和 `vendor` 等本
 ## 依赖安全
 
 - 新依赖必须有明确用途。
-- 依赖变更后运行 `GOWORK=off make security` 和 `GOWORK=off make boundary`；需要漏洞库证据时使用 `XLIB_ENABLE_VULNCHECK=1 XLIB_FORCE_VULNCHECK=1 GOWORK=off make security`，或等待 Security workflow 的每周定时扫描。
+- 依赖变更后运行 `GOWORK=off make security` 和 `GOWORK=off make boundary`；需要漏洞库证据时使用 `XLIB_ENABLE_VULNCHECK=1 XLIB_FORCE_VULNCHECK=1 GOWORK=off make security`。生产发布相关 workflow 也必须固定安装 `govulncheck@v1.1.4` 并强制运行漏洞扫描。
 - 发现漏洞时记录影响面、修复版本和验证命令。
 
 ## 例外

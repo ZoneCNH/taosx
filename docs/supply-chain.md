@@ -40,7 +40,7 @@ GitHub Actions 运行 `GOWORK=off make release-check`，并上传 `release/manif
 
 GitHub Actions workflow 必须使用 40 位 commit SHA 固定第三方 Action，并在同一行用注释记录来源 tag，例如 `# tag v4.2.2`。不得使用 `actions/checkout@v4`、`actions/setup-go@v5` 这类浮动 tag 作为最终发布门禁配置；版本更新应通过维护者审查或 dependabot PR 重新 pin 到新的 commit。
 
-CI、Release Check、Auto Patch 和 Docker Contract workflow 默认不执行 `govulncheck`；Security workflow 每周定时强制执行漏洞扫描。Docker toolchain image 可以安装固定版本以保证工具链可复现，但运行入口仍必须遵守 weekly/force 开关。启用或定时运行时必须使用固定版本。当前基线是 `golangci-lint@v2.1.6` 与 `golang.org/x/vuln/cmd/govulncheck@v1.1.4`；升级时应同步更新 Dockerfile、workflow、发布文档和验证记录。
+生产发布相关 workflow 必须安装固定版本 `golang.org/x/vuln/cmd/govulncheck@v1.1.4`，并显式设置 `XLIB_ENABLE_VULNCHECK=1` 与 `XLIB_FORCE_VULNCHECK=1`，覆盖本地 weekly 窗口以强制执行漏洞扫描。Docker toolchain image 可以安装固定版本以保证工具链可复现；本地入口仍由 `XLIB_ENABLE_VULNCHECK`、一周窗口状态和 `XLIB_FORCE_VULNCHECK` 控制。当前 Docker toolchain lint 基线是 `golangci-lint@v2.1.6`，workflow gate 使用固定安装的 `golangci-lint@v2.6.2`；升级时应同步更新 Dockerfile、workflow、发布文档和验证记录。
 
 Release manifest 相关测试必须在临时 fixture 仓库内构造所需 `.omc` state 文件，不得依赖当前工作区的 Agent 运行态。这样可以保证 Evidence 测试在 clean checkout、CI 和本地开发目录中行为一致。
 

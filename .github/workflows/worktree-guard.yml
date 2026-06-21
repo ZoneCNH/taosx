@@ -2,9 +2,9 @@ name: Worktree Guard
 
 on:
   pull_request:
-    branches: [main]
+    branches: [main, taosx]
   push:
-    branches: [main]
+    branches: [main, taosx]
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -12,18 +12,46 @@ concurrency:
 
 jobs:
   worktree-check:
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, Linux, X64, sre/storage-heavy]
+    env:
+      GOWORK: off
+      XLIB_CONTEXT: ci_pull_request
     steps:
       - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # tag v6.0.3
         with:
           fetch-depth: 0
 
+      - uses: actions/setup-go@40f1582b2485089dde7abd97c1529aa768e1baff # tag v5
+        with:
+          go-version-file: go.mod
+          cache: true
+          cache-dependency-path: go.sum
+
       - name: 检查 PR 来源分支
+        if: github.event_name == 'pull_request'
         run: |
           HEAD_REF="${{ github.head_ref }}"
+          if [ -z "$HEAD_REF" ]; then
+            echo "ERROR: pull_request event missing github.head_ref。"
+            exit 1
+          fi
           if [ "$HEAD_REF" = "main" ] || [ "$HEAD_REF" = "master" ]; then
             echo "ERROR: PR 来源分支不能是 main/master。"
             echo "请使用 worktree 分支提交 PR。"
             exit 1
           fi
           echo "worktree-guard: 来源分支 $HEAD_REF，通过。"
+
+      - name: 检查 Push 来源
+        if: github.event_name == 'push'
+        run: |
+          git fetch origin main --depth=1
+          BRANCH="${GITHUB_REF_NAME}"
+          if [ "$BRANCH" != "main" ] && ! git merge-base --is-ancestor origin/main HEAD; then
+            echo "ERROR: push 分支不是从 origin/main 派生。"
+            exit 1
+          fi
+          echo "worktree-guard: push 分支 $BRANCH，通过。"
+
+      - name: Worktree Guard
+        run: make worktree-guard

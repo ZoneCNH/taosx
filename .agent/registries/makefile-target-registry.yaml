@@ -5,6 +5,7 @@ targets:
   - vet
   - lint
   - test
+  - taosx-coverage-check
   - race
   - boundary
   - architecture

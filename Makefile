@@ -46,6 +46,19 @@ test:
 race:
 	go test -race ./...
 
+.PHONY: taosx-coverage-check
+taosx-coverage-check:
+	@set -e; \
+	coverprofile="$$(mktemp "$${TMPDIR:-/tmp}/taosx.coverprofile.XXXXXX")"; \
+	trap 'rm -f "$$coverprofile"' EXIT; \
+	GOWORK=off go test ./pkg/taosx -covermode=count -coverprofile="$$coverprofile"; \
+	total="$$(go tool cover -func="$$coverprofile" | awk '/^total:/ {print $$3}')"; \
+	if [ "$$total" != "100.0%" ]; then \
+		echo "pkg/taosx coverage gate failed: got $$total, want 100.0%"; \
+		exit 1; \
+	fi; \
+	echo "pkg/taosx coverage gate passed: $$total"
+
 .PHONY: lint
 lint:
 	@if command -v golangci-lint >/dev/null 2>&1; then \
@@ -394,7 +407,7 @@ context-standard: require-gowork-off governance-check p1-governance-check docs-c
 context-full: require-gowork-off governance-check p1-governance-check p2-runtime-check
 
 .PHONY: context-release
-context-release: require-gowork-off context-full integration dependency-check standard-impact-check score-check debt-evidence
+context-release: require-gowork-off context-full taosx-coverage-check integration dependency-check standard-impact-check score-check debt-evidence
 	CHECK_STATUS=passed $(MAKE) evidence
 	$(MAKE) release-evidence-hash
 	$(MAKE) release-evidence-check
@@ -410,7 +423,7 @@ context-standard-check: context-standard
 context-full-check: context-full
 
 .PHONY: ci
-ci: doctor-hooks-local fmt vet lint test race boundary architecture domain secret-check security security-debt contracts governance-check debt score rules-verify
+ci: doctor-hooks-local fmt vet lint test taosx-coverage-check race boundary architecture domain secret-check security security-debt contracts governance-check debt score rules-verify
 
 .PHONY: ci-extended
 ci-extended: ci property golden fuzz-smoke docs-drift
