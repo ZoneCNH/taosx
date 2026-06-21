@@ -2,6 +2,17 @@
 
 ## 未发布
 
+## v1.0.5 - 2026-06-21
+
+### 发布
+
+- 新增 `FEATURES.md` 和 `ACCEPTANCE.md` 两个根投影文档，分别承载能力总览与验收标准的可读入口。
+- 同步 README、AGENTS、release manifest、manifest 工具、goalcli 和包版本锚点到 `v1.0.5`。
+
+### 兼容性
+
+- `pkg/taosx` 公共 API 无破坏性变更；本次只推进发布锚点、根文档投影和验收说明同步。
+
 ## v1.0.4 - 2026-06-19
 
 ### 治理

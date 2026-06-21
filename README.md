@@ -1,6 +1,6 @@
 # taosx
 
-`taosx` 是 `github.com/ZoneCNH/taosx` 的 L2 TDengine adapter 基础库，当前发布版本为 `v1.0.4`。它提供 TDengine 客户端工厂、配置校验、脱敏、错误分类、SQL 构造、批量写入、schemaless 写入、健康检查和可选可观测性注入，不承载业务时序模型或应用编排。
+`taosx` 是 `github.com/ZoneCNH/taosx` 的 L2 TDengine adapter 基础库，当前发布版本为 `v1.0.5`。它提供 TDengine 客户端工厂、配置校验、脱敏、错误分类、SQL 构造、批量写入、schemaless 写入、健康检查和可选可观测性注入，不承载业务时序模型或应用编排。
 
 治理、Harness 与 release gate 继承自标准源 [`xlib-standard`](https://github.com/ZoneCNH/xlib-standard)。
 
@@ -67,6 +67,8 @@ func main() {
 - [错误](docs/errors.md)：错误分类、retry 语义和 secret redaction。
 - [可观测性](docs/observability.md)：可选 metrics 注入与健康状态。
 - [快速开始](docs/quickstart.md)：本地验证和示例命令。
+- [功能总览](FEATURES.md)：根投影版能力边界、核心职责和权威入口。
+- [验收标准](ACCEPTANCE.md)：发布 gate、验收矩阵和完成条件。
 - [测试策略](docs/testing.md)：taosx 单测、schema、示例和 gate 覆盖。
 - [下游矩阵](docs/downstream-matrix.md)：taosx 在 L2 adapter 矩阵中的状态和采用证据边界。
 
@@ -88,7 +90,7 @@ TAOSX_INTEGRATION=1 go test -tags=integration ./pkg/taosx -run TestTDengineWebSo
 GOWORK=off go run ./cmd/goalcli score --min 9.8
 ```
 
-v1.0.4 发布验证要求 `pkg/taosx` 覆盖率达到 100.0%，并通过 `make taosx-coverage-check` 固化到 `ci`、`release-check` 和 `release-check-extended`。真实 TDengine 集成测试必须从本地受控环境注入 `TAOSX_TDENGINE_ENDPOINT`、`TAOSX_TDENGINE_USER`、`TAOSX_TDENGINE_PASSWORD` 和 `TAOSX_TDENGINE_DATABASE`，或注入完整 `TAOSX_TDENGINE_DSN`。测试和文档不得输出原始密码或完整 DSN。
+v1.0.5 发布验证要求 `pkg/taosx` 覆盖率达到 100.0%，并通过 `make taosx-coverage-check` 固化到 `ci`、`release-check` 和 `release-check-extended`。真实 TDengine 集成测试必须从本地受控环境注入 `TAOSX_TDENGINE_ENDPOINT`、`TAOSX_TDENGINE_USER`、`TAOSX_TDENGINE_PASSWORD` 和 `TAOSX_TDENGINE_DATABASE`，或注入完整 `TAOSX_TDENGINE_DSN`。测试和文档不得输出原始密码或完整 DSN。
 
 发布、Evidence 和 release 语境下的命令必须显式使用 `GOWORK=off`，避免本地 `go.work` 改写 module 解析。
 
