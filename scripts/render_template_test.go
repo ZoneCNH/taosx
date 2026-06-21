@@ -3,6 +3,7 @@ package scripts_test
 import (
 	"os"
 	"os/exec"
+	"path"
 	"path/filepath"
 	"strings"
 	"testing"
@@ -94,6 +95,130 @@ func TestRenderTemplateIncludesGoalcliControlPlane(t *testing.T) {
 	if !strings.Contains(string(makefile), "GOALCLI ?= go run ./cmd/goalcli") {
 		t.Fatalf("rendered Makefile missing GOALCLI entrypoint")
 	}
+}
+
+func TestRenderTemplateRewritesSourceModuleIdentity(t *testing.T) {
+	sourceModulePath := currentModulePath(t)
+	sourceModuleName := path.Base(sourceModulePath)
+	sourcePackageName := currentPackageName(t, sourceModuleName)
+	targetModuleName := "rendered-identity"
+	targetModulePath := "github.com/ZoneCNH/rendered-identity"
+	targetPackageName := "rendered_identity"
+	outDir := filepath.Join(t.TempDir(), targetPackageName)
+
+	cmd := exec.Command(
+		"bash",
+		"render_template.sh",
+		"--module-name",
+		targetModuleName,
+		"--module-path",
+		targetModulePath,
+		"--package-name",
+		targetPackageName,
+		"--out",
+		outDir,
+	)
+
+	output, err := cmd.CombinedOutput()
+	if err != nil {
+		t.Fatalf("render template: %v\n%s", err, output)
+	}
+
+	moduleFile, err := os.ReadFile(filepath.Join(outDir, "go.mod"))
+	if err != nil {
+		t.Fatalf("read rendered go.mod: %v", err)
+	}
+	if strings.Contains(string(moduleFile), sourceModulePath) {
+		t.Fatalf("rendered go.mod still references source module path")
+	}
+	if !strings.Contains(string(moduleFile), "module "+targetModulePath) {
+		t.Fatalf("rendered go.mod missing target module path")
+	}
+	if strings.Contains(string(moduleFile), "github.com/taosdata/driver-go") {
+		t.Fatalf("rendered go.mod still references source TDengine dependency")
+	}
+
+	sumFile, err := os.ReadFile(filepath.Join(outDir, "go.sum"))
+	if err != nil && !os.IsNotExist(err) {
+		t.Fatalf("read rendered go.sum: %v", err)
+	}
+	if strings.Contains(string(sumFile), "github.com/taosdata/driver-go") {
+		t.Fatalf("rendered go.sum still references source TDengine dependency")
+	}
+
+	if sourcePackageName != targetPackageName {
+		if _, err := os.Stat(filepath.Join(outDir, "pkg", sourcePackageName)); !os.IsNotExist(err) {
+			t.Fatalf("rendered output should omit source package directory, stat err=%v", err)
+		}
+	}
+
+	makefile, err := os.ReadFile(filepath.Join(outDir, "Makefile"))
+	if err != nil {
+		t.Fatalf("read rendered Makefile: %v", err)
+	}
+	sourceCoverageTarget := sourcePackageName + "-coverage-check"
+	targetCoverageTarget := targetPackageName + "-coverage-check"
+	if sourceCoverageTarget != targetCoverageTarget && strings.Contains(string(makefile), sourceCoverageTarget) {
+		t.Fatalf("rendered Makefile still references source coverage target")
+	}
+	if !strings.Contains(string(makefile), targetCoverageTarget) {
+		t.Fatalf("rendered Makefile missing target coverage target")
+	}
+
+	nestedDir := filepath.Join(t.TempDir(), "nested_identity")
+	nestedCmd := exec.Command(
+		"bash",
+		"scripts/render_template.sh",
+		"--module-name",
+		"nested-identity",
+		"--module-path",
+		"github.com/ZoneCNH/nested-identity",
+		"--package-name",
+		"nested_identity",
+		"--out",
+		nestedDir,
+	)
+	nestedCmd.Dir = outDir
+
+	nestedOutput, err := nestedCmd.CombinedOutput()
+	if err != nil {
+		t.Fatalf("nested render template: %v\n%s", err, nestedOutput)
+	}
+
+	nestedClient, err := os.ReadFile(filepath.Join(nestedDir, "pkg", "nested_identity", "client.go"))
+	if err != nil {
+		t.Fatalf("read nested client: %v", err)
+	}
+	if !strings.HasPrefix(string(nestedClient), "package nested_identity\n") {
+		t.Fatalf("nested rendered client has invalid package declaration:\n%s", nestedClient)
+	}
+}
+
+func currentModulePath(t *testing.T) string {
+	t.Helper()
+
+	cmd := exec.Command("go", "list", "-m")
+	cmd.Dir = ".."
+	cmd.Env = append(os.Environ(), "GOWORK=off")
+	output, err := cmd.Output()
+	if err != nil {
+		t.Fatalf("go list module path: %v", err)
+	}
+	return strings.TrimSpace(string(output))
+}
+
+func currentPackageName(t *testing.T, moduleName string) string {
+	t.Helper()
+
+	goNameTemplate := "{" + "{.Name}" + "}"
+	cmd := exec.Command("go", "list", "-f", goNameTemplate, "./pkg/"+moduleName)
+	cmd.Dir = ".."
+	cmd.Env = append(os.Environ(), "GOWORK=off")
+	output, err := cmd.Output()
+	if err != nil {
+		return strings.ReplaceAll(moduleName, "-", "_")
+	}
+	return strings.TrimSpace(string(output))
 }
 
 func TestRenderTemplateIncludesDockerContract(t *testing.T) {

@@ -1334,7 +1334,7 @@ func TestRunGovernanceCommands(t *testing.T) {
 		}
 		if report.Command != "version" ||
 			report.Status != "passed" ||
-			!slicesContain(report.Details, "xlib-standard release v1.0.1") ||
+			!slicesContain(report.Details, "xlib-standard release v1.0.4") ||
 			!slicesContain(report.Details, "goalcli governance runtime v2.9.3") {
 			t.Fatalf("report = %#v; want version gate report", report)
 		}
@@ -3448,7 +3448,7 @@ func contextProfileMakefileFixture(overrides map[string]string, releaseFinalBody
 		"context-lite":     "require-gowork-off governance-check",
 		"context-standard": "require-gowork-off governance-check p1-governance-check docs-check",
 		"context-full":     "require-gowork-off governance-check p1-governance-check p2-runtime-check",
-		"context-release":  "require-gowork-off context-full integration dependency-check standard-impact-check score-check",
+		"context-release":  "require-gowork-off context-full taosx-coverage-check integration dependency-check standard-impact-check score-check",
 	}
 	for target, deps := range overrides {
 		dependencies[target] = deps

@@ -40,7 +40,7 @@ Release manifest 相关测试必须在临时 fixture 仓库构造所需 `.omc` s
 ## 供应链约束
 
 - GitHub Actions workflow 引用的第三方 Action 必须固定为 40 位 commit SHA，并在同一行保留来源 tag 注释。
-- CI、Release Check、Auto Patch 和 Docker Contract workflow 默认不安装或访问 `govulncheck`；Security workflow 每周定时强制执行漏洞扫描。启用或定时运行时必须使用固定版本；当前基线是 `golang.org/x/vuln/cmd/govulncheck@v1.1.4`。
+- CI、Release Check、Auto Patch、Docker Contract、Security 和 Goal Gates workflow 必须安装固定版本 `golang.org/x/vuln/cmd/govulncheck@v1.1.4`，并通过 `XLIB_ENABLE_VULNCHECK=1` 与 `XLIB_FORCE_VULNCHECK=1` 强制执行漏洞扫描；本地执行仍由 weekly/force 开关控制。
 - 本地缺少 `golangci-lint` 时 `make lint` 必须失败；`make security` 默认只要求 secret scan，通过 `XLIB_ENABLE_VULNCHECK=1` 启用漏洞扫描后，仅当一周窗口到期、状态文件缺失或 `XLIB_FORCE_VULNCHECK=1` 时要求 `govulncheck`，缺失时必须失败，不得把必需 gate 记录为跳过。
 
 ## 版本
@@ -70,4 +70,4 @@ PR 或 release notes 必须说明：
 
 ## Context Runtime v4 release profile 发布基线
 
-Context Runtime v4.0 将 `context-release` 作为发布 profile 基线。`context-full` 只覆盖 `governance-check`、`p1-governance-check` 和 `p2-runtime-check`；`standard-impact-check` 属于 `context-release`，不得写入 `context-full`。`context-release` 在 `context-full` 之上追加 `integration`、`dependency-check`、`standard-impact-check` 和 `score-check`，并由 `release-final-check` 委托执行；`context-release` 不得调用 `release-check` 或 `release-final-check`，以避免递归 release governance。Release manifest 必须包含 `governance_runtime` Evidence，记录 active profile set、`context-profile-check`、`context-release` 和 legacy profile aliases。
+Context Runtime v4.0 将 `context-release` 作为发布 profile 基线。`context-full` 只覆盖 `governance-check`、`p1-governance-check` 和 `p2-runtime-check`；`taosx-coverage-check` 与 `standard-impact-check` 属于 `context-release`，不得写入 `context-full`。`context-release` 在 `context-full` 之上追加 `taosx-coverage-check`、`integration`、`dependency-check`、`standard-impact-check` 和 `score-check`，并由 `release-final-check` 委托执行；`context-release` 不得调用 `release-check` 或 `release-final-check`，以避免递归 release governance。Release manifest 必须包含 `governance_runtime` Evidence，记录 active profile set、`context-profile-check`、`context-release` 和 legacy profile aliases。

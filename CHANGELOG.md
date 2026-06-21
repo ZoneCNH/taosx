@@ -2,6 +2,51 @@
 
 ## 未发布
 
+## v1.0.4 - 2026-06-19
+
+### 治理
+
+- 将 CI、Release、Auto Patch、Docker Contract 和 Security workflow 的 `govulncheck` 从可选扫描升级为生产强制扫描，并固定 `XLIB_ENABLE_VULNCHECK=1` 与 `XLIB_FORCE_VULNCHECK=1`。
+- 将 Goal Gates 从手动参考检查升级为 PR/push 门禁，强制运行 worktree guard、build、lint、test、release-check 和 evidence-check。
+- 加固 Worktree Guard 和 Integration workflow 的 push/PR 覆盖，防止 `taosx` / `main` 分支路径跳过验收。
+
+### 发布
+
+- 同步 README、AGENTS、release manifest、manifest 工具、goalcli 和包版本锚点到 `v1.0.4`。
+
+### 兼容性
+
+- `pkg/taosx` 公共 API 无破坏性变更；本次聚焦生产验收、CI/CD 和发布证据。
+
+## v1.0.3 - 2026-06-19
+
+### 发布
+
+- 同步 README、AGENTS、release manifest、manifest 工具、goalcli 和包版本锚点到 `v1.0.3`。
+
+### 验证
+
+- 保持 `pkg/taosx` 覆盖率发布门禁为 100.0%，并继续要求 `GOWORK=off make release-check` 作为本地候选发布证据。
+
+### 兼容性
+
+- `pkg/taosx` 公共 API 无破坏性变更；本次只推进本地发布候选版本锚点和验证证据。
+
+## v1.0.2 - 2026-06-19
+
+### 治理
+
+- 将 `pkg/taosx` 100.0% 覆盖率检查固化为 `make taosx-coverage-check`，并纳入 `ci`、`release-check` 和 `release-check-extended`。
+- 将 GitHub Actions 的 CI、integration、security、docker contract 和 worktree guard 分支触发对齐到 `taosx` 发布分支。
+
+### 发布
+
+- 同步 README、AGENTS、release manifest、Harness、goalcli 和包版本锚点到 `v1.0.2`。
+
+### 兼容性
+
+- `pkg/taosx` 公共 API 无破坏性变更；本次只强化发布门禁和版本证据。
+
 ## v1.0.1 - 2026-06-13
 
 ### 修复

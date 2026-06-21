@@ -8,8 +8,12 @@ import (
 	"time"
 )
 
+func nilContext() context.Context {
+	return nil
+}
+
 func TestNewRejectsNilContext(t *testing.T) {
-	_, err := New(nil, validConfig())
+	_, err := New(nilContext(), validConfig())
 	if !IsKind(err, ErrorKindValidation) {
 		t.Fatalf("expected validation error, got %v", err)
 	}
@@ -137,7 +141,7 @@ func TestClientMethodsRejectNilReceiverAndNilContext(t *testing.T) {
 	if err != nil {
 		t.Fatalf("new client: %v", err)
 	}
-	_, err = c.(*client).Exec(nil, NewStatement("SELECT 1"))
+	_, err = c.(*client).Exec(nilContext(), NewStatement("SELECT 1"))
 	if !IsKind(err, ErrorKindValidation) {
 		t.Fatalf("expected nil context validation error, got %v", err)
 	}
@@ -208,7 +212,7 @@ func TestCloseRejectsNilContext(t *testing.T) {
 		t.Fatalf("new client: %v", err)
 	}
 
-	err = client.Close(nil)
+	err = client.Close(nilContext())
 	if !IsKind(err, ErrorKindValidation) {
 		t.Fatalf("expected validation error, got %v", err)
 	}
@@ -321,7 +325,7 @@ func TestHealthRejectsNilContext(t *testing.T) {
 		t.Fatalf("new client: %v", err)
 	}
 
-	status := client.Health(nil)
+	status := client.Health(nilContext())
 	if status.Status != HealthUnhealthy || status.Message != "context is required" {
 		t.Fatalf("unexpected status: %#v", status)
 	}

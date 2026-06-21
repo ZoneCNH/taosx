@@ -18,7 +18,7 @@ GOWORK=off make --warn-undefined-variables governance-check
 
 ## 缺少 `golangci-lint` 或启用漏洞扫描时缺少 `govulncheck`
 
-本地 `make lint` 依赖 `golangci-lint`。`make security` 默认只运行 secret scan；只有设置 `XLIB_ENABLE_VULNCHECK=1` 且一周窗口到期、状态文件缺失，或设置 `XLIB_FORCE_VULNCHECK=1` 时才依赖 `govulncheck`。CI 默认不安装或访问漏洞库；Security workflow 每周定时强制执行漏洞扫描。启用漏洞扫描时本地可按 workflow 中的固定版本安装 `govulncheck`，或记录为未运行的本地工具缺口。
+本地 `make lint` 依赖 `golangci-lint`。`make security` 默认只运行 secret scan；只有设置 `XLIB_ENABLE_VULNCHECK=1` 且一周窗口到期、状态文件缺失，或设置 `XLIB_FORCE_VULNCHECK=1` 时才依赖 `govulncheck`。生产发布相关 workflow 固定安装 `govulncheck@v1.1.4`，并设置 enable/force 开关强制执行漏洞扫描。启用漏洞扫描时本地可按 workflow 中的固定版本安装 `govulncheck`，或记录为未运行的本地工具缺口。
 
 ## release manifest 缺失
 

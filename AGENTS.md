@@ -1,6 +1,6 @@
 # 仓库贡献指南
 
-Release version: v1.0.1
+Release version: v1.0.4
 
 ## 项目概述
 
@@ -29,6 +29,7 @@ Release version: v1.0.1
 - `make race`：使用 race detector 运行测试。
 - `make lint`：执行 `golangci-lint run ./...`；缺少 `golangci-lint` 时必须失败。
 - `make security`：默认执行密钥扫描；仅当 `XLIB_ENABLE_VULNCHECK=1` 且一周窗口到期，或 `XLIB_FORCE_VULNCHECK=1` 时追加 `govulncheck`；到期/强制时缺少 `govulncheck` 必须失败。
+- GitHub Actions 的 CI、Release、Auto Patch、Docker Contract、Security 和 Goal Gates workflow 必须固定安装 `govulncheck@v1.1.4`，并以 `XLIB_ENABLE_VULNCHECK=1` 与 `XLIB_FORCE_VULNCHECK=1` 执行生产门禁。
 
 ### 运行单个测试
 
@@ -39,7 +40,7 @@ go test ./... -run 'Test.*Property|Test.*Invariant'   # 属性测试
 go test ./... -run 'Test.*Golden|Test.*Snapshot'       # golden 测试
 ```
 
-当前发布文档锚点为 `v1.0.1`，必须与 `CHANGELOG.md` 最新版本、release manifest 和模板版本常量保持一致。
+当前发布文档锚点为 `v1.0.4`，必须与 `CHANGELOG.md` 最新版本、release manifest 和模板版本常量保持一致。
 
 ### CI 与 Gate
 
@@ -62,7 +63,7 @@ go test ./... -run 'Test.*Golden|Test.*Snapshot'       # golden 测试
 ```bash
 GOWORK=off make release-check
 XLIB_CONTEXT=release_verify GOWORK=off make release-final-check
-XLIB_CONTEXT=release_verify GOWORK=off make release-preflight VERSION=v1.0.1
+XLIB_CONTEXT=release_verify GOWORK=off make release-preflight VERSION=v1.0.4
 make evidence                                    # 生成 release/manifest/latest.json
 ```
 
