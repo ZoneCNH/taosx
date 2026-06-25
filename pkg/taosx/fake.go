@@ -3,15 +3,18 @@ package taosx
 import (
 	"context"
 	"sync"
+	"time"
 )
 
 type FakeDriver struct {
 	ExecResult      ExecResult
 	QueryRows       Rows
 	WriteResult     WriteResult
+	DeleteResult    ExecResult
 	ExecError       error
 	QueryError      error
 	WriteError      error
+	DeleteError     error
 	SchemalessError error
 	HealthError     error
 	CloseError      error
@@ -20,6 +23,7 @@ type FakeDriver struct {
 	execCalls       int
 	queryCalls      int
 	writeCalls      int
+	deleteCalls     int
 	schemalessCalls int
 	healthCalls     int
 	closeCalls      int
@@ -30,10 +34,12 @@ type FakeClient struct {
 	ExecResult      ExecResult
 	QueryRows       Rows
 	WriteResult     WriteResult
+	DeleteResult    ExecResult
 	HealthStatus    HealthStatus
 	ExecError       error
 	QueryError      error
 	WriteError      error
+	DeleteError     error
 	SchemalessError error
 	CloseError      error
 
@@ -41,6 +47,7 @@ type FakeClient struct {
 	execCalls       int
 	queryCalls      int
 	writeCalls      int
+	deleteCalls     int
 	schemalessCalls int
 	healthCalls     int
 	closeCalls      int
@@ -83,6 +90,13 @@ func (f *FakeClient) SchemalessWrite(context.Context, SchemalessPayload) (WriteR
 	return f.WriteResult, f.SchemalessError
 }
 
+func (f *FakeClient) DeleteRange(context.Context, string, time.Time) (ExecResult, error) {
+	f.mu.Lock()
+	defer f.mu.Unlock()
+	f.deleteCalls++
+	return f.DeleteResult, f.DeleteError
+}
+
 func (f *FakeClient) Health(context.Context) HealthStatus {
 	f.mu.Lock()
 	defer f.mu.Unlock()
@@ -123,6 +137,12 @@ func (f *FakeClient) SchemalessCalls() int {
 	f.mu.Lock()
 	defer f.mu.Unlock()
 	return f.schemalessCalls
+}
+
+func (f *FakeClient) DeleteCalls() int {
+	f.mu.Lock()
+	defer f.mu.Unlock()
+	return f.deleteCalls
 }
 
 func (f *FakeClient) HealthCalls() int {
@@ -171,6 +191,13 @@ func (f *FakeDriver) SchemalessWrite(context.Context, SchemalessPayload) (WriteR
 	return f.WriteResult, f.SchemalessError
 }
 
+func (f *FakeDriver) DeleteRange(context.Context, string, time.Time) (ExecResult, error) {
+	f.mu.Lock()
+	defer f.mu.Unlock()
+	f.deleteCalls++
+	return f.DeleteResult, f.DeleteError
+}
+
 func (f *FakeDriver) Health(context.Context) error {
 	f.mu.Lock()
 	defer f.mu.Unlock()
@@ -208,6 +235,12 @@ func (f *FakeDriver) SchemalessCalls() int {
 	f.mu.Lock()
 	defer f.mu.Unlock()
 	return f.schemalessCalls
+}
+
+func (f *FakeDriver) DeleteCalls() int {
+	f.mu.Lock()
+	defer f.mu.Unlock()
+	return f.deleteCalls
 }
 
 func (f *FakeDriver) HealthCalls() int {

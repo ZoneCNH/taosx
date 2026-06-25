@@ -56,6 +56,15 @@ func (d *webSocketDriver) Query(ctx context.Context, query Query) (Rows, error) 
 	return &sqlRows{rows: rows}, nil
 }
 
+func (d *webSocketDriver) DeleteRange(ctx context.Context, table string, before time.Time) (ExecResult, error) {
+	result, err := d.db.ExecContext(ctx, fmt.Sprintf("DELETE FROM %s WHERE ts < ?", quoteIdentifier(table)), before)
+	if err != nil {
+		return ExecResult{}, err
+	}
+	rowsAffected, _ := result.RowsAffected()
+	return ExecResult{RowsAffected: rowsAffected}, nil
+}
+
 // WriteBatch 把 Batch.Points 渲染为 TDengine INSERT SQL 并执行。
 // 每个 Point 渲染为：INSERT INTO {table} USING {stable} TAGS(...) VALUES(timestamp, ...)
 // 使用自动建表语法（USING stable），无需预先创建子表。

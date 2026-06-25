@@ -12,6 +12,7 @@ type Client interface {
 	Query(context.Context, Query) (Rows, error)
 	WriteBatch(context.Context, Batch) (WriteResult, error)
 	SchemalessWrite(context.Context, SchemalessPayload) (WriteResult, error)
+	DeleteRange(context.Context, string, time.Time) (ExecResult, error)
 	Health(context.Context) HealthStatus
 	Close(context.Context) error
 }
@@ -21,6 +22,7 @@ type Driver interface {
 	Query(context.Context, Query) (Rows, error)
 	WriteBatch(context.Context, Batch) (WriteResult, error)
 	SchemalessWrite(context.Context, SchemalessPayload) (WriteResult, error)
+	DeleteRange(context.Context, string, time.Time) (ExecResult, error)
 	Health(context.Context) error
 	Close(context.Context) error
 }
@@ -143,6 +145,31 @@ func (c *client) SchemalessWrite(ctx context.Context, payload SchemalessPayload)
 	return result, nil
 }
 
+func (c *client) DeleteRange(ctx context.Context, table string, before time.Time) (ExecResult, error) {
+	const op = "taosx.DeleteRange"
+	if err := c.checkReady(ctx, op); err != nil {
+		return ExecResult{}, err
+	}
+	if err := validateIdentifier(table); err != nil {
+		wrapped := validationError(op, err.Error(), err)
+		recordErrorMetric(c.metrics, "delete_range", wrapped)
+		return ExecResult{}, wrapped
+	}
+	if before.IsZero() {
+		err := validationError(op, "before timestamp is required", nil)
+		recordErrorMetric(c.metrics, "delete_range", err)
+		return ExecResult{}, err
+	}
+	c.metrics.IncCounter(MetricClientRequestsTotal, map[string]string{"op": "delete_range", "driver_mode": string(c.cfg.DriverMode)})
+	result, err := c.driver.DeleteRange(ctx, table, before)
+	if err != nil {
+		wrapped := normalizeDriverError(ErrorKindSQL, op, err)
+		recordErrorMetric(c.metrics, "delete_range", wrapped)
+		return ExecResult{}, wrapped
+	}
+	return result, nil
+}
+
 func markPartialWrite(result WriteResult, attempted int64) WriteResult {
 	if result.RowsAttempted == 0 {
 		result.RowsAttempted = attempted
@@ -246,6 +273,10 @@ func (unavailableDriver) WriteBatch(context.Context, Batch) (WriteResult, error)
 
 func (unavailableDriver) SchemalessWrite(context.Context, SchemalessPayload) (WriteResult, error) {
 	return WriteResult{}, driverError(ErrorKindUnavailable, "driver.SchemalessWrite", "TDengine driver is not configured", true, nil)
+}
+
+func (unavailableDriver) DeleteRange(context.Context, string, time.Time) (ExecResult, error) {
+	return ExecResult{}, driverError(ErrorKindUnavailable, "driver.DeleteRange", "TDengine driver is not configured", true, nil)
 }
 
 func (unavailableDriver) Health(context.Context) error {

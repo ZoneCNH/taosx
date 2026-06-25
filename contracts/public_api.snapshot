@@ -26,6 +26,7 @@ type Client interface
   Query(context.Context, Query) (Rows, error)
   WriteBatch(context.Context, Batch) (WriteResult, error)
   SchemalessWrite(context.Context, SchemalessPayload) (WriteResult, error)
+  DeleteRange(context.Context, string, time.Time) (ExecResult, error)
   Health(context.Context) HealthStatus
   Close(context.Context) error
 
