@@ -113,3 +113,51 @@ func TestWriteBatchPreservesPartialResultOnDriverError(t *testing.T) {
 		t.Fatalf("write error leaked secret: %v", err)
 	}
 }
+
+func TestDeleteRangeValidatesAndDelegates(t *testing.T) {
+	driver := &recordingDriver{deleteResult: ExecResult{RowsAffected: 7}}
+	client, err := New(context.Background(), validConfig(), WithDriver(driver))
+	if err != nil {
+		t.Fatalf("new client: %v", err)
+	}
+
+	result, err := client.DeleteRange(context.Background(), "meters", time.Unix(1700000000, 0))
+	if err != nil {
+		t.Fatalf("delete range: %v", err)
+	}
+	if result.RowsAffected != 7 || driver.deleteCalls != 1 {
+		t.Fatalf("delete range was not delegated: result=%#v calls=%d", result, driver.deleteCalls)
+	}
+}
+
+func TestDeleteRangeRejectsUnsafeTable(t *testing.T) {
+	driver := &recordingDriver{}
+	client, err := New(context.Background(), validConfig(), WithDriver(driver))
+	if err != nil {
+		t.Fatalf("new client: %v", err)
+	}
+
+	_, err = client.DeleteRange(context.Background(), "meters;DROP", time.Unix(1700000000, 0))
+	if !IsKind(err, ErrorKindValidation) {
+		t.Fatalf("expected validation error, got %v", err)
+	}
+	if driver.deleteCalls != 0 {
+		t.Fatalf("delete range delegated after validation failure: %d", driver.deleteCalls)
+	}
+}
+
+func TestDeleteRangeRejectsZeroBefore(t *testing.T) {
+	driver := &recordingDriver{}
+	client, err := New(context.Background(), validConfig(), WithDriver(driver))
+	if err != nil {
+		t.Fatalf("new client: %v", err)
+	}
+
+	_, err = client.DeleteRange(context.Background(), "meters", time.Time{})
+	if !IsKind(err, ErrorKindValidation) {
+		t.Fatalf("expected validation error, got %v", err)
+	}
+	if driver.deleteCalls != 0 {
+		t.Fatalf("delete range delegated after validation failure: %d", driver.deleteCalls)
+	}
+}

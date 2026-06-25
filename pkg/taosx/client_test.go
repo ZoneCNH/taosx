@@ -20,6 +20,7 @@ func TestClientAPISnapshot(t *testing.T) {
 
 	want := []string{
 		"Close func(context.Context) error",
+		"DeleteRange func(context.Context, string, time.Time) (taosx.ExecResult, error)",
 		"Exec func(context.Context, taosx.Statement) (taosx.ExecResult, error)",
 		"Health func(context.Context) taosx.HealthStatus",
 		"Query func(context.Context, taosx.Query) (taosx.Rows, error)",
@@ -42,6 +43,15 @@ func TestFakeClientImplementsClient(t *testing.T) {
 	}
 	if result.RowsAffected != 2 || fake.ExecCalls() != 1 {
 		t.Fatalf("unexpected exec result/calls: %#v calls=%d", result, fake.ExecCalls())
+	}
+
+	fake.DeleteResult = ExecResult{RowsAffected: 4}
+	deleteResult, err := client.DeleteRange(context.Background(), "cpu", time.Unix(2, 0))
+	if err != nil {
+		t.Fatalf("delete range: %v", err)
+	}
+	if deleteResult.RowsAffected != 4 || fake.DeleteCalls() != 1 {
+		t.Fatalf("unexpected delete result/calls: %#v calls=%d", deleteResult, fake.DeleteCalls())
 	}
 
 	fake.WriteResult = WriteResult{RowsWritten: 1, RowsAttempted: 1}
@@ -145,13 +155,16 @@ type recordingDriver struct {
 	queryRows       Rows
 	queryErr        error
 	writeResult     WriteResult
+	deleteResult    ExecResult
 	writeErr        error
+	deleteErr       error
 	schemalessErr   error
 	healthErr       error
 	closeErr        error
 	execCalls       int
 	queryCalls      int
 	writeCalls      int
+	deleteCalls     int
 	schemalessCalls int
 	closeCalls      int
 }
@@ -174,6 +187,11 @@ func (d *recordingDriver) WriteBatch(context.Context, Batch) (WriteResult, error
 func (d *recordingDriver) SchemalessWrite(context.Context, SchemalessPayload) (WriteResult, error) {
 	d.schemalessCalls++
 	return d.writeResult, d.schemalessErr
+}
+
+func (d *recordingDriver) DeleteRange(context.Context, string, time.Time) (ExecResult, error) {
+	d.deleteCalls++
+	return d.deleteResult, d.deleteErr
 }
 
 func (d *recordingDriver) Health(context.Context) error {
