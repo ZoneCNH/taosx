@@ -6,6 +6,7 @@ import (
 
 type Point struct {
 	Table     string
+	Stable    string
 	Timestamp time.Time
 	Tags      map[string]any
 	Fields    map[string]any

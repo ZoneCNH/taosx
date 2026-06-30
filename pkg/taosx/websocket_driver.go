@@ -11,6 +11,7 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
+	"sort"
 	"strings"
 	"time"
 
@@ -64,13 +65,20 @@ func (d *webSocketDriver) WriteBatch(ctx context.Context, batch Batch) (WriteRes
 		return WriteResult{}, nil
 	}
 	var written int64
+	var firstErr error
 	for _, p := range batch.Points {
 		sqlStr, err := renderPointInsert(batch.Database, p)
 		if err != nil {
-			continue // 跳过无法渲染的点
+			if firstErr == nil {
+				firstErr = err
+			}
+			continue
 		}
 		if _, err := d.db.ExecContext(ctx, sqlStr); err != nil {
-			continue // 单点失败不阻塞整批
+			if firstErr == nil {
+				firstErr = err
+			}
+			continue
 		}
 		written++
 	}
@@ -78,7 +86,7 @@ func (d *webSocketDriver) WriteBatch(ctx context.Context, batch Batch) (WriteRes
 		RowsWritten:   written,
 		RowsAttempted: int64(len(batch.Points)),
 		Partial:       written < int64(len(batch.Points)),
-	}, nil
+	}, firstErr
 }
 
 func (d *webSocketDriver) SchemalessWrite(ctx context.Context, payload SchemalessPayload) (WriteResult, error) {
@@ -94,8 +102,8 @@ func (d *webSocketDriver) Close(ctx context.Context) error {
 }
 
 // renderPointInsert 把 Point 渲染为 TDengine INSERT SQL。
-// 格式：INSERT INTO {db}.{table} (cols) VALUES(...)
-// 假设 stable/子表已存在（TaosWriter 的 EnsureStables 已创建）。
+// 格式：INSERT INTO {db}.{table} USING {stable} TAGS(...) (cols) VALUES(...)
+// 使用自动建表语法（USING stable），无需预先创建子表。
 func renderPointInsert(database string, p Point) (string, error) {
 	if p.Table == "" {
 		return "", fmt.Errorf("point table is required")
@@ -103,19 +111,65 @@ func renderPointInsert(database string, p Point) (string, error) {
 	if p.Timestamp.IsZero() {
 		return "", fmt.Errorf("point timestamp is required")
 	}
-	// 构建 VALUES 部分：timestamp + fields
 	vals := []string{fmt.Sprintf("'%s'", p.Timestamp.Format("2006-01-02 15:04:05.000"))}
 	cols := []string{"ts"}
-	for k, v := range p.Fields {
+	fieldKeys := make([]string, 0, len(p.Fields))
+	for k := range p.Fields {
+		fieldKeys = append(fieldKeys, k)
+	}
+	sort.Strings(fieldKeys)
+	for _, k := range fieldKeys {
 		cols = append(cols, k)
-		vals = append(vals, formatValue(v))
+		vals = append(vals, formatValue(p.Fields[k]))
 	}
 	tableRef := p.Table
 	if database != "" {
 		tableRef = database + "." + p.Table
 	}
-	return fmt.Sprintf("INSERT INTO %s (%s) VALUES (%s)",
-		tableRef, strings.Join(cols, ","), strings.Join(vals, ",")), nil
+	usingClause := ""
+	if p.Stable != "" {
+		stableRef := p.Stable
+		if database != "" {
+			stableRef = database + "." + p.Stable
+		}
+		tagKeys := orderedTagKeys(p.Stable, p.Tags)
+		tagVals := make([]string, 0, len(tagKeys))
+		for _, k := range tagKeys {
+			tagVals = append(tagVals, formatValue(p.Tags[k]))
+		}
+		usingClause = fmt.Sprintf(" USING %s TAGS (%s)", stableRef, strings.Join(tagVals, ","))
+	}
+	return fmt.Sprintf("INSERT INTO %s%s (%s) VALUES (%s)",
+		tableRef, usingClause, strings.Join(cols, ","), strings.Join(vals, ",")), nil
+}
+
+// orderedTagKeys returns tag keys in the supertable schema order (matching
+// StableSpecs column order), not alphabetical. This ensures TAGS(...)
+// values map to the correct tag columns.
+var knownTagOrder = map[string][]string{
+	"st_tick":  {"symbol", "product_line", "source"},
+	"st_trade": {"symbol", "product_line", "source"},
+	"st_bar":   {"symbol", "product_line", "source", "interval"},
+}
+
+func orderedTagKeys(stable string, tags map[string]any) []string {
+	if order, ok := knownTagOrder[stable]; ok {
+		result := make([]string, 0, len(order))
+		for _, k := range order {
+			if _, exists := tags[k]; exists {
+				result = append(result, k)
+			}
+		}
+		if len(result) == len(tags) {
+			return result
+		}
+	}
+	keys := make([]string, 0, len(tags))
+	for k := range tags {
+		keys = append(keys, k)
+	}
+	sort.Strings(keys)
+	return keys
 }
 
 // formatValue 把 Go 值格式化为 TDengine SQL 字面量。
