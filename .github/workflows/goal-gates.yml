@@ -17,7 +17,7 @@ concurrency:
 
 jobs:
   gates:
-    runs-on: [self-hosted, Linux, X64, sre/storage-heavy]
+    runs-on: ubuntu-latest
     env:
       GOWORK: off
       XLIB_CONTEXT: ci_pull_request
