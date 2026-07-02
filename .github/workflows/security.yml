@@ -15,7 +15,7 @@ concurrency:
 
 jobs:
   security:
-    runs-on: [self-hosted, Linux, X64, sre/storage-heavy]
+    runs-on: ubuntu-latest
     env:
       XLIB_ENABLE_VULNCHECK: "1"
       XLIB_FORCE_VULNCHECK: "1"
